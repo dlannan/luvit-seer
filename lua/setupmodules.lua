@@ -11,7 +11,7 @@ local fs = require('fs')
 
 local msetup  = {}
 
-local path_modules = "templates/modules"
+local path_modules = "lua/modules"
 
 msetup.loadfiletype = function( htmlfilename, ext, store )
     local restyfilename = pathJoin(path_modules,htmlfilename)..ext
