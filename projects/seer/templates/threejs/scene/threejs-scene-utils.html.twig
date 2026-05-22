@@ -1,0 +1,560 @@
+<script>
+
+function removeChild( obj ) {
+    if( !obj ) return "";
+    if(obj.child) obj['child'] = "";
+    return obj;
+}
+
+function addNodeToRaycastPool(node) {
+    octree.add( node, { useFaces: false } );
+    objects.push( node );
+    node.visible = true;    
+}
+
+function removeNodeFromRaycastPool(node) {
+    octree.remove( node );
+    var idx = objects.indexOf( node );
+    objects.splice(idx, 1);   
+    node.visible = false;
+}
+
+function hashCode(str) {
+    var hash = 0, i, chr;
+    if (str.length === 0) return hash;
+    for (i = 0; i < str.length; i++) {
+        chr   = str.charCodeAt(i);
+        hash  = ((hash << 5) - hash) + chr;
+        hash |= 0; // Convert to 32bit integer
+    }
+    return hash;
+};
+
+function makeId( obj ) {
+    var id = obj.name + '' + obj.position.toArray();
+    var hash = hashCode(id) + '';
+    //console.log(hash);
+    return hash;
+}
+
+function getDateString() {
+    var d = new Date().toISOString();
+    return d;
+}
+
+
+function takeSnapshot( oncomplete ) {
+    
+    var canvas = document.createElement("canvas");
+    canvas.width = iconwidth;
+    canvas.height = iconheight;
+    // Scale and draw the source image to the canvas
+    canvas.getContext("2d").drawImage(renderer.domElement, 0, 0, iconwidth, iconheight);
+    icon = canvas.toDataURL("image/png");
+
+    // Always update icon in database if screenshot is taken.
+    var base64icon = icon.split(',')[1];
+
+    var sqldata = { tableid: 'icons', row: {}, index: 'uid' };
+    sqldata.row['data'] = base64icon;
+    sqldata.row['name'] = $('#menu-main-project').text();
+    var id = $('#project-update input[name="data[icon]"]').val();
+    if(!id || id.length < 1) id = -1;
+    sqldata.row['uid'] = id;
+
+    //console.log("SQLData: ", sqldata);
+
+    $.post("{{ base_url }}/sqlite-upsert-row", sqldata, function(data){  
+        //console.log("Data: ", data);
+        oncomplete(data);
+    });
+}
+
+// Get data from a data type 
+function getDataTypes( datas, output, name, dtype ) {
+    
+    // Nodes are saved with their position, rotation and state
+    for (var i = 0; i < datas.children.length; i++) {
+
+        var data = datas.children[i];
+        // Use this to temporarily create new ids
+        var dataoutput = {
+            uid: data.userData.uid,
+            name: name + data.id,
+            dataType: dtype
+        };
+
+        if(dtype === 'ways') {
+            var nodelist = waylu[data.id];
+            dataoutput['nodes'] = nodelist;
+
+        }
+        if(dtype === 'nodes') {
+            dataoutput['state'] = data.userData.nodestate;
+            dataoutput['position'] = data.position.toArray();
+            dataoutput['rotation'] = data.rotation.toArray();
+        }
+
+        output['data'][ name + data.id] = dataoutput;
+    }
+}
+
+// Loader functions for objects in the scene
+var objloaders;
+if(!objloaders) objloaders	= {};
+
+objloaders['models'] = function( objs, typename, output ) {
+
+    // Objects need at a minimum: url source, initial id, name, pos, rot
+    for (var i = 0; i < objs.children.length; i++) {
+        
+        var model = objs.children[i];
+        var newdata = {
+            url: removeChild(urls[model.userData.uid]),
+            uid: model.userData.uid,
+            name: typename + model.id,
+            position: model.position.toArray(),
+            rotation: model.rotation.toArray()
+        };      
+
+        output['data'][typename + i] = newdata;
+    }
+};
+
+objloaders['actors'] = objloaders['models'];
+objloaders['objects'] = objloaders['models'];
+
+objloaders['events'] = function( objs, typename, output ) {
+
+    // Objects need at a minimum: url source, initial id, name, pos, rot
+    for (var i = 0; i < objs.children.length; i++) {
+
+        var model = objs.children[i];
+        //console.log(model);
+        var newdata = {
+            url: '',
+            uid: model.userData.uid,
+            name: model.name,
+            position: model.position.toArray(),
+            rotation: model.rotation.toArray(),
+            dataType: typename,
+            radius: model.userData.radius,
+            linked: model.userData.linked
+        };      
+
+        output['data'][typename + i] = newdata;
+    }
+};
+
+objloaders['sensors'] = function( objs, typename, output ) {
+
+    // Objects need at a minimum: url source, initial id, name, pos, rot
+    for (var i = 0; i < objs.children.length; i++) {
+
+        var model = objs.children[i];
+        //console.log(model);
+        var newdata = {
+            url: '',
+            uid: model.userData.uid,
+            name: model.name,
+            position: model.position.toArray(),
+            rotation: model.rotation.toArray(),
+            dataType: typename,
+            effectId: model.userData.effectId,            
+            linked: model.userData.linked
+        };      
+
+        output['data'][typename + i] = newdata;
+    }
+};
+
+// Get a list of object types for saving as json
+function getObjectTypes( objs, typename, output ) {
+
+    if( objloaders.hasOwnProperty(typename) ) {
+        objloaders[typename]( objs, typename, output);
+    }
+}
+
+// Build simple data format in objects and convert to Json for text.
+function getSceneData(sceneid, projectid) {
+
+// To be implemented
+{% set langobj  = grav['language'] %}
+{% set curlang  = langobj.getLanguage() %}
+
+{% set user = grav['user'] %}
+    var output = {};
+    output['name'] = $('#scene-title').find( 'input' ).val();
+    output['sceneid'] = sceneid.toString();
+    output['projectid'] = projectid;
+    output['edituser'] = '{{ user.username }}';
+    output['edittime'] = getDateString();
+
+    $('#project-update input[name="data[name]"]' ).val(output['name']);
+    $('#project-update input[name="data[sceneid]"]' ).val(output['sceneid']);
+    $('#project-update input[name="data[projectid]"]' ).val(output['projectid']);
+    $('#project-update input[name="data[edituser]"]' ).val(output['edituser']);
+    $('#project-update input[name="data[edittime]"]' ).val(output['edittime']);
+    
+    // These will be filled automatically
+    $('#project-update input[name="data[environment]"]' ).val('none');
+    $('#project-update input[name="data[models]"]' ).val('');
+
+    // Check if there is an icon already - if not, make one
+    if( icon == null ) {
+        takeSnapshot( function(id) {
+            $('#project-update input[name="data[icon]"]').val(id);
+        });
+    }
+        
+    output['data'] = {};
+
+    // World should only be one
+    if(world.children.length > 0) { 
+        
+        var wchild = world.children[0];
+        //console.log("URLS>>>", urls[wchild.userData.uid]);
+        output['data']['world'] = {
+            url: removeChild(urls[wchild.userData.uid]),
+            uid: wchild.userData.uid,
+            name: wchild.name,
+            position: wchild.position.toArray(),
+            rotation: wchild.rotation.toArray()
+        };
+
+        $('#project-update input[name="data[environment]"]' ).val(wchild.name);
+    }
+
+    getObjectTypes( statics, 'objects', output );
+    getObjectTypes( models, 'models', output );
+    getObjectTypes( actors, 'actors', output );
+    getObjectTypes( events, 'events', output );
+    getObjectTypes( sensors, 'sensors', output );
+
+    getDataTypes( nodes, output, 'node', 'nodes' );
+    getDataTypes( ways, output, 'way', 'ways' );
+
+    // TODO: Save last camera position
+    //var jsonStr = JSON.stringify(output);
+    //console.log(jsonStr);
+    return output;
+}
+
+function loadDataForScene( obj ) {
+
+    if( obj.dataType ) {
+
+        if( obj.dataType == ObjectTypes.WAYS ) {
+            newWay(obj.nodes);
+        } else if( obj.dataType == ObjectTypes.NODES) {
+            newNode( function( newnode ) {
+                nodelu[newnode.userData.uid] = newnode;
+            }, obj);
+        } else if( obj.dataType == ObjectTypes.EVENTS) {
+            newEvent( function( newnode ) {
+            }, obj);
+        } else if( obj.dataType == ObjectTypes.SENSORS) {
+            newSensor( function( newnode ) {
+            }, obj);
+        } 
+    }
+}
+
+function loadNextScene( obj, parentId, callback ) {
+
+    loadScene( obj.url, parentId, function (newobj) {
+
+        if(newobj != undefined) {
+
+            if(debug.sceneObjects) console.log("loadNextScene:loadScene [obj]:", obj);
+            var pos = new THREE.Vector3();
+            pos.fromArray(obj.position);
+
+            newobj.position.copy(pos);
+            var rot = new THREE.Euler();
+
+            rot.fromArray(obj.rotation);
+            newobj.rotation.copy(rot);
+            newobj.name = obj.name;
+
+            newobj.userData.uid = obj.uid;
+            if(debug.buildIds) newobj.userData.uid = UID();
+
+            // If there is data in the data block then overwrite the auto one.
+            if(obj.userData && obj.userData.parentType) {
+                newobj.userData.parentType = obj.userData.parentType;
+            }
+
+            var key = newobj.userData.parentType; 
+            console.log(">>>>>>", key);      
+
+            if(key == "environments") {
+
+                world.add(newobj);
+
+            } else if( threeMapping.hasOwnProperty(key)) {
+
+                if (key == ObjectTypes.OBJECTS) {
+                    SceneGraph.addStaticObject( newobj );
+                }
+                else if(key == ObjectTypes.EVENTS) {
+                    SceneGraph.addStaticObject( newobj );    
+                } 
+                else if(key == ObjectTypes.SENSORS) {
+                    SceneGraph.addStaticObject( newobj );    
+                }
+                else {
+                    SceneGraph.addMoverObject( newobj );
+                }
+
+                threeMapping[key].add( newobj );
+            }
+        }
+        callback(newobj);
+    });
+}
+
+var cbcomplete = 0;
+var sceneready = false;
+
+function loopSceneKeys( keys, alldata ) {
+
+    if( sceneready == true ) {        
+
+        var key = keys[cbcomplete];
+        //console.log(key);
+        var obj = alldata[key];
+        sceneready = false;
+
+        // If the obj has a url, its loadable.. otherwise, its data!
+        if(obj.url) {
+            var parentId = UID();
+            if(obj.uid) parentId = obj.uid;
+            if(debug.sceneObjects) console.log("loopSceneKeys [obj]:", obj);
+            loadNextScene( obj, parentId, 
+                function(newobj){
+                    cbcomplete++;
+                    sceneready = true;
+                });
+        } else {
+            loadDataForScene( obj );
+            cbcomplete++;
+            sceneready = true;
+        }
+    }
+}
+
+function checkLoadedScene( keys, alldata, completeCallback ) {
+
+    if(cbcomplete > keys.length - 1) {
+        updateAllWays();
+        completeCallback();
+        return;
+    }
+    
+    sleep(1, function() {
+        if(cbcomplete < keys.length) {
+            loopSceneKeys(keys, alldata);
+        }
+        checkLoadedScene( keys, alldata, completeCallback );
+    } );
+}
+
+function loadSceneData( alldata, completeCallback ) {
+
+    clearScene();
+    hidePopups();
+    //$('#select-wrap').hide();
+    
+    //console.log(alldata);
+    // Load each object and then simply set their pos and rot ;)
+    var keys = Object.keys(alldata);
+
+    // Exit for empty scene...
+    if(keys.length == 0) {
+        console.log("Error: No object keys in scene.");
+        completeCallback();
+        return;
+    }
+
+    cbcomplete = 0;
+    sceneready = true;
+    checkLoadedScene(keys, alldata, completeCallback);
+}
+
+function requestSendData( form, jsonData, completeFunc ) {
+
+    var jsonStr = JSON.stringify(jsonData);
+//    console.log(jsonStr);
+//    console.log("Form submit: " + form);
+
+    // If this is new
+    //var form = $("#scene-form-insert");
+    $(form + " input[name='data[data]']" ).val("'" + jsonStr + "'");
+    $(form).submit();
+    
+    completeFunc();
+    //$.post( '/', form.serialize(), function(data) {
+    //    console.log("scene submitted.");
+    //    completeFunc();
+    //});
+
+    // Fire off the request to the form action
+    //$.ajax({
+    //    type: form.attr('method'),
+    //    url: form.attr('action'),
+    //    data: form.serialize(),
+    //    // Callback handler that will be called on success
+    //    success: function (response, textStatus, jqXHR){
+    //        // Log a message to the console
+    //        console.log("Scene Added.");
+    //        completeFunc();
+    //    },
+    //    // Callback handler that will be called on failure
+    //    error: function (jqXHR, textStatus, errorThrown){
+    //        console.log(textStatus, errorThrown);
+    //        completeFunc();
+    //    }
+    //});
+}
+
+function loadSceneFromId( completeCallback ) {
+    
+    scenestatus.loaded = false;     
+    {% set id = sceneid|int %}
+    {% set query = ('[sql-table json]select * from scenes where sceneid = "' ~ id ) ~ '" LIMIT 1 [/sql-table]' %}
+    {% set scenedb = ((query|shortcodes) | json_decode)[0] %}
+    {% set scenename = scenedb.name %}
+
+    {% if scenename %}
+    //console.log("Scene Name: {{ scenename }}");
+    $("#scene-title").find( "input" ).val("{{ scenename }}");
+
+    var strdata = "{{ scenedb.data }}";
+    // Covert back to json string due to sqlite storage
+    strdata = strdata.replace(/'/g, '"');
+    var data = JSON.parse( strdata );
+    if( debug.sceneLoad ) console.log("loadScene [DBData]:", data);
+    if( data != null ) {
+        loadSceneData( data.data, completeCallback );
+    } 
+    {% else %}
+        completeCallback();
+    {% endif %}
+}
+
+function loadGeneratedScene( callback ) {
+
+    scenestatus.loaded = false;     
+    clearSelection();
+    $(".loading").show();
+    loadSceneFromId( function(){
+        
+        updateAllNodes( );
+        if(callback) callback();
+        $(".loading").hide();  
+
+        scenestatus.loaded = true;     
+        scenestatus.loadtime = Date.now();     
+        console.log("Loading Done....");
+    });
+};
+
+function loadLocalScene( scenedata, callback ) {
+
+    scenestatus.loaded = false;     
+    clearSelection();
+    $(".loading").show();
+
+    loadNextScene(scenedata.data.world, scenedata.uid, function( worldObj ) {
+
+        updateAllNodes( );
+        if(callback) callback( worldObj );
+        $(".loading").hide();  
+
+        scenestatus.loaded = true;     
+        scenestatus.loadtime = Date.now();     
+        console.log("Loading Done....");
+    });     
+};
+
+function loadLocalModel( modeldata, callback ) {
+
+    $(".loading").show(); 
+    setTimeout( 
+        function() { 
+            loadScene( modeldata, UID(), function( model ) {
+            
+                if(model) {
+
+                    updateAllNodes( );
+                    if(callback) callback( model );
+                    $(".loading").hide();  
+                    console.log("Loading Done....");
+                }
+            });     
+        }, 100);
+};
+
+function finalizeTools() {
+
+    scene.add( editor );
+    scene.add( selection );
+
+    scene.add( env );
+    scene.add( world );
+    scene.add( models );
+    scene.add( actors );
+    scene.add( statics );
+
+    scene.add( lights );
+
+    scene.add( sensors );
+    scene.add( events );
+
+    scene.add( nodes );
+    scene.add( ways );
+
+    scene.add( simentities );
+}
+
+function finalizeNoTools() {
+
+//    scene.add( editor );
+//    scene.add( selection );
+
+    scene.add( env );
+    scene.add( world );
+    scene.add( models );
+    scene.add( actors );
+    scene.add( statics );
+
+    scene.add( lights );
+
+    scene.add( sensors );
+    scene.add( events );
+
+    scene.add( nodes );
+    scene.add( ways );
+
+    scene.add( simentities );
+}
+
+function createScene( depth ) {
+
+	scene = new THREE.Scene();
+    if(depth) { 
+        sceneDepth = new THREE.Scene();
+        sceneDepth.overrideMaterial = new THREE.MeshDepthMaterial();
+//        var ambientLight = new THREE.AmbientLight( 0xffffff, 0.2 );
+//        sceneDepth.add( ambientLight );
+    }
+}
+
+function addObjectToSceneDepth( obj ) {
+
+    sceneDepth.add( obj );
+}
+
+</script>

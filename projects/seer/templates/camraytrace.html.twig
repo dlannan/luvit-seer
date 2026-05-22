@@ -1,0 +1,403 @@
+
+{% set projectid = page.header.projectid  %} 
+{% set sceneid = page.header.sceneid  %} 
+
+{% embed 'partials/base-nonav.html.twig' %}
+
+{% set viewmode = page.header.viewmode %}
+{% set selectedobject = page.header.selectedobject %}
+{% set cameraeffect = page.header.cameraeffect %}
+
+	{% set RAYTRACE = 1 %}
+
+	{% set collection = page.collection() %}
+	{% set base_url = page.url %}
+    {% set feed_url = base_url %}
+
+    {% if base_url == '/' %}
+        {% set base_url = '' %}
+    {% endif %}
+
+    {% if base_url == base_url_relative %}
+        {% set feed_url = base_url~'/'~page.slug %}
+    {% endif  %}
+
+	{% block content %}
+
+		{% include 'threejs/threejs-style-main.html.twig' %}
+
+		<div id="sensor-status" class="sensor-summary">
+		<div class="row">
+		<div class="col-sm-2"><p>&nbspSENSOR: {{ grav.uri.query('viewmode') }}</p></div>
+		<div class="col-sm-1"><p>AZ: 0</p></div>
+		<div class="col-sm-1"><p>HDG: 000</p></div>
+		<div class="col-sm-1"><p>ALT: 0</p></div>
+		<div class="col-sm-1"><p>SPD: 0</p></div>
+		<div id="status-datain" class="col-sm-1"><p>DI:</p></div>
+		<div id="status-dataout" class="col-sm-1"><p>D0:</p></div>
+		<div id="status-simtime" class="col-sm-2"><p>SIM: 00:00:00</p></div>
+		<div id="status-realtime" class="col-sm-2"><p>TIME: 00:00:00</p></div>
+		</div>
+		</div>
+
+		<div class="loading">Loading&#8230;</div>
+		
+		<div class="main-panel">
+		<div id="container">
+		</dvi>
+		</div>
+
+		{% include 'threejs/threejs-scripts.html.twig' %}
+        {% include 'threejs/fx/threejs-scripts-fx.html.twig' %}
+
+		{% include 'threejs/scene/scene-loader.html.twig' %}
+		{% include 'threejs/scene/scene-loader-anim.html.twig' %}
+		{% include 'sim/net-websocket.html.twig' %}
+		{% include 'threejs/threejs-mode-statemgr.html.twig' %}
+
+		{% include 'threejs/threejs-globals.html.twig' %}
+		{% include 'threejs/threejs-globals-sim.html.twig' %}
+
+		{% include 'threejs/fx/threejs-sky.html.twig' %}
+		{% include 'threejs/fx/threejs-ground.html.twig' %}		
+		{% include 'threejs/fx/threejs-materials.html.twig' %}
+
+		<script src="{{ theme_url }}/assets/js/threejs/renderers/RaytracingRenderer.js"></script>
+
+		<script>
+
+			if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+
+			{% include 'modules/environments.html.twig' %}
+
+			{% include 'threejs/threejs-mode.html.twig' %}
+			{% include 'threejs/threejs-select-objects.html.twig' %}
+
+			{% include 'states/state-defaultSimState.html.twig' %}
+
+			{% include 'sensors/threejs-sensors.html.twig' %}
+			{% include 'threejs/threejs-nodes.html.twig' %}
+			{% include 'threejs/threejs-ways.html.twig' %}
+
+			{% include 'threejs/threejs-events.html.twig' %}
+
+			{% include 'threejs/fx/threejs-effects.html.twig' %}
+			{% include 'threejs/threejs-camview.html.twig' %}
+
+			{% set query = ("[sql-table json]select * from scenes where sceneid = '" ~ sceneid ) ~ "' limit 1[/sql-table]" %}
+			{% set scene = ((query|shortcodes) | json_decode)[0] %}
+			{% if scene.models %}
+			{% set modelmodule = ('modules/' ~ scene.models) ~ '.html.twig' %}
+			{% include modelmodule %}
+			{# {% include 'modules/os-test-pedestrian.html.twig' %} #}
+			{# {% include 'modules/os-test-soccer.html.twig' %} #}
+			{% endif %}
+
+			var hash = location.hash ? location.hash.substring( 1 ) : '3';
+			var WORKERS = + hash || navigator.hardwareConcurrency || 3;
+
+			var container, info;
+			var camera, controls, scene, renderer;
+
+			var cameraFov = 60.0;
+			var nearCamera = 0.1;
+			var farCamera = 1000.0;
+			var mappedChannels = {};
+
+
+			function loadAnimation(url) {}
+
+			init();
+
+			function initScene( width, height ) {
+
+				camera = new THREE.PerspectiveCamera( cameraFov, window.innerWidth / window.innerHeight, nearCamera, farCamera );
+				camera.position.set( 0, 10, -150 );
+
+				createScene();
+				scene.background = new THREE.Color( 0xf0f0f0 );
+				mappedChannels[0] = camera;
+			}
+
+			function init() {
+
+				var w = window.innerWidth;
+				var h = window.innerHeight;
+
+				container = document.getElementById( 'container' );
+
+				info = document.createElement( 'div' );
+				info.style.position = 'absolute';
+				info.style.top = '10px';
+				info.style.width = '100%';
+				info.style.zIndex = '100';
+				info.style.textAlign = 'center';
+				container.appendChild( info );
+
+				updateWorkers();
+
+				{# console.log("----->", [w, h]); #}
+				initScene( w, h );
+
+				renderer = new THREE.RaytracingRenderer( {
+					workers: WORKERS,
+					workerPath: '{{ theme_url }}/assets/js/threejs/renderers/RaytracingWorker.js',
+					randomize: true,
+					blockSize: 64
+				} );
+				renderer.setSize( w, h );
+
+				renderer.domElement.style.position = "absolute";
+				renderer.domElement.style.top = "0px";
+				renderer.domElement.style.left = "0px";
+
+				container.appendChild( renderer.domElement );
+
+				{# composer = new THREE.EffectComposer(renderer, renderTarget);
+				renderBasePass = new THREE.RenderPass(scene, camera);
+				composer.addPass(renderBasePass); #}
+		
+				// TODO: A nice way turn this on/off as needed
+				//renderBloomPass = new THREE.UnrealBloomPass(new THREE.Vector2( window.innerWidth, window.innerHeight ), 1.5, 0.4, 0.85);
+				//renderBloomPass.threshold = 0.85;
+				//renderBloomPass.strength = 1.5;
+				//renderBloomPass.radius = 0.4;
+				//composer.addPass(renderBloomPass);
+
+                {# {% if grav.uri.query('viewmode')  %}
+					renderBasePass.clear = true;
+					renderEffectPass = addEffect(composer, "{{ grav.uri.query('viewmode') }}" );
+					renderEffectPass.clear = false;
+				{% endif %} #}
+
+				// AA needs to be done before camera abberations are made. AA can be various types as needed.
+				//renderEffectPass = applyAntiAliasing( composer );
+				
+                {# {% if grav.uri.query('cameraeffect')  %}
+					renderBasePass.clear = true;
+					renderEffectPass = addCameraEffect(composer, "{{ grav.uri.query('cameraeffect') }}" );
+					renderEffectPass.clear = false;
+				{% endif %} #}
+
+
+				{# renderEffectPass.clear = true;
+				renderEffectPass.renderToScreen = true; #}
+
+				//clearScene();
+				window.addEventListener( 'resize', onWindowResize, false );
+				
+				// Selector init - should move this.
+				mode.state = EditorMode.NONE;
+				mouseMove = false;
+				$("#select-obj").hide();
+				$("#select-spline").hide();
+
+				//addSplineObject();
+				clock.start();
+			}
+
+			function updateWorkers( x ) {
+
+				if ( x ) {
+					WORKERS = Math.max( 1, WORKERS + x );
+					renderer.setWorkers( WORKERS );
+				}
+				info.innerHTML = '<a href="http://threejs.org" target="_blank" rel="noopener">three.js<a/> - raytracing renderer (using '  + WORKERS + ' <button onclick="updateWorkers(-1)">-</button><button onclick="updateWorkers(1)">+</button> web workers)' +
+				'<br/><button onclick="rearrange()">Rearrange</button><button onclick="render()">Render</button>';
+			}
+
+			// Completely clear out the scene
+			function clearScene() {
+
+				clearLookups();
+				clearAllObjects();
+
+				initSky();
+				//initGround();
+
+				initTools();
+				finalizeTools();
+
+				nodes.visible = false;
+				ways.visible = false;
+				
+				mode.state = EditorMode.NONE;
+			}
+
+
+			function onMouseClick( event ) {
+
+				mouseMove = false;
+				// console.log("clicked: ", mode.state);
+				stateManager.MouseEvent( event );
+			}
+
+			function onMouseUp( event ) {
+
+				// check object is spline
+				stateManager.MouseEvent( event );
+
+				mouseMove = false;
+			}
+
+			function onKeyDown( event ) {
+
+				if(event.key === "Shift") { 
+					shiftPressed = true; 
+					//console.log("SHIFT PRESSED");
+				}
+			}
+
+			function onKeyUp( event ) {
+
+				// console.log("KEY RAISED", event);
+				
+				if(event.key === "Shift") { 
+					shiftPressed = false; 
+					//console.log("SHIFT RELEASED");
+				}
+			}			
+
+			function onWindowResize() {
+
+				var w = container.offsetWidth;
+				var h = container.offsetHeight;
+
+				camera.aspect = w / h;
+				camera.updateProjectionMatrix();
+
+				if(effectMode == "THERMAL") {
+					thermalEffect.uniforms.iResolution = new THREE.Vector2( w,h );
+				}
+
+				//if(effectMode == "DEPTH") {
+				//	depthEffect.uniforms.iResolution = new THREE.Vector2( w,h );
+				//}
+			}
+
+			function animate() {
+
+				requestAnimationFrame( animate );
+
+				if(water) {
+					water.material.uniforms.time.value += 1.0 / 60.0;
+					water.material.uniforms.size.value = parameters.size;
+					water.material.uniforms.distortionScale.value = parameters.distortionScale;
+					water.material.uniforms.alpha.value = parameters.alpha;
+				}
+				
+				render();
+			}
+
+			function render() {
+				
+				simstate.delta = clock.getDelta();
+				simstate.realt = simstate.realt + simstate.delta * 1000.0;				
+
+				{# if(effectMode == "THERMAL") {
+                	thermalEffect.uniforms.time.value = simstate.delta;
+				}
+
+				if(effectMode == "NV") {
+                	nvPass.material.uniforms.time.value += simstate.delta;
+				}
+				
+
+				if(sky) {
+					//sky.material.uniforms.time.value = simstate.realt * 0.0002;
+					sky.material.uniforms.time.value = simstate.simt * 0.0002;
+					sky.material.uniforms.cloudHeight.value = parameters.cloudHeight;
+					sky.material.uniforms.coverage.value = parameters.coverage;
+					skyUpdate(parameters);
+				}
+
+				if(ocean) {
+					ocean.material.uniforms.sunDirection.value.copy( dirLight.position ).normalize();
+					ocean.material.uniforms.time.value += simstate.delta * 0.2;
+				}
+
+				if(controls) {
+					mode.camera.lon = controls.lon;
+					mode.camera.lat = controls.lat;
+					controls.update(simstate.delta);
+				}
+
+				camera.getWorldDirection( cameraDir );
+				//camera.updateProjectionMatrix();
+
+				if((selectEditorObj != -1) && (mode.state == EditorMode.NONE)) {
+					handleObjectSelect( SceneGraph.findNodeByUid(selectEditorObj));
+				} #}
+
+				//renderer.toneMappingExposure = Math.pow( 0.95, 4.0 );
+
+				//if(effectMode == "DEPTH") {
+				//	camera.far = 500.0;
+				//	depthEffect.uniforms.cameraNear = camera.near;
+				//	depthEffect.uniforms.cameraFar = camera.far;
+				//}
+
+				//composer.render();
+				renderer.render( scene, camera );
+
+				// update octree post render
+				// this ensures any objects being added
+				// have already had their matrices updated
+				if(useOctree) {
+					octree.update();
+				}
+
+				TWEEN.update();
+			}
+
+			$(document).ready( function() {
+
+			    {% if sceneid  %}
+					scenestatus.scene = {{ sceneid }};
+				{% endif %}
+				
+				// Should enable/disable this when mode changes
+				$(document.documentElement).keydown( onKeyDown );
+				$(document.documentElement).keyup( onKeyUp );
+				scenestatus.watch("loaded", function (id, oldval, newval) {
+
+					console.log("Loaded scene.. starting boids.");
+					if(newval == true ) {
+
+						var pos = models.children[0].position;
+						console.log(pos);
+						camera.position.set( pos.x, pos.y + 2.0, pos.z - 20.0 );
+						camera.lookAt(pos);
+
+						var intensity = 70000;
+						var light = new THREE.PointLight( 0xffffff, intensity * 1.5 );
+						light.position.set( 0, 100, 0 );
+						light.physicalAttenuation = true;
+						scene.add( light );
+
+						// Before rendering.. set all the materials to PHONG!!!
+						scene.traverse( function( node ) {
+
+							node.castShadow = true;
+							node.receiveShadow = true;
+
+							if (node instanceof THREE.Mesh) {                    
+								node.material =  new THREE.MeshPhongMaterial( {
+									color: Math.random() * 0xffffff,
+									specular: Math.random() * 0x222222,
+									shininess: 10000,
+									vertexColors: THREE.NoColors,
+									flatShading: false
+								} );
+							}
+						});
+						render();
+					}
+				});
+			});
+
+		</script>
+
+	{% endblock %}
+
+{% endembed %}

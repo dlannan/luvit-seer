@@ -1,0 +1,413 @@
+﻿@font-face {
+    font-family: gosubsmall;
+    src: url("../fonts/Gosub.ttf");
+}
+
+#top-menu {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 42px;
+    z-index: 1000;
+    background-color: lightgrey;
+    display: flex;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-link button {
+    height: 36px;
+}
+
+.scene-title {
+    margin-left: 5px !important;
+    /* padding-top: 1px !important; */
+    height: 38px;
+}
+
+.nav-link,
+.menu-camera {
+    /* margin-top: 4px;
+    margin-bottom: 4px; */
+}
+
+.dropright {
+    margin: 0px;
+    padding: 0px;
+}
+
+.sensor-summary {
+    font-family: gosubsmall;
+    font-size: 12px;
+    height: 22px;
+    width: 100%;
+    position: fixed;
+    z-index: 12;
+    top: 0;
+    left: 0;
+    background-color: rgb(0, 0, 0);
+    background-color: rgba(0, 0, 0, 0.9);
+    color: rgb(255, 255, 255);
+    overflow: hidden;
+    transition: 0.5s;
+}
+
+.main-view {
+    width: 100%;
+    position: relative;
+    padding-right: 0.75rem;
+    padding-left: 0.75rem;
+    margin-right: auto;
+    margin-left: auto;
+    z-index: 1;
+}
+
+
+/* Absolute Center Spinner */
+
+.fullscreen {
+    position: absolute;
+    z-index: -10;
+    height: 100%;
+    width: 100%;
+    top: 0;
+    left: 0;
+}
+
+.notify-toggle {
+    position: fixed;
+    bottom: 0px;
+}
+
+.notify-topbar {
+    position: fixed;
+    top: 0px;
+    padding-right: 40px;
+    color: white;
+    background: rgb(255, 66, 66);
+    width: 100%;
+    height: 56px;
+    line-height: 56px;
+    display: none;
+    font-size: 20px;
+    font-weight: bold;
+    text-align: right;
+    z-index: 99998;
+}
+
+.HUD {
+    background-color: rgba(220, 220, 220, 0.4);
+    background-blend-mode: overlay;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.SimulationTime {
+    z-index: 19;
+    width: 50%;
+    margin: 0 auto;
+    color: white;
+    font-size: 40px;
+    font-weight: bold;
+}
+
+.speedoGauge {
+    width: 500px;
+    height: 350px;
+    position: absolute;
+    top: 90%;
+    left: 50%;
+    overflow: hidden;
+    text-align: center;
+    transform: translate(-50%, -50%);
+    z-index: 19;
+}
+
+.speedoGauge-a {
+    z-index: 15;
+    position: absolute;
+    background-color: rgba(255, 255, 255, .5);
+    width: 300px;
+    height: 150px;
+    top: 50px;
+    left: 50px;
+    border-radius: 250px 250px 0px 0px;
+}
+
+.speedoGauge-b {
+    z-index: 17;
+    position: absolute;
+    background: radial-gradient(circle at center bottom, #333, #333 50%, #77e 75%, #333 75%);
+    width: 250px;
+    height: 125px;
+    top: 75px;
+    margin-left: 75px;
+    margin-right: auto;
+    border-radius: 250px 250px 0px 0px;
+}
+
+.speedoGauge-c {
+    z-index: 16;
+    position: absolute;
+    background-color: #5664F9;
+    width: 300px;
+    height: 150px;
+    top: 200px;
+    left: 50px;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 0px 0px 200px 200px;
+    transform-origin: center top;
+    transition: all .2s ease-in-out;
+}
+
+.speedoGauge-data {
+    z-index: 18;
+    color: rgba(255, 255, 255, 1);
+    font-size: 1.5em;
+    line-height: 25px;
+    position: absolute;
+    width: 400px;
+    height: 200px;
+    top: 130px;
+    margin-left: auto;
+    margin-right: auto;
+    transition: all 1s ease-out;
+}
+
+.tacoGauge {
+    width: 400px;
+    height: 200px;
+    position: absolute;
+    top: 85%;
+    left: 82%;
+    overflow: hidden;
+    text-align: center;
+    transform: translate(-50%, -50%);
+    z-index: 14;
+}
+
+.tacoGauge-a {
+    z-index: 15;
+    position: absolute;
+    background-color: rgba(255, 255, 255, .5);
+    width: 300px;
+    height: 150px;
+    top: 50px;
+    left: 50px;
+    border-radius: 250px 250px 0px 0px;
+}
+
+.tacoGauge-b {
+    z-index: 17;
+    position: absolute;
+    background-color: #222;
+    background: radial-gradient(circle at center bottom, #333, #333 50%, #e77 75%, #333 75%);
+    width: 250px;
+    height: 125px;
+    top: 75px;
+    margin-left: 75px;
+    margin-right: auto;
+    border-radius: 250px 250px 0px 0px;
+}
+
+.tacoGauge-c {
+    z-index: 16;
+    position: absolute;
+    background-color: #5664F9;
+    width: 300px;
+    height: 150px;
+    top: 200px;
+    left: 50px;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 0px 0px 200px 200px;
+    transform-origin: center top;
+    transition: all .2s ease-in-out;
+}
+
+.tacoGauge-data {
+    z-index: 18;
+    color: rgba(255, 255, 255, 1);
+    font-size: 1.5em;
+    line-height: 25px;
+    position: absolute;
+    width: 400px;
+    height: 200px;
+    top: 130px;
+    margin-left: auto;
+    margin-right: auto;
+    transition: all 1s ease-out;
+}
+
+.overlap {
+    position: absolute;
+    right: 0px;
+    z-index: 150 !important;
+    pointer-events: none;
+}
+
+#scenarist-camera {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 1px;
+    height: 1px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#scenarist-dulled {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    background: black;
+    opacity: 0.4;
+    z-index: 998;
+}
+
+.scenarist-menu-left {
+    position: absolute;
+    left: 5px;
+}
+
+.scenarist-menu-right {
+    display: flex;
+    position: absolute;
+    right: 0px;
+}
+
+.scenarist-menu-right .icon-buttons {
+    margin-right: 5px;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.25rem;
+}
+
+.perf-text {
+    position: absolute;
+    top: 10px;
+    left: 0px;
+    font-size: 9px;
+}
+
+.icons-visible {
+    background-color: darkslategrey;
+}
+
+.scenarist-menu-right #dashboard-icons:hover {
+    background-color: cadetblue;
+}
+
+.scenarist-menu-right #dashboard-tour {
+    background-color: goldenrod;
+}
+
+.scenarist-menu-right #dashboard-tour:hover {
+    background-color: gold;
+}
+
+.entity-icon {
+    position: absolute;
+    z-index: 105;
+    background-color: lightgray;
+    padding: 0.5rem 0.75rem;
+    border-radius: 1.3rem;
+    box-shadow: 2px 2px 2px 2px #888888
+}
+
+.scenarist-project-scene {
+    display: flex;
+    position: absolute;
+    left: 10px;
+}
+
+.scenarist-menu-main {
+    display: block;
+    position: absolute;
+    left: 5px;
+    top: 45px;
+    z-index: 103;
+}
+
+.menu-mode-item {
+    display: block;
+    width: 40px;
+    height: 40px;
+    margin: 5px;
+}
+
+.menu-mode-item.active {
+    background-color: lightslategray;
+}
+
+.scenarist-project-name {
+    height: 38px;
+}
+
+.menu-main:hover,
+.menu-simulator:hover,
+.menu-event:hover,
+.menu-sensor:hover,
+.menu-settings:hover,
+.menu-editor:hover {
+    background-color: rgb(175, 175, 175);
+}
+
+
+/* The side navigation menu */
+
+.sidenav {
+    height: 100%;
+    /* 100% Full-height */
+    width: 0;
+    /* 0 width - change this with JavaScript */
+    position: fixed;
+    /* Stay in place */
+    z-index: -10;
+    /* Stay on top */
+    top: 42px;
+    /* Stay at the top */
+    left: 0;
+    background-color: lightgray;
+    /* Black*/
+    overflow-x: hidden;
+    /* Disable horizontal scroll */
+    padding-top: 10px;
+    /* Place content 60px from the top */
+    transition: 0.5s;
+    /* 0.5 second transition effect to slide in the sidenav */
+}
+
+
+/* When you mouse over the navigation links, change their color */
+
+.sidenav a:hover {
+    color: #f1f1f1;
+}
+
+.sidenav button {
+    text-align: left;
+}
+
+
+/* On smaller screens, where height is less than 450px, change the style of the sidenav (less padding and a smaller font size) */
+
+@media screen and (max-height: 450px) {
+    .sidenav {
+        padding-top: 15px;
+    }
+    .sidenav a {
+        font-size: 18px;
+    }
+}
+
+.copyright {
+    z-index: 5000;
+    position: absolute;
+    bottom: 0px;
+    right: 0px;
+}

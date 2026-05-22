@@ -1,0 +1,116 @@
+
+function fillNodeWayLookup( nodeline, mesh) {
+
+    // Fill up the reverse lookup table
+    for(var t=0; t<nodeline.length; t++) {
+        var id = nodeline[t];
+        if(nodelu[id]) {
+            if( id in nodewaylu ) {
+                if( nodewaylu[id].indexOf( mesh.id ) == -1 ) {
+                    nodewaylu[id].push( mesh.id );
+                }
+            } else {
+                nodewaylu[id] = new Array();
+                nodewaylu[id].push( mesh.id );
+            }
+        }
+    }
+}
+
+function checkNodeline( nodeline ) {
+
+    if(!nodeline[0]) return false;
+    
+    {# for(var key in nodeline) {
+        var id = nodeline[key];
+        if( !nodelu[id] ) {
+            return false;
+        }
+    } #}
+    return true;
+}
+
+// Take a nodeline and create a way + a visual geometry curve as well
+function newWay( nodeline ) {
+
+    var mesh;
+    var nodelinecheck = checkNodeline(nodeline);
+    if(debug.nodeLines) console.log("Nodeline: ", nodeline);
+    // check nodeline has 2 or more points
+    if( (nodeline.length < 2) || (nodelinecheck == false) ) {
+    
+        var geometry = new THREE.BoxGeometry( 1, 1, 1 );
+        var material = new THREE.MeshBasicMaterial( { color: new THREE.Color(0x00ff00) } );
+        var mesh = new THREE.Mesh( geometry, material );
+        mesh.visible = false;
+    }
+    else {
+
+        // Sometimes the array is coming in from a loaded object
+        var pts = new Array();
+        for(var t=0; t<nodeline.length; t++) {
+            if(nodelu[nodeline[t]]) {
+                var pos = nodelu[nodeline[t]].position;
+                pts.push( pos );
+            }
+        }
+
+        if(pts.length > 0) {
+            //Create a closed wavey loop
+            var path = new THREE.CatmullRomCurve3( pts );
+            var geometry = new THREE.TubeGeometry( path, 10 * nodeline.length, 0.4, 6, false );
+            var material = new THREE.MeshBasicMaterial( { color: new THREE.Color(0x00ff00) } );
+            var mesh = new THREE.Mesh( geometry, material );
+
+            fillNodeWayLookup(nodeline, mesh);
+        }
+    }
+
+    if(mesh) {
+        ways.add(mesh);
+        waylu[mesh.id] = JSON.parse(JSON.stringify(nodeline));
+    }
+    return mesh;
+}
+
+// Update a way because points in the way may have changed - pass in the way object!
+function updateWay( way, nodeline ) {
+
+    if(!nodeline) return;
+
+    // check nodeline has 2 or more points
+    if( nodeline.length < 2 ) {
+        return;
+    }
+
+    // Sometimes the array is coming in from a loaded object
+    var pts = new Array();
+    for(var t=0; t<nodeline.length; t++) {
+        if(nodelu[nodeline[t]]) {
+            var pos = nodelu[nodeline[t]].position;
+            pts.push( pos );
+        }
+    }
+
+    if(pts.length < 2) {
+        return;
+    }
+
+    //Create a closed wavey loop
+    var path = new THREE.CatmullRomCurve3( pts );
+    var geometry = new THREE.TubeGeometry( path, 10 * nodeline.length, 0.4, 6, false );
+    way.geometry = geometry;
+    way.visible = true;
+    waylu[way.id] = JSON.parse(JSON.stringify(nodeline));
+
+    fillNodeWayLookup(nodeline, way);
+}
+
+function updateAllWays() {
+
+    //console.log(ways, nodelu, waylu);
+    for(var i=0; i<ways.children.length; i++) {
+        var way = ways.children[i];
+        updateWay( way, waylu[way.id] );        
+    }
+}

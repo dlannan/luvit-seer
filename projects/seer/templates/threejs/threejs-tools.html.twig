@@ -1,0 +1,136 @@
+{% include "threejs/scene/threejs-scene-utils.html.twig"  with { 'sceneid': sceneid, 'projectid': projectid } %}
+
+<script>
+
+{% include 'menus/main-menu-js.html.twig'  with { 'sceneid': sceneid, 'projectid': projectid } %}
+{% include 'menus/popup-menu-js.html.twig'  with { 'sceneid': sceneid, 'projectid': projectid } %}
+
+function initTools() {
+
+    loadTexture( "{{ theme_url }}/assets/images/select-cursor01.png", function(texObj) {
+
+        if(selectCursor === undefined) {
+            var material = new THREE.MeshBasicMaterial( { map: texObj, flatShading: true, transparent: true, opacity:1, side: THREE.DoubleSide, depthTest: false });      
+            selectCursor = new THREE.Mesh(new THREE.PlaneGeometry(.1, .1), material);
+            selectCursor.rotation.order = 'ZYX';
+            selectCursor.rotation.set(-Math.PI/2, 0.0, 0.0);
+            selectCursor.visible = true;
+            editor.add(selectCursor);    
+        }
+    });
+
+    initMainMenus();
+    initPopupMenus();
+
+    // Ensure sensors are not visible.
+    hideSensors();
+}
+
+function enableControls() {
+
+    if(mode.camera.control === ControlMode.CHASE) {
+
+//        if(!(lastcontrols instanceof THREE.chaseControl)) {
+            controls = new THREE.chaseControl( camera, renderer.domElement );
+//        } else {
+//            controls = lastcontrols;
+//        }
+
+        controls.ortho = false;
+        controls.movementSpeed = 70;
+        controls.lookSpeed = 0.5;
+
+        //if(mode.camera.lon != 0.0 || mode.camera.lat != 0.0) {
+        controls.lon = mode.camera.lon;
+        controls.lat = mode.camera.lat;
+        controls.update(0.16);
+        //console.log("----------------> CHASE MODE");
+    }
+
+    if(mode.camera.control === ControlMode.FPS) {
+
+        if(!(lastcontrols instanceof THREE.simpleEditorControl)) {
+            controls = new THREE.simpleEditorControl( camera, renderer.domElement );
+        } else {
+            controls = lastcontrols;
+        }
+
+        controls.ortho = false;
+        controls.movementSpeed = 70;
+        controls.lookSpeed = 0.5;
+        controls.lookVertical = true;
+        controls.mousePressed = true;
+
+        //if(mode.camera.lon != 0.0 || mode.camera.lat != 0.0) {
+        controls.lon = mode.camera.lon;
+        controls.lat = mode.camera.lat;
+        controls.update(0.16);
+        //console.log("----------------> FPS MODE");
+    }
+
+    if(mode.camera.control === ControlMode.TARGET) {
+
+        if(cameraObj == null) 
+            cameraObj = models.children[0];
+
+        controls = {
+            target: selectEditorObj,
+            update: function(delta) {
+                //var objid = models.children[0].id;
+                //if(selectEditorObj != -1)
+                //    objid = selectEditorObj;    
+                var voff = new THREE.Vector3(0.0, 2.0, 0.0);
+                cameraPos = cameraObj.position.clone().add(  voff );
+                camera.position.set( cameraPos.x, cameraPos.y, cameraPos.z );
+                
+                var ydir = cameraObj.rotation.y;
+                var zAxis = new THREE.Vector3( Math.sin(ydir), 0.0, Math.cos(ydir));
+
+                var look = cameraPos.clone().add( zAxis );
+                camera.lookAt( cameraPos.x - zAxis.x, cameraPos.y - zAxis.y, cameraPos.z - zAxis.z);           
+            }
+        };
+        controls.ortho = false;
+
+        //console.log("----------------> TARGET MODE");
+    }
+
+    if(mode.camera.control === ControlMode.ORTHO) {
+
+        if(!(lastcontrols instanceof THREE.MapControls)) {
+            controls = new THREE.MapControls( camera, renderer.domElement );
+        } else {
+            controls = lastcontrols;
+        }
+
+        controls.enableRotate = false;
+        controls.enablePan = true;
+        controls.screenSpacePanning = true;
+
+        controls.minPolarAngle = 0.00001;
+        controls.maxPolarAngle = -0.00001;
+
+        controls.minAzimuthAngle = 0.00001;
+        controls.maxAzimuthAngle = -0.00001;    
+
+        //if(mode.camera.lon != 0.0 || mode.camera.lat != 0.0) {
+        controls.lon = mode.camera.lon;
+        controls.lat = mode.camera.lat;
+        controls.update(0.16);
+        
+        //console.log("----------------> ORTHO MODE");
+    }    
+
+    //} else {
+    //    controls.lon = Math.atan2(-100, -100) * (180/Math.PI);
+    //    controls.lat = Math.atan2(-80, 141.42) * (180/Math.PI);
+    //}
+}
+
+function disableControls() {
+
+    lastcontrols = controls;
+    controls = null;
+}
+
+</script>

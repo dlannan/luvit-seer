@@ -1,0 +1,107 @@
+                      <ul class="nav nav-pills" id="pills-tab" role="tablist">
+                        <li class="nav-item">
+                          <a class="nav-link active" id="pills-home-tab" data-toggle="pill" href="#pills-home" role="tab" aria-controls="pills-home" aria-selected="true">
+                          SUMMARY
+                          </a>
+                        </li>                        
+                        <li class="nav-item">
+                          <a class="nav-link" id="pills-status-tab" data-toggle="pill" href="#pills-status" role="tab" aria-controls="pills-status" aria-selected="false">
+                          STATUS
+                          </a>
+                        </li>      
+                        <li class="nav-item">
+                          <a class="nav-link" id="pills-scene-module-tab" data-toggle="pill" href="#pills-scene-module" role="tab" aria-controls="pills-scene-module" aria-selected="false">
+                          SCENE MODULE
+                          </a>
+                        </li>                    
+                        <li class="nav-item">
+                          <a class="nav-link" id="pills-scene-data-tab" data-toggle="pill" href="#pills-scene-data" role="tab" aria-controls="pills-scene-data" aria-selected="false">
+                          DATA OPS
+                          </a>
+                        </li>       
+                        <li class="nav-item">
+                          <a class="nav-link" id="pills-developer-tab" data-toggle="pill" href="#pills-developer" role="tab" aria-controls="pills-developer" aria-selected="false">
+                          DEVELOPER
+                          </a>
+                        </li>       
+                      </ul>
+
+{% set grouplist = grav.user.groups %}
+{% if 'admin' in grouplist %}   
+                <div class="form-group rightside" style="margin-bottom: 0px;">
+                  <label class="custom-switch">
+                    <input id="projectedit" type="checkbox" name="custom-switch-checkbox" class="custom-switch-input">
+                    <span class="custom-switch-indicator"></span>
+                    <span class="custom-switch-description">Edit Project</span>
+                  </label>
+                </div>  
+{% endif %}
+                      </div>
+
+                      <div class="tab-content">
+                        <div class="tab-pane show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
+
+                      <div class="card-body">
+                        <div class="row">
+                          <div id="projectdesc" class="col-sm-4">
+                            <h6>Modified: {{ project.modified }}</h6>
+                            <h6>Created: {{ project.creation }}</h6>
+                            {{ project.desc }}
+                          </div>
+                          <div class="col-sm-4">     
+                            <div style="overflow: hidden;">                  
+                              <div class="card card-body project-card" id="{{ projectid|md5 }}" style="height: 18.5rem">
+                              </div>
+                            </div>
+                          </div>                    
+                          <div class="col-sm-4 team-card" >
+                            <div class="">
+                              <div class="card">
+                                <div class="card-header">
+                                  <h3 class="card-title">Team</h3>
+                                </div>
+
+                                <div class="card-body o-auto" style="height: 15rem">
+                                  <ul class="list-unstyled list-separated">
+{% set users = project.users|split(',') %}
+{% for user in users %}
+
+{% set query = ("[sql-table json]select * from users where name = '" ~ user ) ~ "' limit 1[/sql-table]" %}
+{% set userdb = ((query|shortcodes) | json_decode)[0] %}
+
+                                    <li class="list-separated-item">
+                                      <div class="row align-items-center">
+                                        <div class="col-auto">
+                                          <span class="avatar avatar-md d-block"></span>
+                                        </div>
+                                        <div class="col">
+                                          <div>
+                                            <a href="javascript:void(0)" class="text-inherit">{{ userdb.fullname }}</a>
+                                          </div>
+                                          <small class="d-block item-except text-sm text-muted h-1x">{{ userdb.email }}</small>
+                                        </div>
+                                        <div class="col-auto">
+                                          <div class="item-action dropdown">
+                                            <a href="javascript:void(0)" data-toggle="dropdown" class="icon"><i class="fe fe-more-vertical"></i></a>
+                                            <div class="dropdown-menu dropdown-menu-right">
+                                              <a href="javascript:void(0)" class="dropdown-item"><i class="dropdown-icon fe fe-tag"></i> New Issue </a>
+                                              <a href="javascript:void(0)" class="dropdown-item"><i class="dropdown-icon fe fe-edit-2"></i> Alert User </a>
+                                              <div class="dropdown-divider"></div>
+                                              <a href="javascript:void(0)" class="dropdown-item"><i class="dropdown-icon fe fe-link"></i> Remove </a>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </li>
+{% endfor %}
+                                  </ul>
+                                </div>
+
+
+                              </div>
+                            </div>                        
+                          </div>                    
+                        </div>
+                      </div>
+
+                        </div>

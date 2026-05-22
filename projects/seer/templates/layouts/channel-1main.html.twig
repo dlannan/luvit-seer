@@ -1,0 +1,16 @@
+
+// -----------------------------------------------------------------------------------------------------------------------------------------
+// Channel updater (this is default layout one - can change at runtime if needed)
+
+channelsUpdate = function( crect ) {
+
+    channels = [];
+    var ratio = 1.0 / renderer.getPixelRatio();
+    var wide = crect.width * ratio;
+    var high = crect.height * ratio;
+
+    var mainwidth = wide;
+    var mainheight = high;
+
+    channels.push( { top: 0, left: 0, width: mainwidth, height: mainheight } );
+}

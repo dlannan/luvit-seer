@@ -1,0 +1,120 @@
+
+<script>
+
+    function selectMode( mode ) {
+        
+        // console.log($("#menu-mode").text());
+
+        if(mode === "Main") {
+            $(".menu-main").show();
+            $(".menu-settings").hide();
+            $(".menu-editor").hide();
+            $(".menu-simulator").hide();
+            $(".menu-sensor").hide();
+            $(".menu-event").hide();
+            // $("#menu-mode").text("Settings");
+        }
+        if(mode === "Settings") {
+            $(".menu-main").hide();
+            $(".menu-settings").show();
+            $(".menu-editor").hide();
+            $(".menu-simulator").hide();
+            $(".menu-sensor").hide();
+            $(".menu-event").hide();
+            // $("#menu-mode").text("Editor");
+        }
+        if(mode === "Editor") {
+            $(".menu-main").hide();
+            $(".menu-settings").hide();
+            $(".menu-editor").show();
+            $(".menu-simulator").hide();
+            $(".menu-sensor").hide();
+            $(".menu-event").hide();
+            // $("#menu-mode").text("Simulation");
+        }
+        if(mode === "Simulation") {
+            $(".menu-main").hide();
+            $(".menu-settings").hide();
+            $(".menu-editor").hide();
+            $(".menu-simulator").show();
+            $(".menu-sensor").hide();
+            $(".menu-event").hide();
+            // $("#menu-mode").text("Sensors");
+        }
+        if(mode === "Sensors") {
+            $(".menu-main").hide();
+            $(".menu-settings").hide();
+            $(".menu-editor").hide();
+            $(".menu-simulator").hide();
+            $(".menu-sensor").show();
+            $(".menu-event").hide();
+            // $("#menu-mode").text("Events");
+        } 
+        if(mode === "Events") {
+            $(".menu-main").hide();
+            $(".menu-settings").hide();
+            $(".menu-editor").hide();
+            $(".menu-simulator").hide();
+            $(".menu-sensor").hide();
+            $(".menu-event").show();
+            // $("#menu-mode").text("Main");
+        } 
+        /* if(mode === "Nodes") {
+            $(".menu-main").hide();
+            $(".menu-settings").hide();
+            $(".menu-editor").hide();
+            $(".menu-spline").hide();
+            $(".menu-builder").show();
+            // $("#menu-mode").text("Builder");
+        } */
+        /* if(mode === "Builder") {
+            $(".menu-main").show();
+            $(".menu-settings").hide();
+            $(".menu-editor").hide();
+            $(".menu-spline").hide();
+            $(".menu-builder").hide();
+            // $("#menu-mode").text("Main");
+        } */
+    }
+
+    $(document).ready(function() {
+
+        // Select Settings mode - by default
+        selectMode("Simulation");
+
+        // Enable/disable objects based on mode selection
+        $("#menu-mode").click( function(e) {
+            selectMode( $(this).text() );
+        })
+
+        $('#cameraDepth').slider({
+            formatter: function(value) {
+                return '' + value;
+            }
+        });
+
+        scenestatus.watch("loaded", function (id, oldval, newval) {
+
+            if(newval == true ) {
+
+                $('#cameraType').click(function (){
+                    
+                    //console.log( "TYPE:" + $('#cameraType').text() );
+                    disableControls();
+                    if( $('#cameraType').text() === "Perspective") {
+                        mode.camera.control = ControlMode.FPS;
+                        $('#cameraType').text("Orthographic");
+                        perspCamera.position.set( camera.position.x, camera.position.y, camera.position.z );
+                        camera = perspCamera;          
+                    } else {
+                        mode.camera.control = ControlMode.ORTHO;
+                        $('#cameraType').text("Perspective");
+                        orthoCamera.position.set( camera.position.x, camera.position.y, camera.position.z );
+                        camera = orthoCamera;
+                    }
+                    enableControls();
+                });
+            }
+        });
+    });
+</script>

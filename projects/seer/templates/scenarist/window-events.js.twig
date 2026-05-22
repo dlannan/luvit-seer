@@ -1,0 +1,64 @@
+<script>
+
+function cleanString( str ) {
+
+    return str.replace(/"/g, "'");
+}
+
+function SaveCameraPosition(callback) {
+
+    // Camera save scenarist. Save to a camera table with Scene and project id'save
+    //    Camera needs: id, position and target (if id is null, main cam is used)
+    var savecam = cameras.persp;
+    var campos = JSON.stringify(savecam.camera.position);
+    campos = campos.replace(/"/g, '\'');
+    var target = new THREE.Vector3();
+    savecam.camera.getWorldDirection( target );
+    var camtarget = JSON.stringify(target);
+    camtarget = camtarget.replace(/"/g, '\'');
+
+    // If a saved camera exists, then overwrite (update) the db
+    {% set query = ( ("[sql-table json]select * from cameras where projectid = '" ~ projectid ) ~ "' and sceneid = '" ~ sceneid ) ~"' [/sql-table]" %}
+    {% set cameradb = ((query|shortcodes) | json_decode)[0] %}
+
+    {% if cameradb %}
+        $('#update-cameras input[name="data[where]"]').val(' sceneid = "{{ sceneid }}" and projectid = "{{ projectid }}"');
+        
+        $('#update-cameras input[name="data[id]"]' ).val( savecam.name );
+        $('#update-cameras input[name="data[position]"]' ).val( campos );
+        $('#update-cameras input[name="data[target]"]' ).val( camtarget );
+        $('#update-cameras input[name="data[sceneid]"]' ).val( {{ sceneid }} );
+        $('#update-cameras input[name="data[projectid]"]' ).val( {{ projectid }} );
+        $('#update-cameras').attr("action", "/scenarist?projectid={{ projectid }}&sceneid={{ sceneid }}");
+
+
+    $("#update-cameras").ajaxSubmit({
+        //To clear form after ajax submitting
+        clearForm: true,
+       success: function(){
+           callback();
+       }
+    });
+
+
+    {% else %}
+        $('#insert-cameras input[name="data[id]"]' ).val( savecam.name );
+        $('#insert-cameras input[name="data[position]"]' ).val( campos );
+        $('#insert-cameras input[name="data[target]"]' ).val( camtarget );
+        $('#insert-cameras input[name="data[sceneid]"]' ).val( {{ sceneid }} );
+        $('#insert-cameras input[name="data[projectid]"]' ).val( {{ projectid }} );
+        $('#insert-cameras').attr("action", "/scenarist?projectid={{ projectid }}&sceneid={{ sceneid }}");
+
+    $("#insert-cameras").ajaxSubmit({
+        //To clear form after ajax submitting
+        clearForm: true,
+       success: function(){
+           callback();
+       }
+    });
+
+    {% endif %}
+
+}
+
+</script>

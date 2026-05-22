@@ -1,0 +1,237 @@
+function showEnvironments() {
+    {% set envpages = '/assets/environments' %}
+    {% include 'partials/selection.html.twig' %}
+}
+
+function showModels() {
+    {% set envpages = '/assets/models' %}
+    {% include 'partials/selection.html.twig' %}
+}
+
+function showModelsNaval() {
+    {% set envpages = '/assets/models-naval' %}
+    {% include 'partials/selection.html.twig' %}
+}
+
+function showModelsAir() {
+    {% set envpages = '/assets/models-air' %}
+    {% include 'partials/selection.html.twig' %}
+}
+
+function showObjects() {
+    {% set envpages = '/assets/objects' %}
+    {% include 'partials/selection.html.twig' %}
+}
+
+function showActors() {
+    {% set envpages = '/assets/actors' %}
+    {% include 'partials/selection.html.twig' %}
+}
+
+function showOutdoorObjects() {
+    {% set envpages = '/assets/outdoors' %}
+    {% include 'partials/selection.html.twig' %}
+}
+
+function updateSelectionPanel(doClear, clickCallback, selectionShowMore){
+
+    $('#scenarist-dulled').fadeIn();
+    $('.nav-circlepop').fadeIn();
+    $('#select-wrap').css('transform', 'translateY( 0% )');
+    $('#selection-images').empty();
+
+    var ocount = 0;        
+    var html = "";
+    var MAX_IMAGES_WIDE = Math.floor(($('#select-wrap').width() - 170) / 212);
+    var MAX_IMAGES_HIGH = Math.floor(($(window).height() - 50) / 200) ;
+    var MAX_IMAGES = MAX_IMAGES_WIDE;
+
+    if(selectionShowMore == undefined) selectionShowMore = 0;
+    if(selectionShowMore == 1) MAX_IMAGES = MAX_IMAGES_WIDE * MAX_IMAGES_HIGH;
+
+    html = html + '<div class="carousel-item active">';
+    html = html + '<div class="row select-center">';
+    var active = "active";
+    var remaining = Object.keys(selectionList).length;
+    for( var obj in selectionList ) {
+
+        html = html + selectionList[obj]['child'];
+
+        if(remaining > 1) {
+        if( ocount % MAX_IMAGES_WIDE == MAX_IMAGES_WIDE-1 ) {
+            html = html + '</div>';
+
+            if( ocount % MAX_IMAGES == MAX_IMAGES - 1 ) {
+                html = html + '</div>';
+                html = html + '<div class="carousel-item">';
+            }
+
+            html = html + '<div class="row select-center">';
+        }
+        }
+        ocount ++;
+        remaining--;
+    }
+    html = html + '</div>';
+    html = html + '</div>';
+    $('#selection-images').append(html);    
+
+    $('.selection-item').unbind('click').on('click', function(e){
+        
+        var target = e.currentTarget;
+        var uid = $(target).attr('uid');
+        var data = selectionList[uid];
+
+        if(doClear === true) clearScene();
+        $("#select-obj").hide();
+        $(".loading").show();
+
+        // Set the mode.object. For non env this enables placement
+        loadScene( data, UID(), clickCallback );
+
+        $('#scenarist-dulled').fadeOut();
+        $('.nav-circlepop').fadeOut();
+        $('#select-wrap').css('transform', 'translateY( -100% )');
+    });    
+}
+
+function updateSelectionMore() {
+    var selectionShowMore = parseInt($('#selection-more').attr('data-more'));
+    if(selectionShowMore == 1) {
+        $('.nav-circlepop a.carousel-control-more .icon-wrap').css('transform', 'rotate(90deg)');
+    }
+    else {
+        $('.nav-circlepop a.carousel-control-more .icon-wrap').css('transform', 'rotate(270deg)');
+    }
+    return selectionShowMore;
+}
+
+function showSelection( doClear, clickCallback ) {
+
+    var selectionShowMore = updateSelectionMore();
+    updateSelectionPanel(doClear, clickCallback, selectionShowMore);
+
+    $('#selection-carousel').carousel({
+        interval: false
+    });
+    
+    $('#selection-carousel').on('slid.bs.carousel', function() {
+        //alert("slid");
+    });
+
+    $('#scenarist-dulled').unbind('click').on('click', function() {
+        $('#select-wrap').css('transform', 'translateY( -100% )');
+        $('.nav-circlepop').fadeOut();
+        $('#scenarist-dulled').fadeOut();
+    });
+
+    $('#selection-more').unbind('click').on('click', function() {
+
+        var selectionShowMore = updateSelectionMore();
+        $('#selection-more').attr('data-more', 1-selectionShowMore);
+        updateSelectionMore();
+        updateSelectionPanel(doClear, clickCallback, 1-selectionShowMore);
+    });
+
+    {# $('#select-wrap').show(); #}
+    {# } #}
+}
+
+$('.threed-selection').on( 'click', function( e ) {
+    var id = e.currentTarget;
+    ctype = $(id).attr('collection');
+    
+    var doClear = false;
+    var callback = null;
+
+    if( ctype === 'environments' ) {
+
+        doClear = true;
+        showEnvironments();
+        showSelection(doClear, function(object) {
+            
+            selectCursor.visible = false;
+
+            // Setup looking at center of env
+            var bbox = new THREE.Box3().setFromObject( object );
+            var cpos = new THREE.Vector3(100, 80+bbox.max.y, 100);
+            var tpos = new THREE.Vector3(0, bbox.max.y, 0);
+            var diff = (tpos - cpos);
+
+            camera.position.copy( cpos );
+            controls.lon = Math.atan2(-100, -100) * (180/Math.PI);
+            controls.lat = Math.atan2(-80, 141.42) * (180/Math.PI);
+
+            // Add to env scene 
+            world.add( object );
+            EndSelection();
+            $(".loading").hide();
+        });
+    }
+    else if( (ctype === 'models') ||  (ctype === 'models-naval') ||  (ctype === 'models-air') ) {
+
+        if(ctype == 'models') showModels();
+        if(ctype == 'models-naval') showModelsNaval();
+        if(ctype == 'models-air') showModelsAir();
+
+        showSelection(doClear, function(object) {
+
+            selectCursor.visible = true;
+
+            // clear other Selections first
+            clearSelection();
+            selection.add( object );
+            var ent = SceneGraph.addMoverObject( object );
+
+            // Enable placement first!!
+            mode.state = EditorMode.INITIALPLACE;
+            mode.group = models;
+            mode.object = object;
+            $(".loading").hide();
+        });
+    }
+    else if(( ctype === 'objects' ) || ( ctype === 'outdoors' )) {
+        
+        if(ctype == 'objects') showObjects();
+        if(ctype == 'outdoors') showOutdoorObjects();
+        
+        showSelection(doClear, function(object) {
+
+            selectCursor.visible = true;
+
+            // clear other Selections first
+            clearSelection();
+            selection.add( object );
+            var ent = SceneGraph.addStaticObject( object );
+
+            // Enable placement first!!
+            mode.state = EditorMode.INITIALPLACE;
+            mode.group = statics;
+            mode.object = object;
+            $(".loading").hide();
+        });
+    }
+    else if( ctype === 'actors' ) {
+        
+        showActors();
+        showSelection(doClear, function(object) {
+
+            if( object != undefined ) {
+
+            console.log("Loaded actor: ", object);
+            selectCursor.visible = true;
+
+            // clear other Selections first
+            clearSelection();
+            selection.add( object );
+            var ent = SceneGraph.addMoverObject( object );
+
+            // Enable placement first!!
+            mode.state = EditorMode.INITIALPLACE;
+            mode.group = actors;
+            mode.object = object;
+            $(".loading").hide();
+            }
+        });
+    }
+});

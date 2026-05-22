@@ -1,0 +1,75 @@
+    // Define the steps for introduction
+    tourSteps.defineSteps([
+    {
+        element: '#menu-mode-dd',
+        popover: {
+            title: 'Menu Selection',
+            description: 'Scenarist drop-down menu that selects different modes of operation.',
+            position: 'bottom'
+        }
+    },
+    {
+        element: '#menu-main-project',
+        popover: {
+        title: 'Project Name',
+        description: 'The name of the project this scene is within.',
+        position: 'bottom'
+        }
+    },
+    {
+        element: '#scene-title',
+        popover: {
+        title: 'Scene Title',
+        description: 'The title of this scene. The title can be modified and saved.',
+        position: 'bottom'
+        }
+    },
+    {
+        element: '#menu-main-snapshot',
+        popover: {
+        title: 'Snapshot',
+        description: 'Take a screen shot the the current main view. This is added to the gallery and also becomes the current icon if the scene is saved.',
+        position: 'bottom'
+        }
+    },
+    {
+        element: '#menu-main-savescene',
+        popover: {
+        title: 'Save',
+        description: 'Save the current scene. This will currently overwrite any previous scene. Revisions of scenes will be added as a feature.',
+        position: 'bottom'
+        }
+    },
+    {
+        element: '#menu-main-close',
+        popover: {
+        title: 'Close / Quit',
+        description: 'Exit current scene editing (without save) back to the project menu.',
+        position: 'bottom'
+        }
+    },
+    {
+        element: '#menu-main-perf-indicator',
+        popover: {
+        title: 'Performance',
+        description: 'An indicator showing the frame rate performance of the scene. As complexity increases performance drops.',
+        position: 'bottom-right'
+        }
+    },
+    {
+        element: '#menu-main-icons',
+        popover: {
+        title: 'Scene Icons',
+        description: 'Toggle the icons for all objects in the scene.',
+        position: 'bottom-right'
+        }
+    },
+    {
+        element: '#scenarist-camera',
+        popover: {
+        title: 'Main View',
+        description: '<p>The main view for Scenarist. Use the left-click to select objects and hold a mouse button down to move the camera around.</p><p>For detailed contol of the interface please read the <a href="/documentation/scenarist-quick-guide">Scenarist Guide document</a></p>',
+        position: 'top',
+        }
+    }         
+    ]);

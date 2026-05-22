@@ -1,0 +1,240 @@
+
+.button-row {
+    display: inline;
+    position: absolute;
+    top: 40px;
+    left: 40px;
+}
+
+
+.editor button {
+    top:0;
+    left:0;
+    background:#222;
+    border:none;
+    width:48px;
+    height:45px;
+    text-indent:-900em;
+    overflow:hidden;
+    position:relative;
+    cursor:pointer;
+    outline:none;
+    -webkit-border-top-right-radius:0;
+    -webkit-border-bottom-right-radius:3px;
+    -webkit-border-bottom-left-radius:0;
+    -webkit-border-top-left-radius:0;
+    -moz-border-radius-topright:0;
+    -moz-border-radius-bottomright:3px;
+    -moz-border-radius-bottomleft:0;
+    -moz-border-radius-topleft:0;
+    border-top-right-radius:0;
+    border-bottom-right-radius:3px;
+    border-bottom-left-radius:0;
+    border-top-left-radius:0;
+    -webkit-background-clip:padding-box;
+    -moz-background-clip:padding;
+    background-clip:padding-box;
+    opacity:0.6
+}
+
+nav a:hover {
+  background-color: rgb(175, 175, 175);
+}
+
+/* Absolute Center Spinner */
+.loading {
+    position: fixed;
+    z-index: 1100;
+    background: url('../images/saldo1.png') 0 0;
+    background-repeat: no-repeat;
+    background-position: center; 
+    background-color: #000;
+    height: 100%;
+    overflow: show;
+    margin: auto;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    text-align: center;
+  }
+  
+
+  .loadinglogo {
+    position: absolute;
+    margin: auto;
+    top: 50%;
+    left: 50%;
+  }
+  
+  .loadingspinner {
+    position: relative;
+    top: -155px;
+    left: -62px;
+
+    width: 117px;
+    height: 124px;
+    background: url('../images/saldo2.png') 0 0;
+
+    -webkit-animation-name: spin;
+    -webkit-animation-duration: 4000ms;
+    -webkit-animation-iteration-count: infinite;
+    -webkit-animation-timing-function: linear;
+    -moz-animation-name: spin;
+    -moz-animation-duration: 4000ms;
+    -moz-animation-iteration-count: infinite;
+    -moz-animation-timing-function: linear;
+    -ms-animation-name: spin;
+    -ms-animation-duration: 4000ms;
+    -ms-animation-iteration-count: infinite;
+    -ms-animation-timing-function: linear;
+    
+    animation-name: spin;
+    animation-duration: 4000ms;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+}
+@-ms-keyframes spin {
+    from { -ms-transform: rotate(0deg); }
+    to { -ms-transform: rotate(360deg); }
+}
+@-moz-keyframes spin {
+    from { -moz-transform: rotate(0deg); }
+    to { -moz-transform: rotate(360deg); }
+}
+@-webkit-keyframes spin {
+    from { -webkit-transform: rotate(0deg); }
+    to { -webkit-transform: rotate(360deg); }
+}
+@keyframes spin {
+    from {
+        transform:rotate(0deg);
+    }
+    to {
+        transform:rotate(360deg);
+    }
+}
+  
+/* css for the radial menu */
+nav.radial {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    position: relative;
+    width: 3rem;
+    height: 3rem;
+    margin: 0 auto;
+  }
+
+  nav.radial input {
+    display: none;
+  }
+
+  nav.radial > label,
+  nav.radial > .btn {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: lightgrey;
+    color: black;
+    text-align: center;
+    font-size: 0;
+    line-height: 2rem;
+  }
+
+  nav.radial label:before,
+  nav.radial .btn:before {
+    font-size: 1.2rem;
+    color: black;
+  }
+
+  nav.radial .btn {
+    color: transparent;
+    text-decoration: none;
+    box-sizing: border-box;
+  }
+
+  nav.radial label {
+    border-radius: 1.5rem 1.5rem 0 0;
+    height: 2rem;
+    cursor: pointer;
+    box-sizing: border-box;
+    border-bottom: 0.25rem solid #2f2f2f;
+    box-shadow: 0 0.1875rem rgba(0, 0, 0, 0.25);
+    transition: border-bottom 0.25s, box-shadow 0.5s;
+  }
+
+  nav.radial input:checked ~ label {
+    border-bottom-width: 1px;
+    box-shadow: none;
+  }
+
+  nav.radial .btn {
+    transition: top 0.1s, left 0.25s, opacity 1s, box-shadow 0.25s;
+    border-radius: 1.5rem;
+    opacity: 0;
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+    border-bottom: 1px solid #888;
+    box-sizing: border-box;
+  }  
+
+  nav.radial .btn:hover {
+    background-color: #007bff;
+    border-bottom-color: #004b8f;
+  }
+
+  nav.radial input:checked ~ .btn {
+    transition: top 0.3s, left 0.3s, box-shadow 1s, background-color 0.25s, border-bottom-color 0.25s, border-bottom-width 0.25s;
+    opacity: 1;
+  }
+
+  nav.radial .btn:hover {
+    border-bottom-width: 0.25rem;
+  }
+
+  nav.radial input:checked ~ .btn:nth-of-type(1),
+  nav.radial input:checked ~ .btn:nth-of-type(7) {
+    box-shadow: 0 -0.1875rem 0.375rem rgba(0, 0, 0, 0.25);
+  }
+
+  nav.radial input:checked ~ .btn:nth-of-type(1) {
+    left: -4.72707721rem;
+    top: -0.83351125rem;
+  }
+
+  nav.radial input:checked ~ .btn:nth-of-type(2) {
+    left: -3.08538053rem;
+    top: -3.67701333rem;
+  }
+
+  nav.radial input:checked ~ .btn:nth-of-type(3) {
+    left: 0rem;
+    top: -4.8rem;
+  }
+
+  nav.radial input:checked ~ .btn:nth-of-type(4) {
+    left: 3.08538053rem;
+    top: -3.67701333rem;
+  }
+
+  nav.radial input:checked ~ .btn:nth-of-type(5) {
+    left: 4.72707721rem;
+    top: -0.83351125rem;
+  }
+
+  nav.radial input:checked ~ .btn:nth-of-type(6) {
+    left: 4.0rem;
+    top: 2.4rem;
+  }
+  
+  nav.radial input:checked ~ .btn:nth-of-type(7) {
+    left: -4.0rem;
+    top: 2.4rem;
+  }  
+  

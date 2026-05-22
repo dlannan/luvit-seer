@@ -1,0 +1,45 @@
+this.$slideOut = $('#slideOut');
+this.$slideOutTimes = $('#slideOutTimes');
+
+// Slideout show
+this.$slideOut.find('.slideOutTab').on('click', function() {
+    $("#slideOut").toggleClass('showSlideOut');
+});				
+
+// SlideoutTimes show
+this.$slideOutTimes.find('.slideOutTab').on('click', function() {
+    $("#slideOutTimes").toggleClass('showSlideOut');
+});				
+
+$("#btn_vehicle_camera").on("click", function() {
+    Physics.keysActions.KeyC.keyup = true;
+});
+
+$("#btn_vehicle_reset").on("click", function() {
+    simstate.mode = SimulationMode.RESET;
+    currEvent = startEvent;
+})
+
+$("#btn_vehicle_pause").on("click", function() {
+    if(simstate.mode !== SimulationMode.PAUSED) {
+        simstate.mode = SimulationMode.PAUSED;
+        for(var cid in charts) { charts[cid].stop(); }
+    }
+    else {
+        simstate.mode = SimulationMode.PLAY;
+        for(var cid in charts) { charts[cid].start(); }
+    }
+});
+
+$("#btn_vehicle_steering").on("click", function() {
+    if(Physics.vehicle.steering == SteeringMode.DIGITAL) {
+        Physics.vehicle.steering = SteeringMode.PROGRESSIVE;
+        $("#btn_vehicle_steering > span").addClass("fa-arrows-alt");
+        $("#btn_vehicle_steering > span").removeClass("fa-circle-o-notch");
+    } else {
+        Physics.vehicle.steering = SteeringMode.DIGITAL;
+        $("#btn_vehicle_steering > span").removeClass("fa-arrows-alt");
+        $("#btn_vehicle_steering > span").addClass("fa-circle-o-notch");
+    }
+    checkSteering();
+});

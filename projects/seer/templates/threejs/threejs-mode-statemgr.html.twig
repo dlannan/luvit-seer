@@ -1,0 +1,139 @@
+<script>
+
+// A stateNode is a single operating node - it ensures singular state execution modes
+//    ie: When in nodes mode, only nodes are active, in sensor mode, only sensors are active etc
+
+var stateNode = {
+
+    name: "None",
+    value: -1,              // Set this value to react to external state control
+    parent: undefined,      // If this is set, exit ensures the parent state is reactivated
+
+    onenter: function(init) {},
+    onupdate: function(dt) {},
+    onmouse: function( event ) {},
+    onexit: function() {}
+};
+
+// The statemanager looks after all the general state operations - keeps things clean, because it has become a MESS!
+//    Always starts with an "initialize" state - if you do not make one, it will not run!
+
+var stateManager = {
+
+    ready: true,
+    pool: {},
+    costates: [],    // States that can run while main state is
+    current: undefined,
+    next: undefined,
+    param: undefined,
+
+    // Add a state to the pool - so it can be jumped or begun later
+    AddState: function(stateName, state) {
+        this.pool[stateName] = state;
+    },
+
+    // Start the stateManager with a specific state
+    //     Calling Start while running other states will act the same as a JumpTo.
+    Start: function(stateName) {
+        if(this.current == undefined) {
+            this.current = stateName;
+            var state = this.pool[this.current];
+            if(state) state.onenter(this.param);
+            this.param = undefined;
+            this.next = undefined;
+        } else {
+            // Let update move to the next state
+            this.next = stateName;
+        }
+    },
+
+    // Exit the current state
+    ChangeTo: function(stateName, param) {
+
+        var state = this.pool[stateName];
+        if(state) {
+            state.parent = this.current;
+        }
+        this.next = stateName;
+        this.param = param;
+
+        console.log("WARN: StateManager - changedTo:", stateName);
+    },
+
+    // Exit the current state
+    ExitState: function() {
+        if(this.current) {
+            var state = this.pool[this.current];
+            if(state && state.parent) {
+                console.log("WARN: StateManager - exitState:", this.current);
+                this.next = state.parent;
+            }   
+        }
+    },
+
+    // Jump to the state at the end of the Update pass (ensures all States can complete)
+    JumpTo: function(stateName, param) {
+        // Let update move to the next state
+        this.next = stateName;
+        this.param = param;
+
+        var state = this.pool[stateName];
+        if(!state) 
+            console.log("WARN: StateManager - Invalid State JumpTo will fail:", stateName);
+        {# else
+            console.log("WARN: StateManager - jumpTo:", stateName); #}
+    },
+
+    Update: function(dt) {
+
+        if(this.ready == false) return;
+        if(this.current !== undefined) {
+            
+            var state = this.pool[this.current];
+            if(state) state.onupdate(dt);
+
+            if(this.next != undefined) {
+                var hadParent = false;
+                if(state) {
+                    state.onexit();
+                    hadParent = (state.parent != undefined);
+                }
+
+                this.current = this.next;
+                this.next = undefined;
+
+                var state = this.pool[this.current];
+                if(state && !hadParent) state.onenter(this.param);
+                this.param = undefined;
+            }
+        } else {
+            console.log("WARN: StateManager - no state set.");
+        }
+
+        for(var idx in this.costates) {
+            var state = this.costates[idx];
+            if(state.onupdate) state.onupdate(dt);
+        }
+    },
+
+    AddCoState: function( stateName ) {
+        var state = this.pool[stateName];
+        if(state) {
+            this.costates.push(state);
+        }
+    },
+
+    MouseEvent: function( event ) {
+
+        if(this.ready == false) return;
+
+        if(this.current !== undefined) {
+            
+            //console.log("Mouse Up", this.current, mode.state, event);
+            var state = this.pool[this.current];
+            if(state && state.onmouse) state.onmouse( event );
+        }
+    }
+};
+
+</script>

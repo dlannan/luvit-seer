@@ -1,0 +1,639 @@
+<!DOCTYPE HTML>
+<html lang="en" prefix="og: http://ogp.me/ns#">
+
+    <head>
+        <title>Image uploads with Cloudinary · ContentTools</title>
+
+        <!-- Meta data -->
+        <meta http-equiv="x-ua-compatible" content="IE=edge">
+        <meta
+            name="description"
+            content="How to use Cloudinary to manage image uploads with none of the hard work - A front-end only approach."
+            >
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta name="author" content="Anthony Blackshaw">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+        <meta name="HandheldFriendly" content="true">
+        <meta name="MobileOptimized" content="320">
+        <meta name="csrf-token" content="1471948620##f42f5f5d63c12a3184409eed10a136f9a0694649">
+        
+        
+
+        <!-- Favicon -->
+        <link rel="icon" type="image/x-icon" href="/favicon.ico">
+        <link rel="apple-touch-icon-precomposed" href="/favicon-152.png">
+        <meta name="msapplication-TileColor" content="#2980b9">
+        <meta name="msapplication-TileImage" content="/favicon-144.png">
+
+        
+            <!-- Twitter card -->
+            <meta name="twitter:card" content="summary">
+            <meta name="twitter:url" content="http://getcontenttools.com/tutorials/image-uploads-with-cloudinary">
+            <meta name="twitter:title" content="Image uploads with Cloudinary · ContentTools">
+            <meta name="twitter:description" content="How to use Cloudinary to manage image uploads with none of the hard work - A front-end only approach.">
+            <meta name="twitter:image" content="http://getcontenttools.com//images/twitter-card-logo.png">
+        
+
+        
+            <!-- Facebook Open Graph -->
+            <meta property="og:type" content="website">
+            <meta property="og:site_name" content="ContentTools">
+            <meta property="og:title" content="Image uploads with Cloudinary">
+            <meta property="og:description" content="How to use Cloudinary to manage image uploads with none of the hard work - A front-end only approach.">
+            <meta property="og:url" content="http://getcontenttools.com/tutorials/image-uploads-with-cloudinary">
+            <meta property="og:image" content="http://getcontenttools.com/images/facebook-share-logo.png">
+            <meta property="og:image:type" content="image/png">
+            <meta property="og:image:width" content="470">
+            <meta property="og:image:height" content="250">
+        
+
+        <!-- CSS -->
+        <link rel="stylesheet" type="text/css" href="/styles/site.css">
+        
+        
+
+        <!-- Google Analytics -->
+        
+            <script>
+              (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+              (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+              m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+              })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+              ga('create', 'UA-66406639-1', 'auto');
+              ga('send', 'pageview');
+            </script>
+        
+    </head>
+
+    <body class="page">
+        
+            <header class="page__header">
+                <nav class="site-nav">
+                    <a href="/" class="site-nav__logo">
+                        <img
+                            src="/images/logo@2x.png"
+                            alt="ContentTools logo"
+                            width="168"
+                            height="36"
+                            >
+                    </a>
+                    <div class="site-nav__toggle">
+                        <span class="sr-only">Toggle navigation</span>
+                    </div>
+                    <ul class="site-nav__items">
+                        <li class="site-nav__item">
+        
+        <a
+            href="/demo"
+            class="
+                site-nav__link
+                
+                "
+            >
+            Demo
+        </a>
+    </li>
+                        <li class="site-nav__item">
+        
+        <a
+            href="/getting-started"
+            class="
+                site-nav__link
+                
+                "
+            >
+            Getting&nbsp;started
+        </a>
+    </li>
+                        <li class="site-nav__item">
+        
+        <a
+            href="/tutorials"
+            class="
+                site-nav__link
+                site-nav__link--you-are-here
+                "
+            >
+            Tutorials
+        </a>
+    </li>
+                        <li class="site-nav__item">
+        
+        <a
+            href="/api"
+            class="
+                site-nav__link
+                
+                "
+            >
+            API
+        </a>
+    </li>
+                        <li class="site-nav__item">
+        
+        <a
+            href="https://github.com/GetmeUK"
+            class="
+                site-nav__link
+                
+                "
+            >
+            GitHub
+        </a>
+    </li>
+                    </ul>
+                </nav>
+                <div class="page__container">
+                    
+    <div data-editable data-name="page__heading">
+
+<h1 class="page__heading">
+    Image uploads with Cloudinary
+</h1>
+
+    </div>
+
+                    
+    <div data-editable data-name="page__opening">
+
+<p class="page__opening">
+    A front-end only approach to image uploads; how to offload the server-side hassle to Cloudinary.
+</p>
+
+</div>
+
+                </div>
+            </header>
+        
+
+        
+            <main class="page__main">
+                <div class="page__container">
+                    
+    <section
+        class="[ page__content ]  [ formatted ]"
+        data-editable
+        data-name="page__content"
+        >
+
+<h2 id="cloudinary-to-the-rescue">
+    Cloudinary to the rescue
+</h2>
+<p>
+    If you've arrived here from the <a href="/tutorials/handling-image-uploads">Handling image uploads</a> tutorial then congratulations on making it this far and now don't be mad but there was an easier alternative all along - <a href="http://cloudinary.com/">Cloudinary</a>.
+</p>
+<p>
+    <b>Cloudinary</b> is a software–as-a-service (SaaS) solution for image management hosted in the cloud.
+</p>
+<p class="note">
+    To be clear I've picked Cloudinary here because it was recommended to me by a friend, there are other image management services out there;&nbsp;<a href="https://uploadcare.com/">Uploadcare</a> was another I stumbled upon that looked promising.
+</p>
+<h3 id="setting-up-your-cloudinary-account">
+    Setting up your Cloudinary account
+</h3>
+<p>
+    If you don't have a Cloudinary account already then <a href="https://cloudinary.com/users/register/free">register one</a> (it's free for the base tier and only takes a few seconds). Once you have an account log into the site to access the console. On the console's dashboard in the <b>Account Details</b> section you'll see your&nbsp;<b>Cloud name</b>&nbsp;- make a note of it as we'll need it later.
+</p>
+<img alt="Account details" height="165" src="/images/pages/tutorials/image-uploads-with-cloudinary/account-details.png" width="765">
+<p>
+    We also need to configure our account to accept <i>unsigned uploads</i>, this is what allows us to off-load all of the server-side image handling to Cloudinary. Select the <b>Settings</b> link within the console navigation then select the&nbsp;<b>Upload</b> tab. Scroll to the bottom of the page and locate the section labelled <b>Upload presets</b>.&nbsp;If unsigned uploading is not enabled click the <b>Enable unsigned uploading</b>&nbsp;link to enable it.
+</p>
+<img alt="Upload presets" height="235" src="/images/pages/tutorials/image-uploads-with-cloudinary/upload-presets.png" width="700">
+<p>
+    Your account may already have an <i>upload preset</i> defined. If so click the <b>Edit</b>&nbsp;option next to it, if not select the <b>Add upload preset</b> link. There are a lot of options on the next screen but we're only interested in the first 2; the <i>Preset name</i> and <i>Mode</i>.
+</p>
+<img alt="Upload preset settings" height="170" src="/images/pages/tutorials/image-uploads-with-cloudinary/upload-preset-settings.png" width="700">
+<p>
+    The <i>Preset name</i> will by default be assigned a unique code, you can leave this as is or rename it to something more memorable, either way make a note of it as we'll need it later. By default the&nbsp;<i>Mode</i> will be set as <i>Signed</i>, change this to <i>Unsigned</i> and then save your changes.
+</p>
+<p>
+    That's it as far as configuring Cloudinary goes, next we need to configure our editor to talk to Cloudinary's API.
+</p>
+<p class="note">
+    <a href="http://cloudinary.com/blog/direct_upload_made_easy_from_browser_or_mobile_app_to_the_cloud">This post</a> from Cloudinary offers some details on the signed vs. unsigned upload approaches and the restrictions applied to unsigned uploads.
+</p>
+<h2 id="building-an-image-uploader-for-cloudinary">
+    Building an image uploader for Cloudinary
+</h2>
+<p>
+    In this section we're going to put together an image uploader for the Cloudinary API. If you're not familar with the basics of setting up an image uploader then I recommend you read the first couple of sections of the <a href="/tutorials/handling-image-uploads">Handling image uploads</a> tutorial (stop when you get to the code examples).
+</p>
+<p>
+    Cloudinary provides API libraries for a number of popular languages including a JQuery plugin for JavaScript, but in the spirit of ContentTools we'll avoid using any specific framework and write our own set of functions to handle calling Cloudinary's (REST) API from the browser.
+</p>
+<p class="note">
+    There's quite a bit of code ahead so if you prefer to learn using rather than reading you'll find all the code in the <b>sandbox</b> folder of the repo. The image uploader code is in the file named <b>cloudinary-image-uploader.coffee</b> and at the top of the <b>sandbox.coffee</b> file you'll find instructions on how to set the sandbox demo up to use Cloudinary.
+</p>
+<p>
+    Before we can get to the good stuff (it's a relative term), we first need to define some settings for the Cloudinary API and a function to act as our image uploader. Use the cloud and upload preset names you set up in the Cloudinary console in place of <b>mycloud</b> and <b>ctpreset</b> in the code below:
+</p>
+<pre><code class="language-javascript">// Define settings for the uploader 
+var CLOUDINARY_PRESET_NAME = 'ctpreset';
+var CLOUDINARY_RETRIEVE_URL = 'http://res.cloudinary.com/mycloud/image/upload';
+var CLOUDINARY_UPLOAD_URL = 'https://api.cloudinary.com/v1_1/mycloud/image/upload';
+
+// Define the image uploader
+function cloudinaryImageUploader(dialog) {
+     var image, xhr, xhrComplete, xhrProgress;
+
+    // Set up the event handlers
+    dialog.addEventListener('imageuploader.cancelupload', function () {
+        // Cancel the current upload
+
+        // Stop the upload
+        if (xhr) {
+            xhr.upload.removeEventListener('progress', xhrProgress);
+            xhr.removeEventListener('readystatechange', xhrComplete);
+            xhr.abort();
+        }
+
+        // Set the dialog to empty
+        dialog.state('empty');
+    });
+
+    dialog.addEventListener('imageuploader.clear', function () {
+        // Clear the current image
+        dialog.clear();
+        image = null;
+    });
+
+    ...
+}</code>
+</pre>
+<p>
+    You'll notice we've defined functions to handle the <b>cancelUpload</b> and <b>clear</b> events. These aren't affected by the integration with Cloudinary but to avoid any confusion:
+</p>
+<ul>
+    <li>
+        <b>cancelUpload</b> handles a user cancelling their file upload.
+    </li>
+    <li>
+        <b>clear</b> handles&nbsp;a user clearing an uploaded image from the dialog.
+    </li>
+</ul>
+<h3 id="cloudinary-urls">
+    Cloudinary URLs
+</h3>
+<p>
+    When you upload an image to Cloudinary a URL is returned that can be used both to retrieve the uploaded image and also to transform it. Transforming the image requires the URL's path to be modified to include the details of each transformation to be applied. For example:
+</p>
+<pre>http://res.cloudinary.com/mycloud/image/upload/w_200,h_100,c_fit/sample.jpg</pre>
+<p>
+    Here the image will be resized to fit within a rectangle 200 pixels wide and 100 high. If we also wanted to rotate the image by 90 degrees we'd modify the URL like so:
+</p>
+<pre>http://res.cloudinary.com/mycloud/image/upload/a_90/w_200,h_100,c_fit/sample.jpg
+</pre>
+<p>
+    We'll be using the rotate, crop and fit transformations and so we need a way to parse Cloudinary URLs and build new ones. Add the following code after the <b>cloudinaryImageUploader</b>&nbsp;function (not inside it):
+</p>
+<pre><code class="language-javascript">function buildCloudinaryURL(filename, transforms) {
+    // Build a Cloudinary URL from a filename and the list of transforms 
+    // supplied. Transforms should be specified as objects (e.g {a: 90} becomes
+    // 'a_90').
+    var i, name, transform, transformArgs, transformPaths, urlParts;
+
+    // Convert the transforms to paths
+    transformPaths = [];
+    for  (i = 0; i &lt; transforms.length; i++) {
+        transform = transforms[i];
+        
+        // Convert each of the object properties to a transform argument
+        transformArgs = [];
+        for (name in transform) {
+            if (transform.hasOwnProperty(name)) {
+                transformArgs.push(name + '_' + transform[name]);
+            }
+        }
+        
+        transformPaths.push(transformArgs.join(','));
+    }
+    
+    // Build the URL
+    urlParts = [CLOUDINARY_RETRIEVE_URL];
+    if (transformPaths.length &gt; 0) {
+        urlParts.push(transformPaths.join('/'));
+    }
+    urlParts.push(filename);
+
+    return urlParts.join('/');
+}
+
+function parseCloudinaryURL(url) {
+    // Parse a Cloudinary URL and return the filename and list of transforms
+    var filename, i, j, transform, transformArgs, transforms, urlParts;
+
+    // Strip the URL down to just the transforms, version (optional) and
+    // filename.
+    url = url.replace(CLOUDINARY_RETRIEVE_URL, '');
+
+    // Split the remaining path into parts
+    urlParts = url.split('/');
+
+    // The path starts with a '/' so the first part will be empty and can be
+    // discarded.
+    urlParts.shift();
+
+    // Extract the filename
+    filename = urlParts.pop();
+
+    // Strip any version number from the URL
+    if (urlParts.length &gt; 0 &amp;&amp; urlParts[urlParts.length - 1].match(/v\d+/)) {
+        urlParts.pop();
+    }
+
+    // Convert the remaining parts into transforms (e.g `w_90,h_90,c_fit &gt;
+    // {w: 90, h: 90, c: 'fit'}`).
+    transforms = [];
+    for (i = 0; i &lt; urlParts.length; i++) {
+        transformArgs = urlParts[i].split(',');
+        transform = {};
+        for (j = 0; j &lt; transformArgs.length; j++) {
+            transform[transformArgs[j].split('_')[0]] =
+                transformArgs[j].split('_')[1];
+        }
+        transforms.push(transform);
+    }
+
+    return [filename, transforms];
+}</code></pre>
+<p class="note">
+    Cloudinary transformations are not limited to the few we're using here, for more information on what's possible <a href="http://cloudinary.com/documentation/image_transformations">read the Cloudinary documentation</a>.
+</p>
+<h3 id="uploading-an-image">
+    Uploading an image
+</h3>
+<p>
+    Uploading to Cloudinary is no different than uploading to your own web server except we need to pass the name of our <b>upload preset</b> when POSTing so that the service knows to accept unsigned requests. The following code should go inside the <b>cloudinaryImageUploader</b> function:
+</p>
+<pre><code class="language-javascript">    dialog.addEventListener('imageuploader.fileready', function (ev) {
+        // Upload a file to Cloudinary
+        var formData;
+        var file = ev.detail().file;
+
+        // Define functions to handle upload progress and completion
+        function xhrProgress(ev) {
+            // Set the progress for the upload
+            dialog.progress((ev.loaded / ev.total) * 100);
+        }
+
+        function xhrComplete(ev) {
+            var response;
+
+            // Check the request is complete
+            if (ev.target.readyState != 4) {
+                return;
+            }
+
+            // Clear the request
+            xhr = null
+            xhrProgress = null
+            xhrComplete = null
+
+            // Handle the result of the upload
+            if (parseInt(ev.target.status) == 200) {
+                // Unpack the response (from JSON)
+                response = JSON.parse(ev.target.responseText);
+
+                // Store the image details
+                image = {
+                    angle: 0,
+                    height: parseInt(response.height),
+                    maxWidth: parseInt(response.width),
+                    width: parseInt(response.width)
+                    };
+
+                // Apply a draft size to the image for editing
+                image.filename = parseCloudinaryURL(response.url)[0];
+                image.url = buildCloudinaryURL(
+                    image.filename,
+                    [{c: 'fit', h: 600, w: 600}]
+                    );
+                
+                // Populate the dialog
+                dialog.populate(image.url, [image.width, image.height]);
+
+            } else {
+                // The request failed, notify the user
+                new ContentTools.FlashUI('no');
+            }
+        }
+
+        // Set the dialog state to uploading and reset the progress bar to 0
+        dialog.state('uploading');
+        dialog.progress(0);
+
+        // Build the form data to post to the server
+        formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', CLOUDINARY_PRESET_NAME);
+
+        // Make the request
+        xhr = new XMLHttpRequest();
+        xhr.upload.addEventListener('progress', xhrProgress);
+        xhr.addEventListener('readystatechange', xhrComplete);
+        xhr.open('POST', CLOUDINARY_UPLOAD_URL, true);
+        xhr.send(formData);
+    });</code>
+</pre>
+<p class="note">
+    If you were paying close attention you might have noticed that we're applying a transform to the image as soon as we get its URL back from Cloudinary. The transform applied resizes the image to make sure it fits within a 600 pixel square, that way if the user uploads a larger image we'll still only load a smaller version for the dialog - which is more efficient.
+</p>
+<h3 id="rotating-images">
+    Rotating images
+</h3>
+<p>
+    To rotate an image all we need to do is change our image URL to include a rotate transformation and Cloudinary will do the rest:
+</p>
+<pre><code class="language-javascript">    function rotate(angle) {
+        // Handle a request by the user to rotate the image
+        var height, transforms, width;
+        
+        // Update the angle of the image
+        image.angle += angle;
+
+        // Stay within 0-360 degree range
+        if (image.angle &lt; 0) {
+            image.angle += 360;
+        } else if (image.angle &gt; 270) {
+            image.angle -= 360;
+        }
+
+        // Rotate the image's dimensions
+        width = image.width;
+        height = image.height;
+        image.width = height;
+        image.height = width;
+        image.maxWidth = width;
+        
+        // Build the transform to rotate the image
+        transforms = [{c: 'fit', h: 600, w: 600}];
+        if (image.angle &gt; 0) {
+            transforms.unshift({a: image.angle});
+        }
+
+        // Build a URL for the transformed image
+        image.url = buildCloudinaryURL(image.filename, transforms);
+        
+        // Update the image in the dialog
+        dialog.populate(image.url, [image.width, image.height]);
+    }
+
+    dialog.addEventListener(
+        'imageuploader.rotateccw', 
+        function () { rotate(-90); }
+        );
+    dialog.addEventListener(
+        'imageUploader.rotatecw', 
+        function () { rotate(90); }
+        );</code>
+</pre>
+<h3>
+    Saving an image
+</h3>
+<p>
+    Once the user is ready to insert the image we need to apply any crop they've defined (again by changing our image URL) and call save against the dialog:
+</p>
+<pre><code class="language-javascript">    dialog.addEventListener('imageuploader.save', function () {
+        // Handle a user saving an image
+        var cropRegion, cropTransform, imageAttrs, ratio, transforms;
+        
+        // Build a list of transforms
+        transforms = [];
+        
+        // Angle
+        if (image.angle != 0) {
+            transforms.push({a: image.angle});
+        }
+
+        // Crop
+        cropRegion = dialog.cropRegion();
+        if (cropRegion.toString() != [0, 0, 1, 1].toString()) {
+            cropTransform = {
+                c: 'crop',
+                x: parseInt(image.width * cropRegion[1]),
+                y: parseInt(image.height * cropRegion[0]),
+                w: parseInt(image.width * (cropRegion[3] - cropRegion[1])),
+                h: parseInt(image.height * (cropRegion[2] - cropRegion[0]))
+                };
+            transforms.push(cropTransform);
+            
+            // Update the image size based on the crop
+            image.width = cropTransform.w;
+            image.height = cropTransform.h;
+            image.maxWidth = cropTransform.w;
+        }
+
+        // Resize (the image is inserted in the page at a default size)
+        if (image.width &gt; 400 || image.height &gt; 400) {
+            transforms.push({c: 'fit', w: 400, h: 400});
+            
+            // Update the size of the image in-line with the resize
+            ratio = Math.min(400 / image.width, 400 / image.height);
+            image.width *= ratio;
+            image.height *= ratio;
+        }
+
+        // Build a URL for the image we'll insert
+        image.url = buildCloudinaryURL(image.filename, transforms);
+
+        // Build attributes for the image
+        imageAttrs = {'alt': '', 'data-ce-max-width': image.maxWidth};
+
+        // Save/insert the image
+        dialog.save(image.url, [image.width, image.height]); 
+    });</code>
+
+</pre>
+<h3 id="resizing-images">
+    Resizing images
+</h3>
+<p>
+    Now that we can insert an image into the page we need to handle what happens when a user resizes it. This isn't part of the image uploader's responsibility <i>(though for the sake of simplicity we'll tag it on the end of our image uploader file for now).</i> The&nbsp;responsibility instead falls to the <b>ContentEdit.Root node</b>, we need to capture any image resize event and update the image's&nbsp;<code>src</code> URL to match its new size:
+</p>
+<pre><code class="language-javascript">// Capture image resize events and update the Cloudinary URL
+ContentEdit.Root.get().bind('taint', function (element) {
+    var args, filename, newSize, transforms, url;
+
+    // Check the element tainted is an image
+    if (element.type() != 'Image') {
+        return;
+    }
+
+    // Parse the existing URL
+    args = parseCloudinaryURL(element.attr('src'));
+    filename = args[0];
+    transforms = args[1];
+
+    // If no filename is found then exit (not a Cloudinary image)
+    if (!filename) {
+        return;
+    }
+
+    // Remove any existing resize transform
+    if (transforms.length &gt; 0 &amp;&amp;
+            transforms[transforms.length -1]['c'] == 'fill') {
+        transforms.pop();
+    }
+
+    // Change the resize transform for the element
+    transforms.push({c: 'fill', w: element.size()[0], h: element.size()[1]});
+    url = buildCloudinaryURL(filename, transforms);
+    if (url != element.attr('src')) {
+        element.attr('src', url);
+    }
+});</code>
+​</pre>
+<p class="note">
+    The resize event handling doesn't request a resized version of the image from Cloudinary until the user applies their changes, instead the browser will simply scale the original image. This may lead to the image appearing to lose quality when scaled up (only whilst editing) but crucially we don't request unnecessary transformations from Cloudinary.
+</p>
+<h3 id="limitations">
+    Limitations
+</h3>
+<p>
+    It's all too good to be true, well sort of. There are some limitations to what you can do with unsigned requests and URL changes. Of chief concern to us are:
+</p>
+<ul>
+    <li>
+        <i>Images</i> and <i>image variations</i> cannot be removed using an unsigned request.
+    </li>
+    <li>
+        Allowing unsigned uploads also means allowing unauthorised uploads to your Cloudinary account.
+    </li>
+</ul>
+<p>
+    So using Cloudinary as a service to simplify image uploads and transformations is awesome but in most cases you'll want to use signed uploads and support image removal via a URL on your server (manually removing them from the Cloudinary console is just less fun). Even so server-side integration is not complex and Cloudinary provide a number of <a href="http://cloudinary.com/documentation">guides for popular frameworks</a>.
+</p>
+
+    </section>
+
+                </div>
+            </main>
+        
+
+        
+            <footer class="page__footer">
+                <div class="page__container">
+                    <p class="sign-off">
+                        ContentTools was created by Anthony Blackshaw - a founder of and
+                        developer at <a href="http://getme.co.uk">getme</a>.
+                        The project is maintained by the crew at <a href="https://github.com/orgs/GetmeUK/people">getme</a>
+                        along with <a href="https://github.com/GetmeUK/ContentTools/graphs/contributors">our contributors</a>.
+                        The code is licensed under <a href="https://github.com/GetmeUK/ContentTools/blob/master/LICENSE">MIT</a>.
+                    </p>
+                    <p class="social-handles">
+                        <a href="https://twitter.com/contenttoolsjs" class="[ twitter-follow-button ]  [ social-handles__handle ]" data-show-count="true" data-dnt="true">Follow @contenttoolsjs</a>
+                        <a href="https://github.com/getmeuk/ContentTools" class="[ github-button ]  [ social-handles__handle ]" data-count-href="/getmeuk/ContentTools/stargazers" data-count-api="/repos/getmeuk/ContentTools#stargazers_count" data-count-aria-label="# stargazers on GitHub" aria-label="Star getmeuk/ContentTools on GitHub">Star</a>
+                        <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+                        <script async defer id="github-bjs" src="https://buttons.github.io/buttons.js"></script>
+                    </p>
+                </div>
+            </footer>
+        
+
+        <script src="/scripts/site.js"></script>
+        
+            <script src="/scripts/prism.js"></script>
+        
+        
+    </body>
+</html>

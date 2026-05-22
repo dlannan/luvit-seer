@@ -1,0 +1,29 @@
+{% if projectset %}
+{% set iiquery = ('[sql-table json]select * from issues WHERE projectid=0 OR projectid=' ~ projectset ) ~ ' [/sql-table]' %}
+{% set itable = ( iiquery|shortcodes ) | json_decode %}
+{% else %}
+{% set iiquery = '[sql-table json]select * from issues [/sql-table]' %}
+{% set itable = ( iiquery|shortcodes ) | json_decode %}
+{% endif %}
+
+{% set piquery = '[sql-table json]select name, uid from projects[/sql-table]' %}
+{% set pilist = ( piquery|shortcodes ) | json_decode %}
+
+<div class="table-responsive">
+<table class="table card-table table-striped table-vcenter">
+    <thead>
+    <tr>
+        <th>User</th>
+        <th>Issue</th>
+        <th>Updated</th>
+        <th>Project</th>
+        <th>Priority</th>
+        <th>Status</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody id="issues-tablebody">
+
+    </tbody>
+</table>
+</div>

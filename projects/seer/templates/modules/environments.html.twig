@@ -1,0 +1,141 @@
+// Environments module
+//   What this module does:
+//      - provides utilities for handling env meshes
+//      - sets up lighting and env specific features not able to be
+//        done during load
+//      - set up physics and events for a specific environment
+
+
+// Get vertices as a list from some geometry
+utils.collectVertices = function( geometry ) {
+
+    var verts = [];
+    for ( i = 0; i < geometry.vertices.length; i++ ) {
+        verts.push(geometry.vertices[i]);
+    }
+    return verts;
+};
+
+// Get triangles as a list from some geometry
+utils.collectTriangles = function( geometry ) {
+
+    var triangles = [];
+    for ( i = 0; i < geometry.faces.length; i++ ) {
+        face = geometry.faces[i];
+        if ( face instanceof THREE.Face3) {
+            triangles.push([face.a, face.b, face.c]);
+        }
+    }
+    return triangles;
+};
+
+utils.modelObjFind = function( findName ) {
+
+    var objFound;
+    for(var i=0; i< models.children.length; i++) {
+        //console.log("Model name: ", models.children[i]);
+        if(models.children[i].userData.filename.indexOf(findName) !== -1) {
+            objFound = models.children[i];
+        }
+    }
+
+    if(objFound === undefined) {
+        console.log("Cannot find model: " + findName );
+        return undefined;
+    }    
+    return objFound;
+};
+
+
+// Add some util functions to hide chunks of track for performance reasons
+utils.hideTrees = function( vis ) {
+    var monaco = world.children[0];
+    utils.hideAllMeshesWithName( monaco, "tree", vis );
+    utils.hideAllMeshesWithName( monaco, "cran", vis );
+};
+
+utils.hidePeople = function( vis ) {
+    var monaco = world.children[0];
+    utils.hideAllMeshesWithName( monaco, "peop", vis );
+    utils.hideAllMeshesWithName( monaco, "mars", vis );
+    utils.hideAllMeshesWithName( monaco, "stan", vis );
+};
+
+utils.hideVehicles = function( vis ) {
+    var monaco = world.children[0];
+    utils.hideAllMeshesWithName( monaco, "car", vis );        
+    utils.hideAllMeshesWithName( monaco, "boat", vis );
+};
+
+utils.hideBuildings = function( vis ) {
+    var monaco = world.children[0];
+    utils.hideAllMeshesWithName( monaco, "boui", vis );        
+    utils.hideAllMeshesWithName( monaco, "bldg", vis );
+};
+
+utils.hideMonaco = function( vis ) {
+    var monaco = world.children[0];
+    monaco.visible = vis;
+    if(vis) {
+        scene.remove(sceneDepth);
+    } else {        
+        scene.add(sceneDepth);   
+    }
+};
+
+perf.toggleTrees = function(init) {
+    if(!init) perf[perf.select].treeshow = !perf[perf.select].treeshow;
+	
+    if(!perf[perf.select].treeshow)
+        $("#perfbtn-tree").addClass("perfBtnToggle");
+    else
+        $("#perfbtn-tree").removeClass("perfBtnToggle");
+
+    utils.hideTrees(perf[perf.select].treeshow);
+    utils.hideVehicles(perf[perf.select].treeshow);
+};
+
+perf.toggleBuildings = function(init) {
+    if(!init) perf[perf.select].buildingshow = !perf[perf.select].buildingshow;
+
+    if(!perf[perf.select].buildingshow)
+	    $("#perfbtn-building").addClass("perfBtnToggle");
+    else 
+        $("#perfbtn-building").removeClass("perfBtnToggle");
+
+    utils.hideBuildings(perf[perf.select].buildingshow);
+};
+
+perf.togglePeople = function(init) {
+    if(!init) perf[perf.select].pplshow = !perf[perf.select].pplshow;
+
+    if(!perf[perf.select].pplshow) {
+        ocean.visible = false;
+        utils.ocean.visible = true;
+    	$("#perfbtn-ppl").addClass("perfBtnToggle");
+    } else {
+        ocean.visible = true;
+        utils.ocean.visible = false;
+        $("#perfbtn-ppl").removeClass("perfBtnToggle");
+    }
+
+    utils.hidePeople(perf[perf.select].pplshow);
+};
+
+perf.toggleViewDistance = function(init) {
+   
+    if(!init) perf[perf.select].viewdist = (perf[perf.select].viewdist + 1) % 3;
+    var idx = perf[perf.select].viewdist;
+    var vd = perf.distances[ idx ];
+
+    camera.far = vd;
+    parameters.cloudHeight = 300.0;
+    sky.scale.setScalar( camera.far - 50.0 );
+
+    if(idx === 0)    
+        $("#perfbtn-viewdist").addClass("perfBtnToggle");
+    else
+        $("#perfbtn-viewdist").removeClass("perfBtnToggle");
+};
+
+

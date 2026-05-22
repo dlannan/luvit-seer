@@ -1,0 +1,106 @@
+
+function checkSensorLinking( ) {
+
+    var ok = (mode.state === EditorMode.SENSORLINK);
+    if(!ok) return;
+
+    var intersections = checkHit();
+
+    if ( intersections.length > 0 ) {
+
+        var intersected = closestHit( mode.object, intersections );
+        
+        //console.log(intersected, intersections);
+        if(intersected != undefined) {
+
+            selectCursor.position.copy(intersected.point );
+
+            var n = intersected.normal;
+            var d = camera.position.distanceTo( intersected.point );
+            
+            selectCursor.scale.set( d, d, d );
+            //selectCursor.lookAt( intersected.point + n );
+
+            // If on an object set the objects color
+            if(intersected.object && intersected.object.userData) {
+
+                // Make sure the current position and direction are used
+                SceneGraph.forceUpdate( mode.object.userData.uid );        
+                SceneGraph.forceRender( mode.object.userData.uid );        
+
+                var pid = intersected.object.userData.parentId;
+                var ptype = intersected.object.userData.parentType;
+
+                if((ptype == "objects") || (ptype == "models") || (ptype == "actors"))
+                    linkSensorState.target = utils.getParentObject(pid, ptype);
+
+                //SceneGraph.updateEntityPosition( mode.object.userData.uid, pt.x, pt.y, pt.z );        
+                //mode.object.position.copy( intersected.point );
+                //mode.object.lookAt( intersected.point + n );
+            }
+        }
+    }
+}
+
+var linkSensorState = {
+
+    name: "linksensor",
+    value: 0,              // Set this value to react to external state control
+    links: [],
+    target: undefined,
+
+    onenter: function(init) {
+
+        selectCursor.material.color.setHex(0x0000ff);
+        selectCursor.visible = true;
+        disableControls();
+        hidePopups();
+
+        //console.log("Initializing Sensor Linking..");
+    },
+
+    onupdate: function(dt) {
+
+        // Dont do much - its an init state, nothing to see here.
+        checkSensorLinking();
+    },
+
+    onmouse: function( event ) {
+
+        if(event.type === "mouseup") {
+
+            if(mode.state === EditorMode.SENSORLINK) {
+                
+                if(this.target != undefined) {
+
+                    var pid = this.target.userData.parentId;
+                    
+                    // TODO: Wrap this in debug
+                    if(debug.sensors) {
+                        console.log("SENSOR LINKING TARGET:", this.target);
+                        console.log("SENSOR LINKED FROM:", mode.object);
+                    }
+
+                    // If already in the link list, then clear it 
+                    var idx = mode.object.userData.linked.indexOf(pid);
+                    if(idx != -1) {
+                        SceneGraph.setEntityParent( mode.object.userData.uid, 0 );
+                        mode.object.userData.linked.splice(idx, 1);
+                    } else {
+                        // Add object to the links list           
+                        SceneGraph.setEntityParent( mode.object.userData.uid, pid );
+                        mode.object.userData.linked.push(pid);
+                    }
+                }
+
+                FinishPlacement();
+                ClearLinkedObjects();
+                mode.state = EditorMode.NONE;
+                mode.popup = PopupMode.MAIN;
+            }
+        }
+    },
+
+    onexit: function() {
+    }
+};

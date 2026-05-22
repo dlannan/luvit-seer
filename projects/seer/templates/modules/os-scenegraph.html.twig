@@ -1,0 +1,551 @@
+
+// --------------------------------------------- Base Entity Object -----------------------------------------------------------
+
+var Entity = function( pd ) {
+
+    // type for a group of Pedestrians
+    this.mover = new SimpleVehicle();
+
+    // allocate one and share amoung instances just to save memory usage
+    // (change to per-instance allocation to be more MP-safe)
+    this.neighbors = [];
+
+    // path to be followed by this pedestrian
+    // XXX Ideally this should be a generic Pathway, but we use the
+    // XXX getTotalPathLength and radius methods (currently defined only
+    // XXX on PolylinePathway) to set random initial positions.  Could
+    // XXX there be a "random position inside path" method on Pathway?
+    this.path = undefined;
+
+    // direction for path following (upstream or downstream)
+    this.pathDirection = 1;
+
+    // a pointer to this boid's interface object for the proximity database
+    this.proximityToken = undefined;
+
+    // switch to new proximity database -- just for demo purposes
+    this.newToken = function( newpd ) {
+
+        // delete this boid's token in the old proximity database
+        if(this.proximityToken) delete this.proximityToken;
+
+        // allocate a token for this boid in the proximity database
+        this.proximityToken = newpd.allocateToken(this);
+    };
+
+    // destructor
+    this.delete = function(){
+        // delete this boid's token in the proximity database
+        delete this.proximityToken;
+    };
+
+    // reset all instance state
+    this.reset = function() {
+
+        this.newToken( pd );
+
+        // reset the vehicle 
+        this.mover.reset ();
+
+        // max speed and max steering force (maneuverability) 
+        this.mover.setMaxSpeed(0.0);
+        this.mover.setMaxForce(0.0);
+
+        // initially stopped
+        this.mover.setSpeed(0.0);
+
+        // size of bounding sphere, for obstacle avoidance, etc.
+        this.mover.setRadius(0.5); // width = 0.7, add 0.3 margin, take half
+
+        // set the path for this Pedestrian to follow
+        // this.path = getTestPath();
+
+        // set initial position
+        // (random point on path + random horizontal offset)
+        // var d = this.path.getTotalPathLength() * frandom01();
+        // var r = this.path.radius;
+        // var randomOffset = randomVectorOnUnitRadiusXZDisk().mult( r );
+        // this.mover.setPosition(this.path.mapPathDistanceToPoint(d).add( randomOffset));
+
+        // randomize 2D heading
+        //this.mover.randomizeHeadingOnXZPlane ();
+
+        // pick a random direction for path following (upstream or downstream)
+        // this.pathDirection = (frandom01() > 0.5) ? -1 : +1;
+
+        // notify proximity database that our position has changed
+        // this.proximityToken.updateForNewPosition( this.mover.position() );
+    };
+
+    // per frame simulation update
+    this.update = function( currentTime, elapsedTime ) {
+               
+        // notify proximity database that our position has changed
+        if(this.hasOwnProperty('mover')) {
+            
+            var force = this.mover.steerForTargetSpeed( this.mover.speed() );
+            this.mover.applySteeringForce( force, elapsedTime );
+
+            this.proximityToken.updateForNewPosition( this.mover.position() );
+        }
+    };
+
+    // draw this pedestrian into scene
+    this.draw = function()
+    {
+    };
+
+    this.reset();
+};
+
+// --------------------------------------------- Base Entity Object -----------------------------------------------------------
+
+var EntityStatic = function( pd ) {
+
+    // type for a group of Pedestrians
+    this.mover = new SimpleStatic();
+
+    // allocate one and share amoung instances just to save memory usage
+    // (change to per-instance allocation to be more MP-safe)
+    this.neighbors = [];
+
+    // a pointer to this boid's interface object for the proximity database
+    this.proximityToken = undefined;
+
+    // switch to new proximity database -- just for demo purposes
+    this.newToken = function( newpd ) {
+
+        // delete this boid's token in the old proximity database
+        if(this.proximityToken) delete this.proximityToken;
+
+        // allocate a token for this boid in the proximity database
+        this.proximityToken = newpd.allocateToken(this);
+    };
+
+    // destructor
+    this.delete = function(){
+        // delete this boid's token in the proximity database
+        delete this.proximityToken;
+    };
+
+    // reset all instance state
+    this.reset = function() {
+
+        this.newToken( pd );
+
+        // reset the vehicle 
+        this.mover.reset ();
+
+        // max speed and max steering force (maneuverability) 
+        this.mover.setMaxSpeed(0.0);
+        this.mover.setMaxForce(0.0);
+
+        // initially stopped
+        this.mover.setSpeed(0.0);
+
+        // size of bounding sphere, for obstacle avoidance, etc.
+        this.mover.setRadius(0.5); // width = 0.7, add 0.3 margin, take half
+    };
+
+    // to force an update for position in case it is moved (it shouldnt, because its static, but editor may move it)
+    this.update = function( ) {
+               
+        // notify proximity database that our position has changed
+        this.proximityToken.updateForNewPosition( this.mover.position() );
+    };
+
+    // draw this pedestrian into scene
+    this.draw = function()
+    {
+    };
+
+    this.reset();
+};
+
+// Singleton type setup - we dont want instances!!
+
+// Scenegraph System ---------------------------------------------------------------------------------------
+//   TODO: Move this to controllers section. 
+var SceneGraph = {
+
+    // LQ Database setup - this will go into the Sim 
+    //   TODO: Move to the Sim
+    center: new Vec3(),
+    div: 20.0,
+    divisions: new Vec3Set(20.0, 1.0, 20.0),
+    diameter: 1000.0, //XXX need better way to get this
+    dimensions: new Vec3Set(5000.0, 1000.0, 5000.0),
+    GPD: undefined,
+
+    updateRate: 35,
+    renderRate: 16,
+    frameCount: 0,
+
+    // Simple entity management to start with - replacing the scenegraph used in ThreeJS (which is dead messy)
+    population: 0,
+    entities: {},
+    entitiesByName: {},
+    entityParents: {},
+    entitiesDeferred: {},
+    selectedEntity: undefined,
+
+    postRenderFuncs: {},
+
+    // Should probably come from the Sim
+    //    TODO: Move time control to the Sim control
+    oldTime: 0.0,
+    currentTime: Date.now() * 0.001, 
+    elapsedTime: 0.0,
+    elapsedRTime: 0.0,
+
+    // Call this again with different settings to change LQDB setup
+    reset: function() {
+        this.GPD = new LQProximityDatabase( this.center, this.dimensions, this.divisions);
+
+        this.population = 0;
+        this.entities = {};
+        this.entityParents = {};
+        this.entitiesDeferred = {};
+        this.selectedEntity = undefined;
+
+        this.postRenderFuncs = {};
+
+        this.frameCount = 0;
+        this.oldTime = 0.0;
+        this.currentTime = Date.now() * 0.001; 
+        this.elapsedTime = 0.0;
+
+        this.oldRTime = 0.0;
+        this.currentRTime = Date.now() * 0.001; 
+        this.elapsedRTime = 0.0;
+        console.log("LQDB has been reset.");
+    },
+
+    findByParentId: function( pid ) {
+        return this.entityParents[pid];
+    },
+
+    findByName: function( name ) {
+        return this.entitiesByName[name];
+    },
+
+    findByUid: function( uid ) {
+        return this.entities[uid];
+    },
+
+    findNodeByUid: function( uid ) {
+        if( this.entities[uid] )
+            return this.entities[uid].node;
+        return undefined;
+    },
+
+    addStaticObject: function( obj ) {
+
+        var box = new THREE.Box3().setFromObject(obj);
+        var pt = new THREE.Vector3();
+        box.getCenter(pt);
+        obj.userData.localCenter = obj.worldToLocal(pt);
+
+        var ent = new EntityStatic( this.GPD );
+        var staticObj = this.addEntityToScenegraph( obj, ent );
+        // Forces the positions to be pushed into the PD
+        staticObj.update();
+        return staticObj;
+    },
+
+    addMoverObject: function( obj, handler ) {
+
+        var box = new THREE.Box3().setFromObject(obj);
+        var pt = new THREE.Vector3();
+        box.getCenter(pt);
+        obj.userData.localCenter = obj.worldToLocal(pt);
+
+        if(handler == undefined) handler = cRenderDefaultLinear;
+        var ent = new Entity( this.GPD );
+        ent['handlerRender'] = handler;
+        ent['handlerUpdate'] = cUpdateDefault;
+        return this.addEntityToScenegraph( obj, ent );
+    },
+
+    addEntityToScenegraph: function( threeObj, ent ) {
+
+        this.population++;    
+        if(!ent) {
+            ent = new Entity( this.GPD ); // Handle original function call!
+            ent['handlerRender'] = cRenderDefaultLinear;
+        }
+
+        var uid = threeObj.userData.uid;
+        if(uid == undefined) uid = UID();
+        threeObj.userData.uid = uid;
+
+        ent['name'] = threeObj.name;
+        ent['node'] = threeObj;
+        ent['updatetime'] = this.currentTime;
+        ent['renderdata'] = { 
+            pos: Vec3Set(0.0, 0.0, 0.0) ,
+            rot: Vec3Set(0.0, 0.0, 0.0) ,
+            offset: Vec3Set(0.0, 0.0, 0.0) 
+        };
+        ent['updatefuncs'] = [];
+
+        this.entities[uid] = ent;
+        this.entitiesByName[threeObj.name] = ent;
+        if( threeObj.userData.parentId == uid ) this.entityParents[uid] = ent;
+        
+        this.updateEntityPosition( uid, threeObj.position.x, threeObj.position.y, threeObj.position.z );
+        
+        var fwd = new THREE.Vector3();
+        threeObj.getWorldDirection(fwd);
+        this.updateEntityForward( uid, fwd.x, fwd.y, fwd.z );
+        return ent;
+    },
+
+    // Replace the entity in the scenegraph
+    replaceMover: function( id, newmover ) {
+        this.entities[id].mover = newmover;
+    },
+
+
+    // Replace the entity in the scenegraph
+    deleteEntity: function( id ) {
+
+        var eobject = this.entities[id].node;
+        var parent = eobject.parent;
+        var parentId = eobject.userData.parentId;
+
+        // Remove from ray cast as well 
+        var idx = objects.length;
+        while(idx--) {
+            if(objects[idx].userData) {
+            if(objects[idx].userData.parentId == eobject.userData.parentId) {
+                objects.splice( idx, 1 );
+            }
+            }
+        }
+
+        idx = objectsSearch.length;
+        while(idx--) {
+            if(objectsSearch[idx].userData) {
+            if(objectsSearch[idx].userData.parentId == eobject.userData.parentId) {
+                objectsSearch.splice( idx, 1 );
+            }
+            }
+        }   
+
+        // Remove node from threeJs and delete it 
+        if(eobject) {
+            var selectedObject = scene.getObjectByName(eobject.name);
+            if(selectedObject) parent.remove( eobject );
+        }
+
+        delete this.entities[id];
+        delete this.entityParents[parentId];
+    },
+
+    // Set pid to null or undefined to clear parent 
+    setEntityParent: function( id, pid ) {
+
+        if( pid != 0 ) {
+            newChildLink(id, id, pid);
+        } else {
+            deleteChildLink(id);
+        }
+    },
+
+    // Set a render data property - pass in property string and value
+    setRenderData: function( id, property, value ) {
+        var ent = this.entities[id];
+        if(ent) ent.renderdata[property] = value;
+    },
+
+    // Set an eneitites handler for movement and update
+    setHandlerRender: function( id, func ) {
+        var ent = this.entities[id];
+        if(ent) ent.handlerRender = func;
+        if(func == undefined) delete ent.handlerRender;
+    },
+
+    // Set an eneitites handler for movement and update
+    setHandlerUpdate: function( id, func ) {
+        var ent = this.entities[id];
+        if(ent) ent.handlerUpdate = func;
+        if(func == undefined) delete ent.handlerUpdate;
+    },
+
+    // Expect a ThreeJS XYZ for updating the entity (convert internally)
+    updateEntityPosition: function( id, x, y, z ) {
+
+        //if(!(id in Object.keys(entities))) { return; }
+        var pos = Vec3Set( x, y, z);
+        var ent = this.entities[id];
+        ent.mover.setPosition( pos );
+        cUpdateDefault(ent, 0, 0);
+    },
+
+    forceUpdate: function( id ) {
+
+        var ent = this.entities[id];
+        if(ent) cUpdateDefault(ent, 0, 0);
+    },
+
+    forceRender: function( id ) {
+
+        var ent = this.entities[id];
+        if(ent) cRenderDefaultStatic( ent, 0, 0 );
+    },
+
+    updateEntityScale: function( id, x, y, z ){
+
+        if(!(id in Object.keys(this.entities))) { return; }
+        var pos = Vec3Set( x, y, z);
+        var ent = this.entities[id];
+        ent.node.scale.set( x, y, z );
+    },
+
+    // Expect a ThreeJS Heading Pitch Roll for updating the entity (convert internally)
+    //  TODO: Get pitch and roll working too.
+    updateEntityForward: function( id, x, y, z ) {
+
+        //if(!(id in Object.keys(entities))) { return; }
+        var ent = this.entities[id];
+        ent.mover.regenerateOrthonormalBasis( Vec3Set( x, y, z) );
+        cUpdateDefault(ent, 0, 0);
+    },
+
+    getEntityForward: function( id ) {
+
+        var ent = this.entities[id];
+        var fwd = new THREE.Vector3();
+        ent.node.getWorldDirection(fwd);
+        return fwd;
+    },
+
+    getEntityEuler: function( id ) {
+
+        var ent = this.entities[id];
+        return ent.node.rotation;
+    },
+
+    setDeferredRender: function( id, handler ) {
+        this.entitiesDeferred[id] = handler;
+    },
+
+    update: function(currentTime, elapsedTime) {
+
+        // update each Entity
+        //   Push opensteer mover positions and rotations into threeJS
+        var ekeys = Object.keys(this.entities);
+        for (var i = 0; i < ekeys.length; i++) {
+
+            var uid = ekeys[i];
+            var ent = this.entities[uid];
+
+            if(ent.hasOwnProperty('handlerUpdate')) {
+                ent.handlerUpdate(ent, currentTime, elapsedTime);
+            }
+
+            // For attached objects and other associated funcs
+            //   - After main update so that most recent position can be used
+            for(var ufi=0; ufi<ent.updatefuncs.length; ufi++) {
+                ent.updatefuncs[ufi]( ent, currentTime, elapsedTime );
+            }
+        }
+    },
+
+    render: function( currentTime, elapsedTime) {
+
+        //var ekeys = Object.keys(this.entities);
+        var ekeys = Object.keys(this.entityParents);
+        for (var i = 0; i < ekeys.length; i++) {
+        
+            var uid = ekeys[i];
+            var ent = this.entities[uid];
+
+            if(ent.hasOwnProperty('handlerRender')) {
+                ent.handlerRender( ent, currentTime, elapsedTime );
+            }
+        }
+
+        var fkeys = Object.keys(this.entitiesDeferred);
+        for (var j = 0; j < fkeys.length; j++) {
+            var uid = fkeys[j];
+            var ent = this.entities[uid];
+            var deferredFunc = this.entitiesDeferred[uid];
+            deferredFunc( ent, currentTime, elapsedTime );            
+        }
+
+        var prkeys = Object.keys(this.postRenderFuncs);
+        for (var j = 0; j < prkeys.length; j++) {
+            var uid = prkeys[j];
+            this.postRenderFuncs[uid]( currentTime, elapsedTime );
+        }
+    },
+
+    sceneUpdate: function() {
+
+        this.oldTime = this.currentTime;
+        this.currentTime = Date.now() * 0.001;
+        this.elapsedTime = this.currentTime - this.oldTime;
+        if(simstate.mode == SimulationMode.NONE) 
+            this.elapsedTime = this.currentTime;
+
+        if(simstate.mode == SimulationMode.PAUSED) 
+            return;
+
+        // Updater is slower than render - we interpolate vision.
+        this.update( this.currentTime, this.elapsedTime );
+    },
+
+    sceneRender: function() { 
+        
+        var oldRTime = this.oldTime;
+        this.frameCount++;
+        this.currentRTime = Date.now() * 0.001;
+        this.elapsedRTime = this.currentRTime - oldRTime;
+
+        // Simple perf indicator based on fps.
+        if( this.frameCount % 30 == 0 ) showPerformance();
+
+        // Render runs faster and usually interpolates
+        this.render( this.currentRTime, this.elapsedRTime );
+    },
+
+    start: function() {
+        this.sceneUpdate();
+        this.sceneRender();
+    }
+};
+
+$(document).ready(function() {
+
+    console.log("LQDB:", SceneGraph.GPD);
+    scenestatus.watch("loaded", function (id, oldval, newval) {
+        
+        if(newval == true ) {
+            console.log("Scenegraph starting...");
+
+            stateManager.Start("initialize");
+            mode.state = EditorMode.NONE;
+
+            // Add the ThreeJS models, actors and sensors to the entity scenegraph
+            {# for (var j = 0; j < models.children.length; j++) {
+                addEntityToScenegraph( models.children[j] );    
+            }
+
+            for (var k = 0; k < actors.children.length; k++) {
+                addEntityToScenegraph( actors.children[k] );    
+            }
+
+            for (var l = 0; l < sensors.length; l++) {
+                addEntityToScenegraph( sensors[l] );    
+            } #}
+
+            // Props should be included (especially for obstacles).
+            //   TODO: will add later.
+            SceneGraph.start();
+            stateManager.ready = true;
+       }
+        return newval;
+    });    
+});

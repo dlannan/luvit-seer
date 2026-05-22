@@ -1,0 +1,12 @@
+
+        {% if editing == true then %}
+        {(templates/tools/adminmainmenu.html, { userid=userid, pageid=pageid } )}
+
+        {% if nosidemenu == nil then %}
+        {(templates/tools/righteditmenu.html, { userid=userid, pageid=pageid } )}
+        {% end %}
+        {(templates/wizards/wizard_assets.html, { userassets=userassets } )}
+        {% end %}
+        {% if loginrequired == true then %}
+        {(templates/wizards/wizard_login.html)}
+        {% end %}

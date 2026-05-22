@@ -1,0 +1,61 @@
+{% embed 'partials/base-dashboard.html.twig' %}
+
+{% if config.plugins.login.enabled and grav.user.authorize('site.login') %}
+{% set uservalid = true %}
+{% endif %}
+
+{% block content %}
+{% include 'dashboard/header.html.twig' %}
+
+    <div class="my-3 my-md-5">
+        <div class="container">   
+
+<article class="hentry">
+    <header>
+    <div class="entry-meta">
+        <span class="entry-date date published updated"><time datetime="{{ page.date()|date }}"><a href="{{ post.url }}">{{ page.date|date("F d, Y") }}</a></time></span>
+        <span class="author vcard"><span class="fn"><a href="{{ base_url_relative }}/about" title="About {{ page.header.author }}">{{ page.header.author }}</a></span></span>{# {% if site.disqus_shortname and post.comments %}&nbsp; &bull; &nbsp;<span class="entry-comments"><a href="{{ base_url_relative }}{{ post.url }}#disqus_thread">Comment</a></span>{% endif %} #}
+        {% if config.plugins.readingtime.enabled %}
+        <span class="entry-reading-time pull-right">
+        <i class="fa fa-clock-o"></i>
+        Reading time ~{{ post.content|readingtime({'round':'minutes'}) }}
+        </span><!-- /.entry-reading-time -->
+        {% endif %}
+    </div><!-- /.entry-meta -->
+    </header>
+    <div class="entry-content">
+    {{ page.content }}
+    </div><!-- /.entry-content -->
+</article><!-- /.hentry -->
+
+</div>
+</div>
+
+<footer class="footer">
+<div class="container">
+    <div class="row align-items-center flex-row-reverse">
+    <div class="col-auto ml-lg-auto">
+        <div class="row align-items-center">
+        <div class="col-auto">
+        </div>
+        <div class="col-auto">
+        </div>
+        </div>
+    </div>
+    <div class="col-12 col-lg-auto mt-3 mt-lg-0 text-center">
+    </div>
+    </div>
+</div>
+</footer>
+</div>
+
+        {% if config.plugins.pagination.enabled and collection.params.pagination %}
+        {% include 'partials/pagination.html.twig' with {'pagination':collection.params.pagination} %}
+        {% endif %}
+
+{% include 'dashboard/footer.html.twig' %}
+{% endblock %}
+
+{% endembed %}
+
+

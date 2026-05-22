@@ -1,0 +1,57 @@
+function ShowObject(object) {
+    object.traverse ( function (child) {
+        if (child instanceof THREE.Mesh) {
+            child.visible = true;
+        }
+    });
+}
+
+function EndSelection() {
+    
+    if(mode.object) {
+        SceneGraph.forceUpdate( mode.object.userData.uid );        
+        SceneGraph.forceRender( mode.object.userData.uid );        
+    }
+
+    clearSelection();
+    selectCursor.visible = false;
+    enableControls();
+
+    mode.group = null;
+    mode.object = null;
+    selectEditorObj = -1;
+    hidePopups();
+
+    ClearLinkedObjects();
+    ClearLinkedEvents();
+}
+
+function FinishMovement() {
+
+    // Ensure the object is visible when finished moving.
+    var obj = SceneGraph.findNodeByUid(selectEditorObj, true);
+    if(obj) ShowObject(obj); 
+
+    mode.group.add( mode.object );
+    EndSelection();
+}
+
+function FinishPlacement() {
+
+    mode.group.add( mode.object );
+    EndSelection();
+}
+
+mode.watch("state", function (id, oldval, newval) {
+    if(debug.watchState) console.log("State:" + oldval+' '+ newval);
+
+    stateManager.JumpTo( newval );
+    return newval;
+});
+
+
+mode.watch("intersected", function (id, oldval, newval) {
+    
+    if(debug.watchIntersected) console.log(oldval+' '+ newval);
+    return newval;
+});

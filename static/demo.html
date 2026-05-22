@@ -1,0 +1,601 @@
+<!DOCTYPE HTML>
+<html lang="en" prefix="og: http://ogp.me/ns#">
+
+    <head>
+        <title>Try before downloading · ContentTools</title>
+        
+        <!-- Favicon -->
+        <link rel="icon" type="image/x-icon" href="/favicon.ico">
+        <link rel="apple-touch-icon-precomposed" href="/favicon-152.png">
+        <meta name="msapplication-TileColor" content="#2980b9">
+        <meta name="msapplication-TileImage" content="/favicon-144.png">
+
+        
+            <!-- Twitter card -->
+            <meta name="twitter:card" content="summary">
+            <meta name="twitter:url" content="http://getcontenttools.com/demo">
+            <meta name="twitter:title" content="Try before downloading · ContentTools">
+            <meta name="twitter:description" content="Out of the box ContentTools features a fully functional WYSIWYG editor that's
+easy to set up an configure - try it out in your browser now.">
+            <meta name="twitter:image" content="http://getcontenttools.com//images/twitter-card-logo.png">
+        
+
+        
+            <!-- Facebook Open Graph -->
+            <meta property="og:type" content="website">
+            <meta property="og:site_name" content="ContentTools">
+            <meta property="og:title" content="Try before downloading">
+            <meta property="og:description" content="Out of the box ContentTools features a fully functional WYSIWYG editor that's
+easy to set up an configure - try it out in your browser now.">
+            <meta property="og:url" content="http://getcontenttools.com/demo">
+            <meta property="og:image" content="http://getcontenttools.com/images/facebook-share-logo.png">
+            <meta property="og:image:type" content="image/png">
+            <meta property="og:image:width" content="470">
+            <meta property="og:image:height" content="250">
+        
+
+        <!-- CSS -->
+        <link rel="stylesheet" type="text/css" href="/styles/site.css">
+        
+        <link rel="stylesheet" type="text/css" href="/styles/base.css">
+        <link rel="stylesheet" type="text/css" href="/styles/colorizer.css">
+        
+        
+        <link rel="stylesheet" type="text/css" href="/styles/content-tools.css">
+        <link rel="stylesheet" type="text/css" href="/styles/spectrum.css">
+        <link rel="stylesheet" type="text/css" href="/styles/menueditor.css">
+        <link rel="stylesheet" type="text/css" href="/styles/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="/styles/bootstrap-select.min.css">
+        <link rel="stylesheet" type="text/css" href="/styles/bootstrap-toggle.min.css">
+        <script src="scripts/modernizr.custom.js"></script>
+        <script src="scripts/jquery-3.1.0.min.js"></script>
+        
+    </head>
+
+    <body class="page">
+<div id="nav-toggle"><span class="icon-hamburger"></span></div>
+        
+        <nav class="cbp-spmenu cbp-spmenu-vertical cbp-spmenu-left" id="cbp-spmenu-s1">
+			<a href="#">DASHBOARD</a>
+			<a href="#">INBOX</a>
+			<a href="#">CREATE BLOG</a>
+			<a href="#">CREATE PAGE</a>
+			<a href="#">EDIT WEBSITE</a>
+			<a href="#">SETTINGS</a>
+		</nav>
+        
+        <style>
+            #nav-toggle {
+                position: fixed;
+    top: 0;
+    left: 0;
+    padding: 20px;
+    z-index: 100;
+    color: #000;
+                    width: 30px;
+    height: 30px;
+    background: rgba(241,241,241,0.5);
+    display: table;
+    border-radius: 30px;
+    margin: 20px;
+             transition: all 0.5s;
+           }
+            #nav-toggle:hover {
+               background: rgba(241,241,241,0.7);
+     
+            }
+            #nav-toggle.movedbydrawer {
+                margin-left:260px;
+            }
+            #nav-toggle span {
+                display: block;
+            }
+        .cbp-spmenu {
+	background: #e8e8e8;
+	position: fixed;
+            transition: all 0.5s;
+}
+    .cbp-spmenu-vertical {
+	width: 240px;
+	height: 100%;
+	top: 0;
+	z-index: 1000;
+}
+
+.cbp-spmenu-vertical a {
+	border-bottom: 1px solid #e0e0e0;
+	padding: 2em;
+    display: block;
+    text-decoration: none;
+    letter-spacing: 0.1em;
+    font-size: 0.7em;
+    text-align: center;
+    text-transform: uppercase;
+    color: #777;
+    font-family: sans-serif;
+}    
+
+    .cbp-spmenu-left {
+	left: -240px;
+}
+.cbp-spmenu-left.cbp-spmenu-open {
+	left: 0px;
+}        
+            body {
+                            transition: all 0.5s;
+
+            }
+            body.movedbydrawer {
+                margin-left:240px;
+            }     
+            .page__main.draweropen {
+                opacity: 0.5;
+            }
+            .page__main {
+                transition: all 0.5s;
+            }
+            .ct-widget {
+                transition: all 0.5s;
+            }
+            .ct-widget.draweropen {
+                opacity: 0.5;
+            }
+            
+
+        </style>
+        
+        
+                     <nav id="site-nav" class="horizontal-nav">
+                        <a href="/" class="site-nav__logo" style="display:none;">
+                            <img src="/images/logo@2x.png" alt="ContentTools logo" width="168" height="36">
+                        </a>
+                        <div id="site-nav__toggle">
+                            <span>Toggle navigation</span>
+                        </div>
+                         <div id="site-nav__items-wrapper">
+                        <ul id="site-nav__items">
+                            <li class="site-nav__item">
+                                <a href="" class="site-nav__link">Demo</a>
+                            </li>
+                            <li class="site-nav__item">
+                                <a href="" class="site-nav__link">Getting started</a>
+                            </li>
+                            <li class="site-nav__item">
+                                <a href="" class="site-nav__link">Tutorials</a>
+                            </li>
+                            <li class="site-nav__item">
+                                <a href="" class="site-nav__link">
+                                    API
+                                </a>
+                            </li>
+                            <li class="site-nav__item">
+                                <a href="" class="site-nav__link">
+                                    GitHub
+                                </a>
+                            </li>
+                        </ul>
+                             </div>
+                    </nav>
+        
+        
+        
+        
+        
+        <main class="page__main">
+                <a name="about"></a>
+            
+            <style>
+                .module-fullscreenmedia {
+                    background-image: url("/images/pages/demo/fullscreenmedia.jpg");
+                    background-size: cover;                    
+                    background-position: center center;
+                    background-repeat: no-repeat;
+                    height: 100vh;
+                }
+                .verticallycentered-text-container {
+                     position: absolute; 
+  text-align: center;
+  width: 80%;
+  height: 0%;
+  margin: auto;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  z-index: 5;
+  display: table;
+                } 
+                .verticallycentered-text {
+                  display: table-cell;
+  vertical-align: middle;
+  color: #000;    
+                }
+            </style>
+            
+    <div class="module-fullscreenmedia">
+        <div class="verticallycentered-text-container">
+            <div class="verticallycentered-text">
+                <h1>Landing Page</h1>
+                <h3>Start from a template</h3>
+            </div>
+        </div>
+    </div>
+            
+            <style>
+                .module-banner .container {
+                    padding: 90px;
+                }
+            </style>
+            
+    <div class="module-banner">
+        <div class="container text-center">
+                <h1>Hello</h1>
+                <h3>Add some text here. Yep, this page is a little bit special because you get to edit it. I trust you'll only write nice things. Unrelated to this, I also disabled the save option.</h3>
+        </div>
+    </div> 
+            <style>
+.parallax {
+    position: relative;
+    height: 100vh;
+    overflow: hidden;
+    z-index: 1 !important;
+}
+.parallax__layer {
+  position: fixed;
+    width: 100%;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+            </style>
+
+            
+<div class="parallax">
+  <div class="parallax__layer">
+     <img class="img-responsive" src="/images/pages/demo/media2.jpg" alt="">
+  </div>
+</div>
+                    
+            <style>               
+                
+                .module-fullscreenmedia-half {
+                    background-image: url("/images/pages/demo/media2.jpg");
+                    background-size: cover;                    
+                    background-position: center center;
+                    background-repeat: no-repeat;
+                    height: 60vh;
+                }
+            </style>
+            
+   <div class="module-fullscreenmedia-half">
+        <div class="verticallycentered-text-container">
+            <div class="verticallycentered-text">
+                <h1>Featured image</h1>
+                <h3>Some text here</h3>
+            </div>
+        </div>
+    </div>
+            
+        
+    <div class="module-sidefeature">
+                <div class="container">
+            <div class="row">
+                <div class="col-lg-6 col-sm-6">
+                    <h2 class="section-heading">Death to the Stock Photo:<br>Special Thanks</h2>
+                    <p class="lead">A special thanks to <a target="_blank" href="http://join.deathtothestockphoto.com/">Death to the Stock Photo</a> for providing the photographs that you see in this template. Visit their website to become a member.</p>
+                </div>
+                <div class="col-lg-6 col-sm-6">
+                    <img class="img-responsive" src="http://placehold.it/800x500" alt="">
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+<br />
+     <div class="module-sidefeature">
+                <div class="container">
+            <div class="row">
+                <div class="col-lg-6 col-sm-6">
+                    <img class="img-responsive" src="http://placehold.it/800x500" alt="">
+                </div>
+                                <div class="col-lg-6 col-sm-6">
+                    <h2 class="section-heading">Death to the Stock Photo:<br>Special Thanks</h2>
+                    <p class="lead">A special thanks to <a target="_blank" href="http://join.deathtothestockphoto.com/">Death to the Stock Photo</a> for providing the photographs that you see in this template. Visit their website to become a member.</p>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+                <div class="module-banner" style="background-color:#f1f1f1;color: #777;">
+        <div class="container text-center">
+                <h1>Hello</h1>
+                <h3>Add some text here. Yep, this page is a little bit special because you get to edit it. I trust you'll only write nice things. Unrelated to this, I also disabled the save option.</h3>
+        </div>
+    </div>
+
+            
+            
+            <style>
+                .module-mediagrid img {
+                    padding: 15px;
+                }
+            </style>   
+            
+    <div class="module-mediagrid">
+        <div class="container text-center">
+            <div class="col-md-4 col-sm-6">
+                <img src="http://placehold.it/700x450">
+            </div>            
+            <div class="col-md-4 col-sm-6">
+                <img src="http://placehold.it/700x450">
+            </div>
+            <div class="col-md-4 col-sm-6">
+                <img src="http://placehold.it/700x450">
+            </div>
+            <div class="col-md-4 col-sm-6">
+                <img src="http://placehold.it/700x450">
+            </div>            
+            <div class="col-md-4 col-sm-6">
+                <img src="http://placehold.it/700x450">
+            </div>
+            <div class="col-md-4 col-sm-6">
+                <img src="http://placehold.it/700x450">
+            </div>
+        </div>
+    </div>
+            
+                <div class="container">
+                    
+    <section>
+<h2>
+    What are you waiting for?
+</h2>
+<p>
+    As soon as you've clicked the pencil icon the page will be editable and two new elements will appear; the <b>toolbox</b>&nbsp;and the <b>inspector bar</b>. The toolbox by default will appear in the upper left corner of the page, but it can be dragged to wherever you like. The inspector bar will appear fixed to the bottom of the page (it will be empty until an element on the page is selected).
+</p>
+<h3>
+    Editable regions
+</h3>
+<p>
+    How do you know what content on the page you can edit? I admit it's not so hard to guess in this case, but imagine if you will a far more elaborate page design.
+</p>
+    </section>
+
+                </div>
+                                    <style>
+                .module-fullscreenmedia-half2 {
+                    background-image: url("/images/pages/demo/media3.jpg");
+                    background-size: cover;
+                    background-position: center center;
+                    background-repeat: no-repeat;
+                    height: 100vh;
+                }
+            </style>
+            
+   <div class="module-fullscreenmedia-half2">
+        <div class="verticallycentered-text-container">
+            <div class="verticallycentered-text">
+                <h1>Featured image</h1>
+                <h3>Some text here</h3>
+            </div>
+        </div>
+    </div>
+            </main>   
+        
+            <footer>
+                <div class="container text-center">
+<h3>this is the footer</h3>
+                </div>
+            </footer>
+        <style>
+            .editor-header-wrapper {
+                text-align: center;
+                margin: 7px;
+            }
+            .editor-header {
+                width:30px;
+                height:30px;
+                background-color: #f1f1f1;
+                border-radius: 20px;
+                float: left;
+                display: table;
+                margin: 2px;
+            }
+            .editor-header span {
+                display: table-cell;
+                vertical-align: middle;
+            }
+            .module-toggled {
+                font-weight: 800;
+            }
+        </style>
+          <div class="ct-widget ct-toolbox ct-widget--active" style="right: 118px; top: 114px;">
+            <div class="editor-header-wrapper">
+                <div id="text-editor_toggle" class="editor-header"><span class="icon-type"></span></div>
+                <div id="color-palette_toggle" class="editor-header"><span class="icon-palette"></span></div>
+                <div id="modules_toggle" class="editor-header"><span class="icon-plus"></span></div>
+            </div>
+              <div id="text-editor">
+            <div class="ct-tool-groups">
+            <div class="ct-tool-group">
+                <div class="ct-tool ct-tool--bold ct-tool--disabled" data-ct-tooltip="Bold"></div>
+                <div class="ct-tool ct-tool--italic ct-tool--disabled" data-ct-tooltip="Italic"></div>
+                <div class="ct-tool ct-tool--link" data-ct-tooltip="Link"></div>
+                <div class="ct-tool ct-tool--align-left ct-tool--disabled" data-ct-tooltip="Align left"></div>
+                <div class="ct-tool ct-tool--align-center ct-tool--disabled" data-ct-tooltip="Align center"></div>
+                <div class="ct-tool ct-tool--align-right ct-tool--disabled" data-ct-tooltip="Align right"></div>
+                </div>
+                <div class="ct-tool-group">
+                    <div class="ct-tool ct-tool--heading ct-tool--disabled" data-ct-tooltip="Heading"></div>
+                    <div class="ct-tool ct-tool--subheading ct-tool--disabled" data-ct-tooltip="Subheading"></div>
+                    <div class="ct-tool ct-tool--paragraph" data-ct-tooltip="Paragraph"></div>
+                    <div class="ct-tool ct-tool--unordered-list ct-tool--disabled" data-ct-tooltip="Bullet list"></div>
+                    <div class="ct-tool ct-tool--ordered-list ct-tool--disabled" data-ct-tooltip="Numbers list"></div>
+                    <div class="ct-tool ct-tool--table" data-ct-tooltip="Table"></div>
+                    <div class="ct-tool ct-tool--indent ct-tool--disabled" data-ct-tooltip="Indent"></div>
+                    <div class="ct-tool ct-tool--unindent ct-tool--disabled" data-ct-tooltip="Unindent"></div>
+                    <div class="ct-tool ct-tool--line-break ct-tool--disabled" data-ct-tooltip="Line break"></div>
+                </div>
+                <div class="ct-tool-group">
+                    <div class="ct-tool ct-tool--image" data-ct-tooltip="Image"></div>
+                    <div class="ct-tool ct-tool--video" data-ct-tooltip="Video"></div>
+                    <div class="ct-tool ct-tool--preformatted ct-tool--disabled" data-ct-tooltip="Preformatted"></div>
+                </div>
+                <div class="ct-tool-group">
+                    <div class="ct-tool ct-tool--undo" data-ct-tooltip="Undo"></div>
+                    <div class="ct-tool ct-tool--redo ct-tool--disabled" data-ct-tooltip="Redo"></div>
+                    <div class="ct-tool ct-tool--remove" data-ct-tooltip="Remove"></div>
+                </div>
+            </div>
+              </div>
+            <div id="color-palette">
+                 <div id="colorchange">CHANGE COLORS</div>
+                 <div class="customizer">
+				    <ul class="color-tool" id="color-list">                    
+					<li><button class="reset-button" title="Reser colors">Reset colors</button></li>
+				    </ul>
+			     </div>  
+            </div>
+              <div id="modules" class="text-center">
+                  <h5>DISPLAY</h5>
+                  <select id="nav-display" class="selectpicker" title="Display...">
+                      <option value="module_horizontal-nav" selected="selected">Horizontal Nav</option>
+                      <option value="module_vertical-nav">Vertical Nav</option>
+                  </select>
+                  <h5>LINKS ALIGN</h5>
+                  <select id="nav-align" class="selectpicker" title="Nav Align...">
+                      <option value="left">Left</option>
+                      <option value="right" selected="selected">Right</option>
+                      <option value="center">Center</option>
+                  </select>
+                                  
+                      <form role="form">
+<select class="selectpicker" title="Direction...">
+                      <option value="top">Top</option>
+                      <option value="left">Left</option>
+                      <option value="right">Right</option>
+                      <option value="bottom">Bottom</option>
+                  </select>
+                      </form>
+                  <h5>COLLAPSED NAV</h5>
+                  <input id="module_collapsed-nav" type="checkbox" name="module_collapsed-nav" value="collapsed" data-toggle="toggle" data-on="Collapsed" data-off="Not collapsed"><br>
+                  <select id="navtoggle-align" class="selectpicker" title="Toggle Align...">
+                      <option value="left" selected="selected">Left</option>
+                      <option value="right">Right</option>
+                      <option value="center">Center</option>
+                  </select>
+                  <select id="collapsednav-display" class="selectpicker">
+                      <option value="module_collapsednav-offcanvas">Off Canvas</option>
+                      <option value="module_collapsednav-fullscreen">Full Screen</option>
+                      <option value="module_collapsednav-inline" selected="selected">Inline</option>
+                  </select>
+                  <input id="nav_offcanvas-push" type="checkbox" name="nav_offcanvas-push" value="collapsed" data-toggle="toggle" data-on="Push menu" data-off="Pull Menu">
+                  <select id="nav_offcanvas-direction" class="selectpicker" title="Direction...">
+                      <option value="top" selected="selected">Top</option>
+                      <option value="left" selected="selected">Left</option>
+                      <option value="right">Right</option>
+                      <option value="bottom">Bottom</option>
+                  </select>
+                  <h5>FIXED</h5>
+                  <input id="module_fixed-nav" type="checkbox" name="module_fixed-nav" value="fixed" data-toggle="toggle" data-on="Fixed" data-off="Not Fixed"><br>
+              </div>
+        </div>
+        
+        <style>
+            #color-palette, #modules {
+                display:none;
+            }
+            #colorchange {
+                text-align: center
+            }
+            #colorchange.selected {
+                color: #000;
+            }
+        </style>
+        
+		<script src="/scripts/classie.js"></script>
+		<script src="/scripts/interact-1.2.4.min.js"></script>
+        <script src="/scripts/site.js"></script>
+        <script src="/scripts/colorizer.js"></script>
+        <script src="/scripts/spectrum.js"></script>
+        <script src="/scripts/content-tools.js"></script>
+
+                <script src="/scripts/bootstrap.min.js"></script>
+                <script src="/scripts/bootstrap-select.min.js"></script>
+
+                <script src="/scripts/bootstrap-toggle.min.js"></script>
+
+
+        <script src="/scripts/prism.js"></script>
+
+            <script src="/scripts/menueditor.js"></script>
+
+        <script>
+        
+            $( document ).ready(function() {
+                $("#nav-toggle").click(function(){
+                    $(".cbp-spmenu-left").toggleClass("cbp-spmenu-open");
+                    $("body").toggleClass("movedbydrawer");
+                    $(this).toggleClass("movedbydrawer");
+                    $(".page__main").toggleClass("draweropen");
+                    $(".ct-widget").toggleClass("draweropen");
+                    $("#nav-toggle > span").toggleClass("icon-hamburger");
+                    $("#nav-toggle > span").toggleClass("icon-x");
+                });
+                
+                for (i = 1; i < 12; i++) { 
+                    
+                    $("head").append('<style>.color'+i+' { color: #ff00ff;background: #ff00ff;}</style>');
+
+                    $("#color-list").append( '<input id="color'+i +'" type="color" name="color'+i +'" value="#ff00ff" />' );
+					$("#color-list").append( '<li class="color'+i+'"><div class="drag-element" id="color'+i+'-drag" data-color="#ff00ff"><div class="drop color'+i+'"></div><i class="drop-helper-1 color'+i+'"></i><i class="drop-helper-2 color'+i+'"></i><i class="drop-helper-3 color'+i+'"></i><i class="drop-helper-4 color'+i+'"></i></div></li>' );
+
+//                  <input id="color1" type='color' name='color1' value='#404040' />
+//					<li class="color-1"><div class="drag-element" data-color="#404040"><div class="drop color-1"></div><i class="drop-helper-1 color-1"></i><i class="drop-helper-2 color-1"></i><i class="drop-helper-3 //                   color-1"></i><i class="drop-helper-4 color-1"></i></div></li>
+                    
+                    
+                    $("#color" + i).spectrum({
+                        change: function(n) {
+                            $("#" + this.name + "-drag").attr("data-color", n.toHexString());
+                            $("." + this.name).css("background-color", n.toHexString());
+                            $("." + this.name).css("color", n.toHexString());
+                        }
+                    }); 
+                }
+                
+                $("#text-editor_toggle").click(function(){
+                    $("#text-editor").show();
+                    $("#color-palette, #modules").hide();
+                });
+                $("#color-palette_toggle").click(function(){
+                    $("#color-palette").show();
+                    $("#text-editor, #modules").hide();
+                });
+                $("#modules_toggle").click(function(){
+                    $("#modules").show();
+                    $("#text-editor, #color-palette").hide();
+                });
+                $("#colorchange").click(function(){
+                    $(this).toggleClass("selected");
+                    $(".sp-replacer").toggle();
+                    for (i = 1; i < 12; i++) { 
+                        $(".color" + i).toggle();
+                    }
+                });                
+                
+                $('main, main > div, main > *').each(function(i, ele) { 
+                     $(ele).addClass("paint-area");
+                 });
+                 $("main h1, main h2, main h3, main h4, main h5, main h6, main p, main li, main tr, main td").each(function(i, ele) { 
+                     if( $(ele).hasClass("note") == "true" ) { $(ele).empty(); }
+                     $(ele).addClass("paint-area");
+                     $(ele).addClass("paint-area--text");
+                 });
+            });
+        </script>
+
+    </body>
+</html>

@@ -1,0 +1,166 @@
+
+// Vehicle-engine
+//  Defines a basic simulated car engine. Set the appropriate parameters for
+//  the engine torque curve and driveline to produce a reasonable simulated result.
+//  Gearbox and differential are defined here
+
+function float2int (value) {
+    return value | 0;
+}
+
+var VehicleEngine = function( physics, profile ) {
+
+    // external variables
+    this.physics = physics;
+    this.profile = profile;
+    
+    // Used to generate engine sound (a callback can be set)
+    this.audio = undefined;
+
+    // Engine parameters
+    this.started = false;
+    this.gear = 1;
+    this.throttle = 0.0;
+    this.brake = 0.0;
+    
+    // Rpm and gear related
+    this.idleRpm = 800.0;
+    this.gearUpRpm = 5500.0;
+    this.gearDownRpm = 1500.0;
+
+    this.acceleratingForce = 0.0;
+    this.velocity = 4.0; //???????
+
+    // Profile parameters - should come from car profile!
+    this.differentialRatio = 3.42;
+    this.transmissionEfficiency = 0.7;
+    this.wheelRadius = 0.34;
+    this.mass = 1000.0;
+    this.coefficientOfFriction = 0.3;
+    this.frontalArea = 2.2;
+    this.airDensity = 1.29;
+    this.brakingForce = 1000.0;
+
+    // rpm vs torque  (torque curve)
+    this.torque = {
+        '0': 0.0,
+        '500': 0.0, 
+        '1000': 400.0, 
+        '1500': 440.0,
+        '2000': 480.0, 
+        '2500': 530.0,
+        '3000': 530.0,
+        '3500': 530.0, 
+        '4000': 530.0,
+        '4500': 530.0,
+        '5000': 520.0,
+        '5500': 490.0,
+        '6000': 450.0,
+        '6500': 420.0,
+        '7000': 0.0, 
+        '7500': 0.0, 
+        '8000': 0.0, 
+        '8500': 0.0,
+        '9000': 0.0, 
+        '9500': 0.0, 
+        '10000': 0.0
+    };
+
+    this.ratios = {
+        '1': 3.5,
+        '2': 2.186,
+        '3': 1.405,
+        '4': 1.00,
+        '5': 0.831
+    };
+
+    this.lastgear = Object.keys(this.ratios).length;
+
+    this.brakeFunc = function( value ) {
+        if( value != undefined ) this.brake = Math.max(0.0, Math.min(value, 1.0 ));
+        return this.brake;
+    };
+
+    this.throttleFunc = function( value ) {
+        if( value != undefined ) this.throttle = Math.max(0.0, Math.min(value, 1.0 ));
+        return this.throttle;
+    };
+
+    this.gearFunc = function( value ) {
+        if( value != undefined ) { this.gear = Math.max(1.0, Math.min(this.lastgear, value));  }
+        return this.gear;
+    };
+
+    this.getRpm = function() {
+        var wheelAngularVelocity = this.velocity / this.wheelRadius;
+        var rpm = wheelAngularVelocity * this.ratios[this.gear] * this.differentialRatio;
+        // Convert to revolutions per minute
+        rpm *= 60.0 / (2.0 * Math.PI);
+        return rpm;        
+    };
+
+    this.getTorque = function( rpm ) {
+        // Clamp the rpm between 0 and 10000
+        rpm = Math.max(this.idleRpm, Math.min(rpm, 10000.0));
+        var rpmIncrementInTorqueArray = 500.0;
+        var floatingArrayPosition = rpm / rpmIncrementInTorqueArray;
+        var exactArrayPosition = float2int(floatingArrayPosition);
+        var interpolationAmount = floatingArrayPosition - exactArrayPosition;
+
+        var firstTorque = this.torque[exactArrayPosition * 500];
+        if(++exactArrayPosition > Object.keys(this.torque).length - 1)
+            exactArrayPosition = Object.keys(this.torque).length - 1;
+        var secondTorque = this.torque[exactArrayPosition * 500];
+
+        // Calculate the interpolated torque using the remainder
+        // left from the division above
+        var interpolatedTorque = (1.0 - interpolationAmount) * firstTorque + interpolationAmount * secondTorque;
+        return interpolatedTorque;        
+    };
+
+    this.getDrive = function( rpm ) {
+
+        // Return the real torque the engine would give
+        var maximumTorque = this.getTorque(rpm);
+        var engineTorque = maximumTorque * this.throttle;
+        var gearTorque = engineTorque * this.ratios[this.gear];
+        var driveTorque = gearTorque * this.differentialRatio;
+        return (driveTorque * this.transmissionEfficiency);        
+    };
+
+    this.getDrag = function() {
+		// Simply calculate the air drag, everyone knows the formula :)
+		return (0.5 * this.coefficientOfFriction * this.frontalArea * this.airDensity * (this.velocity * this.velocity));
+    };
+
+    this.update = function(dt) {
+
+        var rpm = this.getRpm();
+        var value = this.gear;
+        if(( rpm > this.gearUpRpm ) && (this.throttle > 0.5)) { 
+            this.gearFunc(value + 1.0);
+            rpm = this.idleRpm;
+        }
+        if(( this.gear > 1 ) && ( rpm < this.gearDownRpm ) && (this.throttle < 0.5)) { 
+            this.gearFunc(value - 1.0);
+            rpm = this.gearUpRpm;
+        }
+        //console.log( [rpm, this.gear, this.velocity] );        
+
+        this.acceleratingForce = this.getDrive(rpm) - this.getDrag() - (this.brake * this.brakingForce);
+        this.velocity = this.physics.vehicle.currentVehicleSpeedKmHour * 1000.0 / 3600.0;
+
+        if(this.velocity < 0.0)
+            this.velocity = 0.0;        
+    };
+
+    this.reset = function() {
+
+        this.acceleratingForce = 0.0;
+        this.velocity = 0.0;
+        this.gear = 1;
+        this.throttle = 0.0;
+        this.brake = 0.0;
+        this.started = false;
+    };
+};

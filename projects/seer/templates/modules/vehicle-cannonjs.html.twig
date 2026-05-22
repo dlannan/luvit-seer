@@ -1,0 +1,742 @@
+
+// Vehicle contants
+var profile = {
+    massVehicle: 1000.0, // 800 kg - low weight for race car
+    chassisLength: 3.8,
+    chassisHeight: 0.56,
+    chassisWidth: 1.5,
+
+    wheelRadiusBack: .31,
+    wheelAxisPositionBack: -1.37,
+    wheelHalfTrackBack: 0.8,
+    wheelAxisHeightBack: 0.30,
+    wheelAxisFrontPosition: 1.37,
+    wheelHalfTrackFront: 0.8,    
+    wheelAxisHeightFront: 0.30,
+    wheelRadiusFront: .31,
+    wheelWidthFront: .23,
+    
+    maxSteerVal: 0.5,
+    maxForce: 2500,
+    brakeForce: 100,
+
+    shiftDownRPM: 1500.0,   // rpm script will shift gear down
+    shiftUpRPM: 4000.0,     // rpm script will shift gear up
+    idleRPM: 800.0,         // idle rpm   
+    shiftDelay: 0.0, 
+
+    motorRPM: 0.0,
+
+    // gear ratios (index 0 is reverse)
+    gears:[ -2.90, 2.66, 1.78, 1.3, 1.0, 0.74, 0.5 ],
+    diff: 3.42,
+
+    currentGear: 1,
+    fuel: 60.0,             // Start with 60.0 litres
+                            //   This is added as weight too.
+    
+    cameras: [ [-5.0, 2.5, 2.3], [-5.0, 1.5, 1.4], [0.2, 1.1, 1.1] ],
+    currentCam: 0
+};
+
+
+var roadPhysics = [];
+var roadRaycast = new THREE.Raycaster();
+
+var originalRaycaster = undefined;
+
+// Custom raycaster to lookup using depth buffer (much fatser than raycast)
+var customRayCaster = function(from, to, result ) {
+
+    // No movement if physics isnt ready
+    if(mappedChannels[0].depthIsReady == false) return;
+
+    var pos = from;
+    var py = pos.y;
+
+    //trigger your events. 
+    var cam = mappedChannels[0];
+    
+    var cpos = Physics.chassisMesh.position; //cam.depthCamera.position;
+    var rpos = { x: cpos.x - pos.x, y: cpos.y - pos.y, z: cpos.z - pos.z };
+  
+    // Using depth buffer .. lookup wheel!!
+    var buff = cam.depthBuffer;
+    var centerxy = cam.depthResolution / 2;
+    var x = Math.floor(rpos.x * -cam.depthScale) + centerxy;
+    var y = Math.floor(rpos.z * cam.depthScale) + centerxy;
+
+    var lu = (y * cam.depthResolution + x) * 4;
+    var lu1 = 1.0-buff[(y * cam.depthResolution + x + 2) * 4];
+    var lu2 = 1.0-buff[((y + 2) * cam.depthResolution + x) * 4];
+    var lu3 = 1.0-buff[(y * cam.depthResolution + x - 2) * 4];
+    var lu4 = 1.0-buff[((y - 2) * cam.depthResolution + x) * 4];
+
+    var va = new CANNON.Vec3(4.0 * cam.depthXY, (lu3 - lu1) * cam.depthDeep, 0.0);
+    va.normalize();
+    var vb = new CANNON.Vec3(0.0, (lu2 - lu4) * cam.depthDeep, 4.0 * cam.depthXY);
+    vb.normalize();
+    var norm = vb.cross(va);
+
+    var height  = cam.depthCamera.position.y - (1.0 - buff[lu]) * cam.depthDeep;
+
+    //console.log([py, cpos.y, height]);
+
+    var hitSpot = new CANNON.Vec3(pos.x, height, pos.z);
+    var dist = hitSpot.distanceTo(from);
+    var fullDistance = from.distanceTo(to);
+
+    // Large or small values mean no hit! Should have average values all the time!!
+    if((buff[lu] > 0.95) || (buff[lu] < 0.05))  {
+        result.distance = -1;
+        result.hasHit = false;
+        result.body = null;
+        return false;
+    }
+
+    {# result.rayFromWorld = from;
+    result.rayToWorld = to; #}
+    result.hitPointWorld = hitSpot;
+    result.hitNormalWorld = norm;
+    result.distance = dist;
+    result.hasHit = true;
+    result._shouldStop = true;
+
+    // This just ensures that our data is read!!
+    result.body = Physics.ground;
+    return true;
+}
+
+
+// Raycaster just for mobile, because depth RT's will likely fail
+var customMobileRayCaster = function(from, to, result ) {
+
+    var fullDistance = from.distanceTo(to);
+
+    var fromVec = new THREE.Vector3( from.x, from.y, from.z );
+    var toVec = new THREE.Vector3( to.x, to.y, to.z );
+    var dirVec = toVec.clone().sub(fromVec);
+    dirVec.normalize();
+
+    var startVec = new THREE.Vector3( from.x - dirVec.x, from.y - dirVec.y, from.z - dirVec.z );
+    roadRaycast.set( startVec, dirVec );
+    var hits = roadRaycast.intersectObjects( roadPhysics, true );
+
+    // Large values mean no hit!
+    if(hits.length <= 0) {
+        result.distance = -1;
+        result.hasHit = false;
+        result.body = null;
+        return false;
+    }
+
+    var isec = hits[0];
+    var hitSpot = new CANNON.Vec3( isec.point.x, isec.point.y, isec.point.z);
+    var dist = hitSpot.distanceTo(from);
+    var norm = new CANNON.Vec3( isec.face.normal.x, isec.face.normal.y, isec.face.normal.z);
+
+    result.hitPointWorld = hitSpot;
+    result.hitNormalWorld = norm;
+    result.distance = dist;
+    result.hasHit = true;
+    result._shouldStop = true;
+
+    // This just ensures that our data is read!!
+    result.body = Physics.ground;
+    return true;
+}
+
+{# var CustomCasterFunc = function( world ) {
+    this.ptr = Ammo._malloc(CustomCasterFunc);
+    CustomCasterFunc.prototype.__cache__[this.ptr] = this;
+    this.__class__ = CustomCasterFunc;
+}
+
+CustomCasterFunc.prototype.__cache__ = {};
+CustomCasterFunc.prototype.constructor = CustomCasterFunc;
+CustomCasterFunc.prototype['castRay'] = newRayCastFunc; #}
+
+var Physics = {
+
+    // Physics variables
+    world: undefined,
+    vehicleNode: undefined,
+    vehicleEngine: undefined,
+
+
+    // Keybord actions
+    keysActions: {
+        "ArrowUp": { name: 'acceleration', state: false },
+        "ArrowDown": { name: 'braking', state:false },
+        "ArrowLeft": { name: 'left', state:false },
+        "ArrowRight": { name: 'right', state:false },
+        "KeyZ": { name: 'brakes', state:false },
+        "KeyC": { name: 'camera', state:false }
+    },
+
+    buildRoadDepthScene: function ( shapes ) {
+        // for each shape, make a static physics rigid boday
+        for(var shape in shapes) {
+            var obj = shapes[shape];
+            //console.log(shape, obj);
+            addObjectToSceneDepth(obj.clone());
+        }
+    },
+
+    buildShapeFromThreeBox: function( obj ) {
+        var scale = obj.scale;
+        return new CANNON.Box(new CANNON.Vec3(scale.x * 0.5, scale.y * 0.5, scale.z * 0.5));
+    },
+
+    buildBodyFromThreeBox: function( obj ) {
+        var pos = obj.position;
+        var quat = obj.quaternion;
+
+        var newShape = Physics.buildShapeFromThreeBox(obj);
+        var newBody = new CANNON.Body({ mass: 0, shape: newShape });
+        newBody.position.set(pos.x, pos.y, pos.z);
+        newBody.angularVelocity.set(0, 0, 0);
+        newBody.quaternion.set( quat.x, quat.y, quat.z, quat.w);
+        return newBody;
+    },
+
+    vehicle: undefined,
+
+    simpleTerrain: function(pos, grid=64, physicalSize=100) {
+
+        var matrix = [];
+        var sizeX = grid,
+            sizeY = grid;
+
+        for (var i = 0; i < sizeX; i++) {
+            matrix.push([]);
+            for (var j = 0; j < sizeY; j++) {
+                var height = 0.0;
+                matrix[i].push(height);
+            }
+        }
+
+        var hfShape = new CANNON.Heightfield(matrix, {
+            elementSize: physicalSize / sizeX
+        });
+
+        var hfBody = new CANNON.Body({ mass: 0 });
+        hfBody.addShape(hfShape);
+        //hfBody.quaternion.set(0, 0, 0.707, 0.707);
+        hfBody.shapeOrientations[0].setFromAxisAngle(new CANNON.Vec3(1,0,0), -Math.PI * 0.5);
+        hfBody.position.set(pos.x - 50.0, 0, pos.z + 50.0);
+        Physics.ground = hfBody;
+        Physics.world.addBody(hfBody);
+    },
+
+    vehicleSetup: function() {
+
+        // Get car for physics
+        var obj = utils.modelObjFind("AMGDTM-AMG");    
+        var objent = SceneGraph.addMoverObject( obj );   
+        var body = obj.getObjectByName("body");
+
+        // Get the physics vehicle in the scenegraph.
+        Physics.vehicleNode = SceneGraph.findByName("AMGDTM-AMG");
+
+        // Need to update this scenegraph node so that the vehicle is still selectable, and can be used as an camera target
+        SceneGraph.setHandlerRender( obj.id, immediatePosHeading );
+
+        //addObjectToSceneDepth(world.clone());
+
+        var pos = obj.position;
+        var quat = obj.quaternion;
+    
+        // Setup road surfaces for collision
+        var monaco = world.children[0]; // Should always be the main environment
+        var roads = utils.getAllMeshesWithName( monaco, "road");
+        var trac = utils.getAllMeshesWithName( monaco, "trac");
+        var curb = utils.getAllMeshesWithName( monaco, "curb");
+        var nocu = utils.getAllMeshesWithName( monaco, "nocu");
+        var tark = utils.getAllMeshesWithName( monaco, "tark");
+
+        roadPhysics = roads;
+        roadPhysics = roadPhysics.concat(curb);
+        roadPhysics = roadPhysics.concat(nocu);
+        roadPhysics = roadPhysics.concat(trac);
+        roadPhysics = roadPhysics.concat(tark);
+
+        Physics.buildRoadDepthScene(roads);
+        Physics.buildRoadDepthScene(curb);
+        Physics.buildRoadDepthScene(nocu);
+        Physics.buildRoadDepthScene(trac);
+        Physics.buildRoadDepthScene(tark);
+
+        var options = {
+
+            radius: 0.34,
+            directionLocal: new CANNON.Vec3(0, -1, 0),
+            suspensionStiffness: 30,
+            suspensionRestLength: 0.3,
+            frictionSlip: 2,
+            dampingRelaxation: 2.3,
+            dampingCompression: 4.4,
+            maxSuspensionForce: 100000,
+            rollInfluence:  0.5,
+            axleLocal: new CANNON.Vec3(-1, 0, 0),
+            chassisConnectionPointLocal: new CANNON.Vec3(1, 0, 1),
+            maxSuspensionTravel: 0.3,
+            customSlidingRotationalSpeed: -30,
+            useCustomSlidingRotationalSpeed: true
+        };
+
+        // Wheel / Ground setup for CANNON
+        var groundMaterial = new CANNON.Material("groundMaterial");
+        var bodyMaterial = new CANNON.Material("bodyMaterial");
+        var wheelMaterial = new CANNON.Material("wheelMaterial");
+        var wheelGroundContactMaterial = new CANNON.ContactMaterial(wheelMaterial, groundMaterial, 
+        {
+            friction: 0,
+            restitution: 0,
+            contactEquationStiffness: 1000
+        });
+
+        bodyMaterial.friction = 0;
+        bodyMaterial.restitution = 0;
+
+        // We must add the contact materials to the world
+        Physics.world.addContactMaterial(wheelGroundContactMaterial);      
+
+        // Chassis
+        var chassisBody = new CANNON.Body( { mass: profile.massVehicle, material: bodyMaterial });
+        var colliders = obj.getObjectByName("colliders");
+        for(var i=0; i<colliders.children.length; i++) {
+            var shape = Physics.buildShapeFromThreeBox(colliders.children[i]);
+            var pos = colliders.children[i].position;
+            var quat = colliders.children[i].quaternion;
+            //pos.y += -0.40;
+            pos.z += 0.1;
+            chassisBody.addShape(shape, pos, quat);
+        }
+
+        // Get chasis mesh from object - need to have a single node for this (decouple from parent node!)
+        Physics.chassisMesh = obj;
+
+        Physics.vehicle = new CANNON.RaycastVehicle({
+            chassisBody: chassisBody,
+            indexRightAxis: 0,
+            indexForwardAxis: 2,
+            indexUpAxis: 1            
+        });
+
+        Physics.vehicle.currAccelVal = 0.0;
+        Physics.vehicle.currBrakeVal = 0.0;
+        Physics.vehicle.currSteerVal = 0.0;
+        Physics.vehicle.currReverselVal = 0.0;
+        
+        var vehicle = Physics.vehicle;
+        
+        // Wheels
+        Physics.wheelMeshes = [];
+        var wheelMeshNames = ["FL", "FR", "RL", "RR"];
+
+        function addWheel(isFront, pos, radius, index) {
+
+            var mesh = obj.getObjectByName(wheelMeshNames[index]);
+            Physics.wheelMeshes[index] = utils.getObjectMesh(obj, wheelMeshNames[index]);
+
+            options.radius = radius;
+            options.chassisConnectionPointLocal.set(pos.x, pos.y, pos.z);
+            vehicle.addWheel(options);
+        }
+
+        addWheel(true, new CANNON.Vec3(profile.wheelHalfTrackFront, 
+                    profile.wheelAxisHeightFront, 
+                    profile.wheelAxisFrontPosition), 
+                    profile.wheelRadiusFront, 0);
+        addWheel(true, new CANNON.Vec3(-profile.wheelHalfTrackFront, 
+                    profile.wheelAxisHeightFront, 
+                    profile.wheelAxisFrontPosition), 
+                    profile.wheelRadiusFront, 1);
+        addWheel(false, new CANNON.Vec3(-profile.wheelHalfTrackBack, 
+                    profile.wheelAxisHeightBack, 
+                    profile.wheelAxisPositionBack), 
+                    profile.wheelRadiusBack, 2);
+        addWheel(false, new CANNON.Vec3(profile.wheelHalfTrackBack, 
+                    profile.wheelAxisHeightBack, 
+                    profile.wheelAxisPositionBack), 
+                    profile.wheelRadiusBack, 3);        
+
+        vehicle.addToWorld(Physics.world);
+
+        Physics.wheelBodies = [];
+        for(var i=0; i<vehicle.wheelInfos.length; i++){
+
+            var wheel = vehicle.wheelInfos[i];
+            var cylinderShape = new CANNON.Cylinder(wheel.radius, wheel.radius, wheel.radius / 2, 20);
+            var wheelBody = new CANNON.Body({
+                mass: 0
+            });
+
+            wheelBody.type = CANNON.Body.KINEMATIC;
+            wheelBody.collisionFilterGroup = 0; // turn off collisions
+            var q = new CANNON.Quaternion();
+            q.setFromAxisAngle(new CANNON.Vec3(0, 1, 0), Math.PI / 2);
+            wheelBody.addShape(cylinderShape, new CANNON.Vec3(), q);
+            Physics.wheelBodies.push(wheelBody);
+            Physics.world.addBody(wheelBody);
+        }        
+
+
+        document.onkeydown = handler;
+        document.onkeyup = handler;
+
+        // Sync keybord actions and physics and graphics
+        function handler(event) {
+
+            if(Physics.keysActions[event.code]) {
+
+                Physics.keysActions[event.code].keyup = (event.type == 'keyup');
+                Physics.keysActions[event.code].keydown = (event.type == 'keydown');
+
+                event.preventDefault();
+                event.stopPropagation();
+                return false;
+            } 
+        }
+    },
+
+    // Sync keybord actions and physics and graphics
+    update: function(dt) {
+
+        var vehicle = Physics.vehicle;
+
+        for (var i = 0; i < vehicle.wheelInfos.length; i++) {
+            vehicle.updateWheelTransform(i);
+            var t = vehicle.wheelInfos[i].worldTransform;
+            var wheelBody = Physics.wheelBodies[i];
+            wheelBody.position.copy(t.position);
+            wheelBody.quaternion.copy(t.quaternion);
+
+            var wq = new THREE.Quaternion( 0, -0.707, 0, 0.707 );
+            if(i == 0 || i == 3) wq.y = -wq.y;
+            var nq = new THREE.Quaternion();
+            nq.copy(t.quaternion);
+            nq.multiply(wq);
+            Physics.wheelMeshes[i].position.copy(t.position);
+            Physics.wheelMeshes[i].quaternion.set(nq.x, nq.y, nq.z, nq.w);
+        }
+
+        var pos = Physics.vehicle.chassisBody.position;
+        var quat = Physics.vehicle.chassisBody.quaternion;
+//          SceneGraph.updateEntityForward( Physics.chassisMesh.id, -fwd.x(), fwd.y(), fwd.z() );            
+//          SceneGraph.updateEntityPosition( Physics.chassisMesh.id, p.x(), p.y()-0.4, p.z());
+        
+        var down = new CANNON.Vec3(0.0, 0.0, 0.1);
+        //var down = new CANNON.Vec3(0.0, -0.40, 0.1);
+        var result = Physics.vehicle.chassisBody.vectorToWorldFrame(down);
+
+        Physics.chassisMesh.position.set(pos.x+result.x, pos.y+result.y, pos.z+result.z);
+        Physics.chassisMesh.quaternion.copy(quat);
+
+        SceneGraph.updateEntityPosition( Physics.chassisMesh.userData.uid, pos.x+result.x, pos.y+result.y, pos.z+result.z);
+    }
+}
+
+
+function close() {
+}
+
+function initPhysics() {  
+    
+    // Cannon js setup 
+    Physics.world = new CANNON.World();       
+
+    Physics.world.quatNormalizeSkip = 0;
+    Physics.world.quatNormalizeFast = false;
+    Physics.solver = new CANNON.GSSolver();
+    Physics.solver.iterations = 3;
+    Physics.solver.tolerance = 0.1;
+
+    Physics.world.broadphase = new CANNON.NaiveBroadphase(Physics.world);
+    //Physics.world.broadphase = new CANNON.SAPBroadphase(Physics.world);
+
+    Physics.world.gravity.set(0, -9.8, 0.0);
+    Physics.world.defaultContactMaterial.friction = 1;
+    Physics.world.defaultContactMaterial.restitution = 1;
+}
+
+// ----------------------------------------------------------------------------
+
+var selectedVehicle;
+
+var oldTime;
+var currentTime; 
+var elapsedTime;
+
+var startData = {};
+var audio = {
+    low: [ 
+        $buzz('/assets/audio/vehicle1/outside/low_on.wav'),
+        $buzz('/assets/audio/vehicle1/outside/low_on.wav')
+    ],
+    med: [
+        $buzz('/assets/audio/vehicle1/outside/med_on.wav'),
+        $buzz('/assets/audio/vehicle1/outside/med_on.wav')
+    ],
+    high: [
+        $buzz('/assets/audio/vehicle1/outside/high_on.wav'),
+        $buzz('/assets/audio/vehicle1/outside/high_on.wav')
+    ],
+    ready: false
+};
+
+function vehicleInit() {
+
+    Physics.vehicleSetup();
+    Physics.vehicleEngine = new VehicleEngine( Physics, profile );
+    Physics.simpleTerrain(Physics.chassisMesh.position);
+    //Physics.cannonDebugRenderer = new THREE.CannonDebugRenderer( scene, Physics.world );    
+    
+    startData.pos = Physics.chassisMesh.position.clone();
+    startData.quat = Physics.chassisMesh.quaternion.clone();
+
+    Physics.vehicle.steering = SteeringMode.DIGITAL;
+    Physics.vehicle.steeringFunc = steeringDigital;
+
+    profile.shiftDelay = currentTime;
+    audio.channel = { 
+        off: audio.low[0], 
+        on: audio.low[1] 
+    };
+
+    audio.start = $buzz({
+        src: '/assets/audio/vehicle1/outside/startup.wav',
+        volume: 1.0,
+        rate: 1.0,
+        onplayend: () => audio.ready = true
+    });
+
+    audio.start.play();
+
+    audio.channel.off.loop(true);
+    audio.channel.on.loop(true);
+
+    audio.channel.off.play();
+    audio.channel.on.play(); 
+    audio.channel.off.volume(0.0);
+    audio.channel.on.volume(0.0);
+
+    // Replace the rayCast for World with depth test!
+    if(isMobile) {
+        Physics.world.rayTest = customMobileRayCaster;
+        perf.select = "mobile"
+    } else {
+        Physics.world.rayTest = customRayCaster;
+        perf.select = "pc"
+    }
+
+    perf.toggleTrees(true);
+    perf.toggleBuildings(true);
+    perf.togglePeople(true);
+    perf.toggleViewDistance(true)
+}
+
+function checkEngineAudio() {
+
+    var vehicle = Physics.vehicle;
+    // calculate pitch (keep it within reasonable bounds)
+    var pitch = clampValue(Physics.vehicleEngine.getRpm() / 1000.0, 1.0, 10.0);
+
+    audio.channel.off.rate(pitch);
+    audio.channel.on.rate(pitch);
+}
+
+function checkSteering() {
+    if(Physics.vehicle.steering == SteeringMode.DIGITAL) {
+        Physics.vehicle.steeringFunc = steeringDigital;
+    } else {
+        Physics.vehicle.steeringFunc = steeringProgressive;
+    }
+}
+
+function checkCamera(dt) {
+
+    if(Physics.keysActions.KeyC.keyup) {
+        profile.currentCam = (profile.currentCam + 1) % 3;
+        var cdata = profile.cameras[profile.currentCam];
+        controls.distance = cdata[0];
+        controls.height = cdata[1];
+        controls.lookheight = cdata[2];
+
+        Physics.keysActions.KeyC.keyup = false;
+    }
+}
+
+// simstate.mode = SimulationMode.RESET
+function vehicleReset() {
+
+    oldTime = 0.0;
+    currentTime = 0.0;
+    // Stop the clock and statemanager
+    stateManager.ready = false;
+    Physics.chassisMesh.position.set(startData.pos.x, startData.pos.y, startData.pos.z);
+    Physics.chassisMesh.quaternion.set(startData.quat.x, startData.quat.y, startData.quat.z, startData.quat.w);
+    Physics.vehicle.chassisBody.position.set(startData.pos.x, startData.pos.y, startData.pos.z);
+    Physics.vehicle.chassisBody.quaternion.set(startData.quat.x, startData.quat.y, startData.quat.z, startData.quat.w);
+    Physics.vehicle.chassisBody.velocity = new CANNON.Vec3();
+    Physics.vehicle.chassisBody.angularVelocity = new CANNON.Vec3();
+
+    Physics.vehicleEngine.reset();
+}
+
+function steeringProgressive(dt) {
+
+    if(Physics.keysActions.ArrowLeft.keydown) {
+
+        if(Physics.vehicle.currSteerVal < profile.maxSteerVal) 
+            Physics.vehicle.currSteerVal += dt;
+    }
+    else {       
+        if(Physics.keysActions.ArrowRight.keydown) {
+
+            if(Physics.vehicle.currSteerVal > -profile.maxSteerVal)
+                Physics.vehicle.currSteerVal -= dt;
+        }
+        else {
+            if(Physics.vehicle.currSteerVal < -dt)
+                Physics.vehicle.currSteerVal += dt;
+            else {
+                if(Physics.vehicle.currSteerVal > dt)
+                    Physics.vehicle.currSteerVal -= dt;
+                else {
+                    Physics.vehicle.currSteerVal = 0.0;
+                }
+            }   
+        }
+    }
+}
+
+function steeringDigital(dt) {
+    
+    if(Physics.keysActions.ArrowLeft.keydown) {
+
+        Physics.vehicle.currSteerVal = profile.maxSteerVal;
+    }
+    else {       
+        if(Physics.keysActions.ArrowRight.keydown) {
+
+            Physics.vehicle.currSteerVal = -profile.maxSteerVal;
+        }
+        else {
+            Physics.vehicle.currSteerVal = 0.0;
+        }
+    }
+}
+
+function checkMovement( dt ) {
+
+    var vehicle = Physics.vehicle;
+    var speed = vehicle.currentVehicleSpeedKmHour;
+
+    if(Physics.vehicle.chassisBody.position.y < 0.0) simstate.mode = SimulationMode.RESET;
+
+    var accel = 0.0;
+    var brake = false;
+
+    if(Physics.keysActions.ArrowUp.keydown) {
+
+        Physics.vehicleEngine.throttleFunc(1.0);
+        audio.channel.off.volume(0.0);
+        audio.channel.on.volume(1.0);   
+    } else {
+
+        Physics.vehicleEngine.throttleFunc(0.0);
+        audio.channel.on.volume(0.0);        
+        audio.channel.off.volume(1.0);
+    }
+
+    if(Physics.keysActions.ArrowDown.keydown) {
+        Physics.vehicleEngine.brakeFunc(1.0);
+    } else {
+        Physics.vehicleEngine.brakeFunc(0.0);
+    }
+
+    Physics.vehicle.steeringFunc(dt);
+    
+    checkCamera(dt);
+    checkEngineAudio();
+    Physics.vehicle.currBrakeForce = (Physics.vehicleEngine.brake > 0.8)?profile.brakeForce:0.0;
+    if(vehilceBrakesMaterial) {
+        if(Physics.vehicleEngine.brake > 0.8) {
+            vehilceBrakesMaterial.uniforms.amount.value = 0.8;
+        } else { 
+            vehilceBrakesMaterial.uniforms.amount.value = 0.2;
+        }
+    }
+
+    // Apply forces to the wheel axles etc
+    vehicle.applyEngineForce(-Physics.vehicleEngine.acceleratingForce, 0);
+    vehicle.applyEngineForce(-Physics.vehicleEngine.acceleratingForce, 1);
+    vehicle.applyEngineForce(-Physics.vehicleEngine.acceleratingForce, 2);
+    vehicle.applyEngineForce(-Physics.vehicleEngine.acceleratingForce, 3);
+    
+    vehicle.setBrake(Physics.vehicle.currBrakeForce, 0);
+    vehicle.setBrake(Physics.vehicle.currBrakeForce, 1);
+    vehicle.setBrake(Physics.vehicle.currBrakeForce, 2);
+    vehicle.setBrake(Physics.vehicle.currBrakeForce, 3);
+        
+    vehicle.setSteeringValue(Physics.vehicle.currSteerVal, 0);
+    vehicle.setSteeringValue(Physics.vehicle.currSteerVal, 1);
+
+    Physics.prevpressed = Physics.pressed;
+}
+
+function vehicleUpdater( dt ) {
+
+    oldTime = currentTime;
+    currentTime += dt ;
+    elapsedTime = dt;
+
+    checkMovement( dt );
+    Physics.vehicleEngine.update();
+    Physics.update(dt);
+    // Get buffer lookup!
+    if(Physics.chassisMesh) 
+        heightLookup(mappedChannels[0], Physics.chassisMesh);	
+
+    //Physics.cannonDebugRenderer.update();
+    Physics.world.step(1.0/30.0, dt, 4);
+}
+
+// Scenery colliders.. hack for time being.
+var colliders;
+
+$(document).ready(function() {
+
+    console.log("Starting CannonJS Vehicle physics.");
+    var monacocollider = { 
+        parentType: "models",
+        format: "glb",
+        url: "/assets/environments/monaco-gp/monaco-colliders.glb"
+    };
+
+    loadScene( monacocollider, UID(), function(newobj) {
+        
+        console.log("Collider loaded.");
+        colliders = newobj;
+        initPhysics();
+        
+        // After the physics is ready, add the world colliders from the object
+        for(var i=0; i<colliders.children.length; i++) {
+            var body = Physics.buildBodyFromThreeBox(colliders.children[i]);
+            Physics.world.add(body);
+        }
+
+        // Find vehicle entity to attach physics to!
+        currentTime = appClock.getElapsedTime();
+
+        simstate.mode = SimulationMode.NONE;
+        simstate.funcinit = vehicleInit;
+        simstate.funcupdate = vehicleUpdater;
+        simstate.funcreset = vehicleReset;
+        simstate.funckill = close;
+
+    });
+});
+

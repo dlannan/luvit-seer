@@ -1,0 +1,56 @@
+<div class="col-sm-12 admin-banner">
+    <div class="container">
+        <nav class="navbar">
+            <div>
+                <div class="navbar-header">
+                    <a class="navbar-brand">Pages</a>
+                </div>
+                <ul class="nav navbar-nav navbar-right">
+                    <li><a id="pagenew" class="btn btn-primary btn-fill" onclick="">Add Page</a></li>
+                </ul>
+            </div>
+        </nav>
+    </div>
+</div>
+<div class="col-md-12 admin-panel">
+    <div class="container">
+        <div class="admin-table">
+            <div id="table-toolbar" class="btn-group">
+                <button type="button" class="btn btn-default">
+                    <span class="icon-bin"></span>
+                </button>
+            </div>
+            <table data-toggle="table" data-show-columns="true" data-search="true"
+       data-toolbar="#table-toolbar">
+                <thead>
+                    <tr>
+                        <th data-field="state" data-checkbox="true"></th>
+                        <th data-field="blogpost-name" data-sortable="true">Page name</th>
+                        <th data-field="blogpost-publishdate" data-sortable="true">Publish Date</th>
+                        <th data-field="blogpost-published">Published</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% local count = 0 %}
+                    {% for k,v in pairs(allpages) do %}
+                    {%     count = count + 1 %}
+                    <tr>
+                        <td></td>
+                        <td>
+                            <span class="edit-page">{* _G.HTMLPAGES.getpagedata(k).name *}</span>
+                        </td>
+                        <td>date here</td>
+                        <td>
+                            <label class="switch" for="published">
+                                <input name="published" type="checkbox" />
+                                <div class="checkboxslider"></div>
+                            </label>
+                        </td>
+                    </tr>
+                    {% end %} 
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+

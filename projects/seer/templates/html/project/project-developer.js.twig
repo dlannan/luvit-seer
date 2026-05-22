@@ -1,0 +1,140 @@
+<script>
+
+{% include 'html/developer/samples.html.twig' %}
+
+function addSensorList( datalist ) {
+
+  var sensorlist = $('#sensor-select-list');
+  sensorlist.html('');
+
+  for (let key of Object.keys(datalist)) {  
+    let value = datalist[key];   
+    var texttype = key.replace(/[0-9]/g, '');
+    var textobject = "";
+    if(texttype in tableObjectTextFunc) {
+      textobject = tableObjectTextFunc[texttype]( value );
+    }
+
+    var opttext = "";
+    var objurl = "";
+
+    var ico = "<i class='fe fe-cross'></i>&nbsp&nbsp";
+    if(texttype != 'world') {
+      objurl = "http://localhost/sim/camview?projectid=" + sdata.projectid +"&sceneid=" + sdata.sceneid + "&object=" + value.uid + "&viewmode=RGB";
+      if(texttype == 'actors') ico = "<i class='fe fe-eye'></i>&nbsp&nbsp";
+      if(texttype == 'models') ico = "<i class='fe fe-eye'></i>&nbsp&nbsp";
+      if(texttype == 'objects') ico = "<i class='fe fe-eye'></i>&nbsp&nbsp";
+      if(texttype == 'sensors') ico = "<i class='fe fe-eye'></i>&nbsp&nbsp";
+          opttext += ico +  value.name;
+    } else {
+          opttext += ico +  value.name;
+    }
+
+    sensorlist.append($('<option/>', { 
+        value: objurl,
+        html : opttext
+    }));
+  }
+  return html;
+}
+
+function getData( url, func ) {
+  var client = new XMLHttpRequest();
+  client.onload = function( data ) {
+    func(data.target.response);
+  }
+  client.open("GET", url);
+  client.send();  
+}
+
+function launchOutput( url ) {
+  getData(url, function(data) {
+    loadSensorView(data);
+  });
+}
+
+$(document).ready(function() {
+
+  var dkeys = Object.keys(developer_samples);
+  for( var i=0; i<dkeys.length; i++) {
+    var samplename = dkeys[i];
+    var html = "<option value='"+samplename+"'>"+samplename+"</option>";
+    $('#select-developer-sample').append(html);
+    $('#select-developer-sample').on('change', function (e) {
+      var optionSelected = $("option:selected", this);
+      var valueSelected = this.value;
+      
+      if(developer_samples[valueSelected].html) {
+        getData(developer_samples[valueSelected].html, function(data) {
+          htmleditor.setValue( data + "\n" );
+        });
+      }
+      if(developer_samples[valueSelected].js) {
+        getData(developer_samples[valueSelected].js, function(data) {
+          jseditor.setValue( data + "\n" );
+        });
+      }
+    });
+  }
+  
+  $('#select-developer').on('change', function (e) {
+    
+    var optionSelected = $("option:selected", this);
+    var valueSelected = this.value;
+
+    var html = "";
+    var datalist = scenedata[valueSelected];
+
+    sdata = scenedata[valueSelected];
+
+    sdata = sdata.replace(/'/g, '"');
+    sdata = JSON.parse(sdata);
+
+    var datalist = sdata.data;
+    sceneidSelected = datalist.sceneid;
+
+    {# if( datalist.models.length > 0 ) {
+      $('#select-module').val(datalist.models);
+    } else {
+      $('#select-module').val(0);
+    } #}
+
+    addSensorList( datalist );
+    $("#sensor-select-list").on('change', function(e) {
+
+      var url = this.value;
+      {# console.log(url); #}
+      if(url) launchOutput(url);
+    });
+  });
+
+  $('#select-developer').on('change', function (e) {
+    var optionSelected = $("option:selected", this);
+    var valueSelected = this.value;
+
+    if(valueSelected === '0') { valueSelected = ""; }
+
+    {# var url = "{{ page.url }}";
+    var params = "{{ uri.query }}&sceneid=" + sceneidSelected + "&models=" + valueSelected;
+
+    var http = new XMLHttpRequest();
+    http.open("POST", url, true);
+
+    // Write this to the DB if possible. Ideally a simple submit would be great!
+    http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    http.setRequestHeader("Content-length", params.length);
+    http.setRequestHeader("Connection", "close");
+
+    http.onreadystatechange = function() {//Call a function when the state changes.
+      if(http.readyState == 4 && http.status == 200) {
+        //$('#error_output').html(http.responseText);
+        console.log(http.responseText);
+      }
+    }
+    http.send(params); #}
+
+  });
+
+});
+</script>
+

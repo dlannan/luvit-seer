@@ -1,0 +1,48 @@
+{% set scenequery = ("[sql-table json]select * from scenes where projectid = '" ~ projectid ) ~ "' [/sql-table]" %}
+{% set scenedb = ((scenequery|shortcodes) | json_decode) %}
+
+<div class="tab-pane" id="pills-scene-data" role="tabpanel" aria-labelledby="pills-scene-data-tab">
+    <div class="col-12">
+
+		<div class="row card-header">
+      <div class="form-group">
+        <label class="form-label">Select Scene</label>
+        <select name="scene-select" id="select-scene" class="form-control custom-select">
+{% for key, scene in scenedb %}
+{% if scene %}
+          <option value="{{ key }}">{{ scene.name }}</option>
+{% endif %}
+{% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="table-responsive"  style="min-height: 18rem;">
+        <table class="table table-hover table-outline table-vcenter text-nowrap card-table">
+	<col style="width:20%">
+	<col style="width:50%">
+	<col style="width:10%">
+	<col style="width:10%">
+	<col style="width:10%">
+            <thead>
+            <tr>
+              <th>Data Name</th>
+              <th>Value</th>
+              <th>Type</th>
+              <th>Controller (IO)</th>
+              <th>Source (O)</th>
+              <th class="text-center"><i class="icon-settings"></i></th>
+            </tr>
+          </thead>
+          <tbody id="scene-data-table">
+          </tbody>
+        </table>
+      </div>      
+    </div>
+
+    <div id="error_output">
+    </div>
+  </div>
+</div>
+

@@ -1,0 +1,9 @@
+{(templates/modules/comments.html, {
+id=0,
+inputtext=[[
+<div class="container">
+    <h1 class="text-center">Comments</h1>
+    <div id="comments-container"></div>
+</div>
+]]
+})}

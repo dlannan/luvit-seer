@@ -1,0 +1,87 @@
+
+function checkEventLinking( ) {
+
+    var ok = (mode.state === EditorMode.EVENTLINK);
+    if(!ok) return;
+
+    var intersections = checkHit();
+
+    if ( intersections.length > 0 ) {
+
+        var intersected = closestHit( mode.object, intersections );
+        if(intersected != undefined) {
+            selectCursor.position.copy(intersected.point );
+
+            var n = intersected.normal;
+            var d = camera.position.distanceTo( intersected.point );
+            
+            selectCursor.scale.set( d, d, d );
+            //selectCursor.lookAt( intersected.point + n );
+
+            // If on an object set the objects color
+            if(intersected.object && intersected.object.userData && intersected.object.userData.parentType == "events") {
+
+                var pt = intersected.point;
+                // The target is always a mesh, need parent
+                linkEventState.target = intersected.object.parent;
+
+                //SceneGraph.updateEntityPosition( mode.object.userData.uid, pt.x, pt.y, pt.z );        
+                //mode.object.position.copy( intersected.point );
+                //mode.object.lookAt( intersected.point + n );
+            }
+        }
+    }
+}
+
+var linkEventState = {
+
+    name: "linkevent",
+    value: 0,              // Set this value to react to external state control
+    parent: undefined,      // If this is set, exit ensures the parent state is reactivated
+    links: [],
+    target: undefined,
+
+    onenter: function(init) {
+
+        selectCursor.material.color.setHex(0x0000ff);
+        selectCursor.visible = true;
+        disableControls();
+        hidePopups();
+
+        //console.log("Initializing Event Linking..");
+    },
+
+    onupdate: function(dt) {
+
+        // Dont do much - its an init state, nothing to see here.
+        checkEventLinking();
+    },
+
+    onmouse: function( event ) {
+
+        if(event.type === "mouseup") {
+
+            if(mode.state === EditorMode.EVENTLINK) {
+                
+                if(this.target != undefined) {
+                    // If already in the link list, then clear it 
+                    var idx = mode.object.userData.linked.indexOf(this.target.userData.uid);
+                    if(idx != -1) {
+                        mode.object.userData.linked.splice(idx, 1);
+                    } else {
+                        // Add object to the links list                        
+                        mode.object.userData.linked.push(this.target.userData.uid);
+                    }
+                }
+
+                FinishPlacement();
+                ClearLinkedEvents();
+                mode.state = EditorMode.NONE;
+                mode.popup = PopupMode.MAIN;
+            }
+        }
+    },
+
+    onexit: function() {
+    }
+};

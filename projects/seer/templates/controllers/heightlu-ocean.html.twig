@@ -1,0 +1,44 @@
+
+function heightluOcean() {
+    // Used for heightmap lookup and buoyancy (can be used for terrain)
+    // NOTE: To be extracted into entity management and vehicles.
+    if(depthCamera && ocean) {
+        // Render onto our off-screen texture
+        var obj = SceneGraph.findNodeByUid(selectEditorObj);
+        var isModel = false;
+        if(obj && obj.userData.parentType === "models") isModel = true;
+        
+        if(isModel) {
+            if(!('origPosition' in obj)) { obj.origPosition = obj.position.y; }
+            depthCamera.position.set(obj.position.x, obj.position.y + 5, obj.position.z);
+            depthCamera.lookAt( obj.position.x, obj.position.y, obj.position.z );
+            depthCamera.rotation.z = obj.rotation.y;
+            models.visible = false;
+            editor.visible = false;
+            ocean.material.uniforms.entity.value.copy(obj.position);
+            ocean.material.uniforms.entity.value.y = obj.rotation.y;
+            ocean.material.uniforms.entityCheck.value = 3.0;
+            renderer.setRenderTarget(depthTexture);
+            renderer.render(scene, depthCamera);
+            models.visible = true;
+            editor.visible = true;
+            ocean.material.uniforms.entityCheck.value = 0.0;
+            //depthMat.map = depthTexture.texture;
+
+            var buffer = new Uint8Array( 128 * 128 * 4 );
+            // Now use the depth texture on entity control
+            renderer.readRenderTargetPixels( depthTexture, 0, 0, 128, 128, buffer );
+            var p1 = buffer[(32 * 128 + 32) * 4] * 0.00390625 - 0.5;
+            var p2 = buffer[(32 * 128 + 96) * 4] * 0.00390625 - 0.5;
+            var p3 = buffer[(96 * 128 + 64) * 4] * 0.00390625 - 0.5;
+
+            // Sample three positions for rot X, Z and pos Y
+            obj.position.y = lerp(obj.position.y, obj.origPosition + (p1 + p2 + p3) / 3.0, 0.1);
+            var xrot = Math.atan2((p1 + p2) * 0.5 - p3, 4.0);
+            var zrot = Math.atan2((p1 - p2), 4.0);
+            obj.rotation.set(lerp(obj.rotation.x, xrot, .2), 
+                            obj.rotation.y, 
+                            lerp(obj.rotation.z, zrot, .2));
+        }
+    }
+}

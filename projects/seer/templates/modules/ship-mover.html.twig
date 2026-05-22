@@ -1,0 +1,21 @@
+{% include "html/developer/sample-shipcontrol.js"  %}
+
+function reset() {
+    startships();
+}
+
+function close() {
+
+}
+
+$(document).ready(function() {
+
+    console.log("Testing Ship Mover Demo.");
+    currentTime = appClock.getElapsedTime();
+
+    simstate.mode = SimulationMode.NONE;
+    simstate.funcinit = startships;
+    simstate.funcupdate = moveships;
+    simstate.funcreset = reset;
+    simstate.funckill = close;
+});

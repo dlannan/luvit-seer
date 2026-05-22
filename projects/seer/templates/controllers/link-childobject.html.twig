@@ -1,0 +1,170 @@
+// -----------------------------------------------------------------------------------------------------------------------------------------
+// Entity Controllers - these manage and control entities of different types.
+
+var controllers = {
+
+	vehicles: {},
+	pedestrians: {},
+	vessels: {},
+	aircraft: {},
+	links: {}
+	// All functions are defined in the threejs-controllers.html.twig file
+};
+
+// Controllers apply a function to an object or objects 
+controllers.links['LinkChild'] = {};
+
+// A global reverse lookup for links - objectid list of linked (child) objects
+controllers.linkslu = {};
+
+// ----------------------------------------------------------------------------
+
+var cLinkChild = function( id, entityid, parentid ) {
+
+    // if id is not set or 0 then make one 
+    if(!id || (id == 0))
+        this.id = UID();
+    else 
+        this.id = id;
+
+    var entobject = SceneGraph.findByUid(entityid);
+    var parent = SceneGraph.findByUid(parentid);
+
+    if(entobject == undefined) {
+        console.log("[LINK ERROR] Invalid Child Entity:", entityid);
+        return;
+    }
+
+    if(parent == undefined) {
+        console.log("[LINK ERROR] Invalid Parent Entity:", parentid);
+        return;
+    }
+
+    // Store the parent because we need it
+    this.parentid = parentid;
+    // Store the object so we can update it
+    this.objectid = entityid;
+
+    // Make a local copy of the original object mover - so it can be restored.
+    this.originalPos = JSON.parse(JSON.stringify(entobject.mover.position()));
+    this.originalFwd = JSON.parse(JSON.stringify(entobject.mover.forward()));
+
+    // If this entity has a handler, save it.
+    this.originalUpdate = entobject.handlerUpdate;
+    this.originalRender = entobject.handlerRender;
+    //console.log(entobject);
+
+    // Local matrix for the object relationship with the parent
+    LocalSpace(this);
+
+    // remove the controller (delink the child from the parent)
+    //     When removing there is an option to "restore original position"
+    this.remove = function(pid, restoreOriginal = false) {
+
+        var fwd = this.originalFwd;
+        var pos = this.originalPos;
+
+        if(restoreOriginal == true) {
+            SceneGraph.updateEntityForward( this.objectid, fwd.x, fwd.y, fwd.z );
+            SceneGraph.updateEntityPosition( this.objectid, pos.x, pos.y, pos.z );
+        }
+
+        SceneGraph.setHandlerUpdate( this.objectid, this.originalUpdate );
+        SceneGraph.setHandlerRender( this.objectid, this.originalRender );
+        
+        delete controllers.links['LinkChild'][pid];
+    };
+
+    // update the local position - use the OS-Vec3
+    this.changePosition = function(vec) {
+        this.setPosition( vec );
+    };
+
+    // update the direction of object (for orbits etc)
+    this.changeForward = function(vec) {
+        this.setForward( vec )
+    };
+
+    // During controller update, apply local positioning based on the
+    //   parent onto the object
+    this.update = function( ent, currentTime, elapsedTime ) {
+        
+        var ctrlr = controllers.links['LinkChild'][ent.node.userData.uid];
+        if(ctrlr == undefined) return;
+
+        // In this case the update link is being removed
+        if(ctrlr.parentid == 0) return;
+
+        var parent = SceneGraph.findByUid(ctrlr.parentid);
+        var object = SceneGraph.findByUid(ctrlr.objectid);
+
+        var newfwd = parent.mover.globalizeDirection(ctrlr.forward());
+        var newpos = parent.mover.globalizePosition(ctrlr.position());
+        
+        ent.mover.setForward( newfwd );
+        ent.mover.setPosition( newpos );
+
+        // Copy the mover position and rotation so that its "kind of" double buffered
+        //    ie: any mover changes after this wont impact the render.            
+        ent.renderdata.pos = newpos;
+        ent.renderdata.rot = newfwd;  
+    };
+
+    var localfwd = parent.mover.localizeDirection(entobject.mover.forward());
+    var localpos = parent.mover.localizePosition(entobject.mover.position());
+    
+    // Localise based on parent 
+    this.setForward( localfwd );
+    this.setPosition( localpos );
+
+    // Assign this controller to the child object 
+    entobject.handlerUpdate = this.update;
+    entobject.handlerRender = function() {};
+
+    // Deferring Render and Update means the child is always calculated after its parent
+    SceneGraph.setDeferredRender(entityid, cRenderDefaultLinear);
+};
+
+
+// ----------------------------------------------------------------------------
+// Make it easier to make links
+
+function newChildLink( id, entobj, parobj ) {
+
+    var newlink = new cLinkChild( id, entobj, parobj );
+    controllers.links['LinkChild'][id] = newlink;
+    controllers.linkslu[id] = newlink;
+}
+
+function deleteChildLink( id ) {
+
+    var link = controllers.links['LinkChild'][id];
+    link.remove(id);
+    delete controllers.linkslu[id];
+}
+
+// ----------------------------------------------------------------------------
+
+// Find any links in the lookup and then update them
+function renewLinks( id ) {
+
+    var ctrlr = controllers.linkslu[id];
+    if(ctrlr == undefined) return;
+
+    var entobject = SceneGraph.findByUid(ctrlr.objectid);
+    var parent = SceneGraph.findByUid(ctrlr.parentid);
+
+    var localfwd = parent.mover.localizeDirection(entobject.mover.forward());
+    var localpos = parent.mover.localizePosition(entobject.mover.position());
+
+    // Localise based on parent 
+    ctrlr.setForward( localfwd );
+    ctrlr.setPosition( localpos );
+
+    SceneGraph.forceUpdate( id );        
+    SceneGraph.forceRender( id );        
+}
+
+
+
+// ----------------------------------------------------------------------------

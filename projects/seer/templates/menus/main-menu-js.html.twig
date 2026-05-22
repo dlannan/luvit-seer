@@ -1,0 +1,227 @@
+function showNotification( err, text ){
+
+    if(err.toLowerCase() == "error") {
+        $(".notify-topbar").css("background", "rgb(255, 0, 0)");
+    }
+    else if(err.toLowerCase() == "ok") {
+        $(".notify-topbar").css("background", "rgb(0, 0, 255)");
+    }
+    else {
+        $(".notify-topbar").css("background", "rgb(255, 255, 0)");
+        err = "Unknown";
+    }
+
+    $(".notify-topbar").text("[" + err + "] " + text);
+    $(".notify-topbar").slideToggle();     
+}
+
+var perfLevels = [
+    'fa fa-thermometer-empty',
+    'fa fa-thermometer-quarter',
+    'fa fa-thermometer-half',
+    'fa fa-thermometer-three-quarters',
+    'fa fa-thermometer-full'
+];
+
+function showPerformance() {
+
+    var fps = 100;
+    if(SceneGraph.elapsedRTime > 0.0) {
+        fps = Math.floor(1.0 / SceneGraph.elapsedRTime);
+    }
+    //console.log(fps );
+    html = perfLevels[4];
+    if(SceneGraph.elapsedRTime > 0.016) {
+        if(SceneGraph.elapsedRTime < 0.033 ) {
+            html = perfLevels[3];
+        } else if( SceneGraph.elapsedRTime < 0.050) {
+            html = perfLevels[2];
+        } else if( SceneGraph.elapsedRTime < 0.066) {
+            html = perfLevels[1];
+        } else {
+            html = perfLevels[0];
+        }
+    }
+
+    $("#menu-main-perf").attr( "class", html );
+    $("#menu-main-fps").text( fps );
+}
+
+$(document).ready(function() {
+
+    $(".notify-topbar").on('click',function(){
+       $(".notify-topbar").slideToggle(); 
+    });
+
+    $("#project-update").validate({
+
+        submitHandler: function(form) {
+            $(form).ajaxSubmit({
+                //To clear form after ajax submitting
+                clearForm: true,
+                success: function(){
+                    showNotification("Ok", "Scene saved.");
+                }
+            });
+            return false;
+        },
+
+        invalidHandler: function(form) {
+            showNotification("Error", "Saving scene.");
+        }
+    });    
+
+    $("#project-issue").validate({
+
+        submitHandler: function(form) {
+            $(form).ajaxSubmit({
+                //To clear form after ajax submitting
+                clearForm: true,
+                success: function(){
+                    showNotification("Ok", "Created issue.");
+                }
+            });
+            return false;
+        },
+
+        invalidHandler: function(form) {
+            showNotification("Error", "Creating issue.");
+        }
+    });        
+});
+
+
+// Menu Main
+function initMainMenus() {
+
+    $("#menu-main-openscene").unbind('mouseup').mouseup( function (event) {
+
+        event.stopPropagation();
+        var title = $("#scene-title").find( "input" ).val();
+        window.open("{{ base_url }}/?" + serialize({ scene: title }),"_self");
+    });
+
+    $("#menu-main-snapshot").unbind('mouseup').mouseup( function (event) {
+
+        event.stopPropagation();
+        takeSnapshot( function(id) {
+            $('#project-update input[name="data[icon]"]').val(id);
+        });
+    });    
+
+    $("#menu-main-savescene").unbind('mouseup').mouseup( function (event) {
+
+        event.stopPropagation();
+        $(".loading").show();
+
+        // Determine update or insert
+        var sceneid = {{ sceneid|int }};
+
+        {% set query = ("[sql-table json]select * from scenes where sceneid = '" ~ sceneid ) ~ "' LIMIT 1 [/sql-table]" %}
+        {% set scenedb = ((query|shortcodes) | json_decode)[0] %}
+
+        {% if scenedb %}
+            $('#project-update input[name="data[where]"]').val(' sceneid = "{{ scenedb.sceneid }}"');
+
+            var sceneJson = getSceneData( {{ sceneid|int }}, {{ projectid|int }} );      
+            var jsonStr = JSON.stringify(sceneJson);
+            
+            //console.log("Form submit: " + form);
+            // Have to convert " to ' specially for sqlite storage!
+            jsonStr = jsonStr.replace(/"/g, '\'');
+            $('#project-update input[name="data[data]"]' ).val(jsonStr);
+            $('#project-update').attr("action", "/scenarist?projectid={{ projectid }}&sceneid={{ sceneid }}");
+
+            $('#project-update').submit();
+        {% endif %}
+        $(".loading").hide();        
+    });
+
+    $("#menu-main-exit").unbind('mouseup').mouseup( function (event) {
+        event.stopPropagation(); 
+        SaveCameraPosition( function() {    
+	    window.location.href = "/project?projectid={{ projectid }}";
+	});
+    });
+
+    $("#menu-main-icons").unbind('mouseup').mouseup( function (event) {
+        event.stopPropagation(); 
+        if( $("#menu-main-icons").hasClass('icons-visible')) {
+            $("#menu-main-icons i").attr("class", "fa fa-toggle-off");
+            $('#scene-icons').html( '' );
+            objiconcache = {};
+            delete SceneGraph.postRenderFuncs.iconsRender;
+        } else {
+            $("#menu-main-icons i").attr("class", "fa fa-toggle-on");
+            SceneGraph.postRenderFuncs["iconsRender"] = checkObjectIcons;
+        }
+        $("#menu-main-icons").toggleClass('icons-visible');
+    });
+
+// Simulator Main Menu
+
+    $("#menu-simulator-start").unbind('mouseup').mouseup( function (event) {
+        event.stopPropagation();
+        
+        simstate.mode = SimulationMode.PLAY;
+        startSim( {{ sceneid }}, function(data) {
+            simpleConnect();
+        });
+    });
+
+    $("#menu-simulator-pause").unbind('mouseup').mouseup( function (event) {
+        event.stopPropagation();
+        
+        simstate.mode = SimulationMode.PAUSED;
+        stopSim({{ sceneid }});
+    });
+
+    $("#menu-simulator-reset").unbind('mouseup').mouseup( function (event) {
+        event.stopPropagation();
+
+        simstate.mode = SimulationMode.RESET;
+        resetSim({{ sceneid }});
+    });
+
+    $("#menu-simulator-kill").unbind('mouseup').mouseup( function (event) {
+        event.stopPropagation();
+
+        simstate.mode = SimulationMode.NONE;
+        killSim({{ sceneid }});
+    });
+
+
+// Misc handlers - should move builder out of here.
+    $('#menu-spline-new').unbind('mouseup').mouseup( function (e) {
+        e.stopPropagation();
+        newNodeSelect();        
+    });
+
+    $('#menu-sensor-channels').unbind('mouseup').mouseup( function (e) {
+        e.stopPropagation();
+        toggleChannelView();
+    });
+
+    $("#menu-event-new").unbind('mouseup').mouseup( function (event) {
+        event.stopPropagation();
+        console.log("Event New");
+        
+        newEventSelect();
+    });  
+
+    $("#menu-builder-export").unbind('mouseup').mouseup( function (event) {
+        event.stopPropagation();
+    });
+
+
+    $("#menu-builder-car").unbind('mouseup').mouseup( function (event) {
+        event.stopPropagation();
+        if(mode.camera.control === ControlMode.FPS) {
+            mode.camera.control = ControlMode.TARGET;
+        } else {
+            mode.camera.control = ControlMode.FPS;
+        }
+        disableControls();
+        enableControls();
+    });
+}

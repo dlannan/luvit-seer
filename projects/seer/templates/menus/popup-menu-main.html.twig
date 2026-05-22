@@ -1,0 +1,65 @@
+<style>
+.carousel-control {
+  padding-top:10%;
+  width:5%;
+}
+</style>
+
+<div class="main-panel">
+	<div id="select-wrap">
+
+		<div class="row">
+		<div id="selection-more" class="selection-more" data-more="0">
+		<div class="nav-circlepop">
+			<a class="carousel-control-more" role="button">
+				<span class="icon-wrap"></span>
+			</a>		
+		</div>
+		</div>
+
+		<div id="selection-filter" class="selection-filter col-3 center">
+		<form class="navbar-form navbar-left">
+			<div class="form-group">
+				<input type="text" class="form-control" placeholder="Search..." value="">
+			</div>
+		</form>
+		</div>
+		</div>
+
+		<div id="selection-carousel" class="carousel slide">
+
+            <div id="selection-images" class="carousel-inner">
+			</div>
+
+			<div class="nav-circlepop">
+			<a class="carousel-control-prev" href="#selection-carousel" role="button" data-slide="prev">
+				<span class="icon-wrap"></span>
+			</a>
+			<a class="carousel-control-next" href="#selection-carousel" role="button" data-slide="next">
+				<span class="icon-wrap"></span>
+			</a>		
+			</div>
+		</div>
+
+	</div>
+	<div id="select-obj" class="select-popup">
+		<nav class="radial select-obj-icon">
+		<input type="checkbox" id="menu-obj">
+		<div id="btn-move-object" class="btn fa fa-arrows-alt" data-toggle="tooltip" title="Move Object">Move</div>
+		<div id="btn-rotate-object" class="btn fa fa-undo" data-toggle="tooltip" title="Rotate Object">Rotate</div>
+		<div id="btn-channel-add" class="btn fa fa-tv" data-toggle="tooltip" title="New Sensor">Sensor</div>
+		<div id="btn-test-view" class="btn fa fa-eye" data-toggle="tooltip" title="Test Render View">View</div>
+		<div id="btn-delete-object" class="btn fa fa-trash-o" data-toggle="tooltip" title="Delete Object">Delete</div>
+		<label for="menu-obj" class='fa fa-bars'>Menu</label>
+		</nav>
+
+		<div id="select-obj-line"></div>
+	</div>
+
+{% include 'menus/popup-menu-icon.html.twig' %}
+{% include 'menus/popup-menu-sensor.html.twig' %}
+{% include 'menus/popup-menu-event.html.twig' %}
+{% include 'menus/popup-menu-spline.html.twig' %}
+
+</div>
+		

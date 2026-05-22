@@ -1,0 +1,350 @@
+
+function hidePopups() {
+    $("#select-sensor").hide();
+    $("#select-obj").hide();
+    $("#select-spline").hide();
+    $("#select-event").hide();
+}
+
+function showPopupSensor() {
+    $("#select-obj").hide();
+    $("#select-spline").hide();
+    $("#select-sensor").show();
+    $("#select-event").hide();
+}
+
+function showPopupEvent() {
+    $("#select-obj").hide();
+    $("#select-spline").hide();
+    $("#select-sensor").hide();
+    $("#select-event").show();
+}
+
+function showPopupObject() {
+    $("#select-sensor").hide();
+    $("#select-spline").hide();
+    $("#select-obj").show();
+    $("#select-event").hide();
+}
+
+function showPopupNode() {
+    $("#select-sensor").hide();
+    $("#select-obj").hide();
+    $("#select-spline").show();
+    $("#select-event").hide();
+}
+
+// This may need to go to globals.
+// TODO: Remove it entirely (and what it does).
+var flipper = 0;
+
+// Popup button handlers   
+function initPopupMenus() {
+    // Control what popup is allowed by setting state
+    mode.watch("popup", function(id, oldval, newval) {
+
+        var left = 0.0;
+        var top = 0.0;
+        if( oldval != PopupMode.NONE ) {
+            left = $(".select-popup").css('left');
+            top = $(".select-popup").css('top');
+            //console.log("Old Popup:", left, top);
+        }
+
+        if (newval == PopupMode.NONE) {
+            hidePopups();
+        } else if( newval == PopupMode.MAIN ) {
+            showPopupObject();
+            $("#select-obj").css('left', left);
+            $("#select-obj").css('top', top);
+        } else if( newval == PopupMode.SPLINE ) {
+            showPopupNode();
+            $("#select-spline").css('left', left);
+            $("#select-spline").css('top', top);
+        } else if (newval == PopupMode.SENSOR ) {
+            showPopupSensor();
+            $("#select-sensor").css('left', left);
+            $("#select-sensor").css('top', top);
+            //console.log("New Popup:", left, top);
+        } else if (newval == PopupMode.EVENT ) {
+            showPopupEvent();
+            $("#select-event").css('left', left);
+            $("#select-event").css('top', top);
+            //console.log("New Popup:", left, top);
+        }        
+        return newval;  
+    });
+
+
+    // Init the object control system
+    $("#btn-move-spline").unbind('mouseup').mouseup( function (event) {
+        event.stopPropagation();
+        selectCursor.visible = true;
+
+        // Change to move mode!
+        // clear other Selections first
+        clearSelection();
+        var obj = SceneGraph.findNodeByUid(selectEditorObj, true);
+        selection.add( obj );
+
+        mode.object = obj;
+        mode.state = EditorMode.NODEPLACE;
+        hidePopups();
+    });
+
+    $("#btn-rotate-spline").unbind('mouseup').mouseup( function (event) {
+        event.stopPropagation();
+        selectCursor.visible = true;
+        
+        // Change to rotate mode!
+        // clear other Selections first
+        clearSelection();
+        var obj = SceneGraph.findNodeByUid(selectEditorObj, true);
+        selection.add( obj );
+
+        mode.object = obj;
+        mode.state = EditorMode.SPLINEROTATE;
+        hidePopups();
+    });
+
+    // Init the object control system
+    $("#btn-move-object").unbind('mouseup').mouseup( function (event) {
+        event.stopPropagation();
+        selectCursor.visible = true;
+
+        // Change to move mode!
+        // clear other Selections first
+        clearSelection();
+        var obj = SceneGraph.findByUid( selectEditorObj );
+        selection.add( obj.node );
+
+        mode.object = obj.node;
+        mode.state = EditorMode.PLACE;
+        hidePopups();
+    });
+
+    $("#btn-rotate-object").unbind('mouseup').mouseup( function (event) {
+        event.stopPropagation();
+        selectCursor.visible = true;
+        
+        // Change to rotate mode!
+        // clear other Selections first
+        clearSelection();
+        var obj = SceneGraph.findByUid( selectEditorObj );
+        selection.add( obj.node );
+
+        mode.object = obj.node;
+        mode.state = EditorMode.ROTATE;
+        hidePopups();
+    });
+
+    function deleteSelectedObject() {
+        selectCursor.visible = true;
+
+        // clear other Selections first
+        clearSelection();
+        SceneGraph.deleteEntity(selectEditorObj);
+
+        hidePopups();
+        selectCursor.visible = false;
+    }
+
+    // Init the object control system
+    $("#btn-delete-object").unbind('mouseup').mouseup( function (event) {
+        event.stopPropagation();
+        deleteSelectedObject();
+    });
+
+    $("#menu-event-new").unbind('mouseup').mouseup( function (event) {
+        event.stopPropagation();
+        console.log("Event New");
+        
+        newEventSelect();
+        mode.popup = PopupMode.EVENT;       
+    });    
+
+    $("#menu-event-show").unbind('mouseup').mouseup( function (event) {
+        event.stopPropagation();
+        console.log("Event Show/Hide");
+        
+        events.visible = !events.visible;
+        mode.popup = PopupMode.EVENT;       
+    });    
+
+    // Init the object control system
+    $("#btn-move-event").unbind('mouseup').mouseup( function (event) {
+        event.stopPropagation();
+        selectCursor.visible = true;
+
+        // Change to move mode!
+        // clear other Selections first
+        clearSelection();
+        var obj = SceneGraph.findNodeByUid(selectEditorObj, true);
+        selection.add( obj );
+
+        mode.object = obj;
+        mode.state = EditorMode.EVENTPLACE;
+        hidePopups();
+    });
+
+    // Init the object control system
+    $("#btn-scale-event").unbind('mouseup').mouseup( function (event) {
+        event.stopPropagation();
+        selectCursor.visible = true;
+
+        // Change to move mode!
+        // clear other Selections first
+        clearSelection();
+        var obj = SceneGraph.findNodeByUid(selectEditorObj, true);
+        selection.add( obj );
+
+        mode.object = obj;
+        mode.state = EditorMode.EVENTSCALE;
+        hidePopups();
+    });    
+
+    $("#btn-link-event").unbind('mouseup').mouseup( function (event) {
+        event.stopPropagation();
+        console.log("Event Link");
+
+        // Change to move mode!
+        // clear other Selections first
+        clearSelection();
+        var obj = SceneGraph.findNodeByUid(selectEditorObj, true);
+        selection.add( obj );
+        
+        mode.object = obj;
+        mode.popup = PopupMode.EVENT;       
+        mode.state = EditorMode.EVENTLINK;
+        hidePopups();
+    });  
+
+
+    $("#menu-sensor-new").unbind('mouseup').mouseup( function (event) {
+        event.stopPropagation();
+        console.log("Sensor New");
+        
+        newSensorSelect();
+        mode.popup = PopupMode.SENSOR;   
+    });
+
+    $("#btn-move-sensor").unbind('mouseup').mouseup( function (event) {
+        event.stopPropagation();
+        selectCursor.visible = true;
+
+        // Change to move mode!
+        // clear other Selections first
+        clearSelection();
+        var obj = SceneGraph.findNodeByUid(selectEditorObj, true);
+        selection.add( obj );
+
+        mode.object = obj;
+        mode.state = EditorMode.SENSORPLACE;
+        hidePopups();  
+    });
+
+    $("#btn-rotate-sensor").unbind('mouseup').mouseup( function (event) {
+        event.stopPropagation();
+        selectCursor.visible = true;
+        
+        // Change to rotate mode!
+        // clear other Selections first
+        clearSelection();
+        var obj = SceneGraph.findNodeByUid(selectEditorObj, true);
+        selection.add( obj );
+
+        mode.object = obj;
+        mode.state = EditorMode.SENSORROTATE;
+        hidePopups();   
+    });
+
+    $("#btn-switch-sensor").unbind('mouseup').mouseup( function (event) {
+        event.stopPropagation();
+        console.log("Sensor Switch Type");
+        
+        var obj = SceneGraph.findNodeByUid(selectEditorObj);
+        // check object is spline
+        if(obj.userData.parentType == ObjectTypes.SENSORS)
+            cycleChannelType( obj, 1 );        
+    });
+
+    $("#btn-sensor-channel").unbind('mouseup').mouseup( function (event) {
+        event.stopPropagation();
+        console.log("Sensor Channels Toggle");
+        
+        var obj = SceneGraph.findNodeByUid(selectEditorObj);
+        if(obj.userData.parentType == ObjectTypes.SENSORS)
+            toggleChannelView(obj);
+    });    
+
+    $("#btn-link-sensor").unbind('mouseup').mouseup( function (event) {
+        event.stopPropagation();
+
+        // Change to move mode!
+        // clear other Selections first
+        clearSelection();
+        var obj = SceneGraph.findNodeByUid(selectEditorObj, true);
+        selection.add( obj );
+        
+        mode.object = obj;
+        mode.popup = PopupMode.SENSOR;       
+        mode.state = EditorMode.SENSORLINK;
+        hidePopups();
+    }); 
+
+    $("#btn-delete-sensor").unbind('mouseup').mouseup( function (event) {
+        event.stopPropagation();
+        deleteSelectedObject();
+    });
+
+    $("#btn-test-view").unbind('mouseup').mouseup( function (event) {
+        event.stopPropagation();
+
+        // We must have a selected object to get here, so pass object, and 
+        // scene as params to the thermal view.      
+        var obj =SceneGraph.findNodeByUid(selectEditorObj, true);
+        var params = { 
+            projectid: {{ projectid }}, 
+            sceneid: {{ sceneid }}, 
+            object: obj.userData.uid,
+            viewmode: "LUMINOS"
+        };
+        if(flipper % 3 == 1) params.viewmode = "EDGEFC";
+        if(flipper % 3 == 2) params.viewmode = "THERMAL";
+        flipper++;
+
+        var paramstr = jQuery.param( params );
+        var url = "/sim/camview?" + paramstr;
+        var win = window.open(url, '_blank');
+        win.focus();
+    });
+
+    $("#btn-change-spline").unbind('mouseup').mouseup( function (event) {
+        event.stopPropagation();
+        var obj = SceneGraph.findNodeByUid(selectEditorObj);
+        // check object is spline
+        if(obj.userData.parentType == "spline")
+            toggleSpline( obj );
+    });
+
+    $("#btn-view-sensor").unbind('mouseup').mouseup( function (event) {
+        event.stopPropagation();
+        // We must have a selected object to get here, so pass object, and 
+        // scene as params to the thermal view.      
+        var obj = SceneGraph.findNodeByUid(selectEditorObj, true);
+        var params = { 
+            projectid: {{ projectid }}, 
+            sceneid: {{ sceneid }}, 
+            object: obj.userData.uid,
+            viewmode: "LUMINOS"
+        };
+        if(flipper % 3 == 1) params.viewmode = "EDGEFC";
+        if(flipper % 3 == 2) params.viewmode = "THERMAL";
+        flipper++;
+
+        var paramstr = jQuery.param( params );
+        var url = "/sim/camview?" + paramstr;
+        var win = window.open(url, '_blank');
+        win.focus();
+    });
+}

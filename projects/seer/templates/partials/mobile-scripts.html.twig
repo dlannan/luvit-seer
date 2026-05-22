@@ -1,0 +1,59 @@
+<script> 
+$(document).ready( function() {
+    if(isMobile) {
+    $("#mobilebtn-steer-left").on('touchstart', function(e) {
+        Physics.keysActions.ArrowLeft.keydown = true;
+        Physics.keysActions.ArrowRight.keydown = false;
+        e.stopPropagation(); e.preventDefault();					
+    });
+    function endLeft(e) {
+        Physics.keysActions.ArrowLeft.keydown = false;
+        Physics.keysActions.ArrowRight.keydown = false;
+        e.stopPropagation(); e.preventDefault();					
+    };
+    $("#mobilebtn-steer-left").on('touchend', endLeft);
+    $("#mobilebtn-steer-left").on('touchcancel', endLeft);
+
+    $("#mobilebtn-steer-right").on('touchstart', function(e) {
+        Physics.keysActions.ArrowRight.keydown = true;
+        Physics.keysActions.ArrowLeft.keydown = false;
+        e.stopPropagation(); e.preventDefault();					
+    });
+    function endRight(e) {
+        Physics.keysActions.ArrowLeft.keydown = false;
+        Physics.keysActions.ArrowRight.keydown = false;
+        e.stopPropagation(); e.preventDefault();					
+    };
+    $("#mobilebtn-steer-right").on('touchend', endRight);
+    $("#mobilebtn-steer-right").on('touchcancel', endRight);
+
+    $("#mobilebtn-accel").on('touchstart', function(e) {
+        Physics.keysActions.ArrowUp.keydown = true;
+        Physics.keysActions.ArrowDown.keydown = false;
+        e.stopPropagation(); e.preventDefault();
+    });
+
+    function endAccel(e) {
+        Physics.keysActions.ArrowUp.keydown = false;
+        Physics.keysActions.ArrowDown.keydown = false;
+        e.stopPropagation(); e.preventDefault();					
+    };
+    $("#mobilebtn-accel").on( 'touchend', endAccel );
+    $("#mobilebtn-accel").on( 'touchcancel', endAccel );
+
+    $("#mobilebtn-brake").on('touchstart', function(e) {
+        Physics.keysActions.ArrowDown.keydown = true;
+        Physics.keysActions.ArrowUp.keydown = false;
+        e.stopPropagation(); e.preventDefault();					
+    });
+
+    function endBrake(e) {
+        Physics.keysActions.ArrowUp.keydown = false;
+        Physics.keysActions.ArrowDown.keydown = false;
+        e.stopPropagation(); e.preventDefault();					
+    };
+    $("#mobilebtn-brake").on('touchend', endBrake);
+    $("#mobilebtn-brake").on('touchcancel', endBrake);
+    }
+});
+</script>

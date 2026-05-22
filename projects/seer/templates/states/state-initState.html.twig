@@ -1,0 +1,23 @@
+
+var initState = {
+
+    name: "initialize",
+    value: 0,              // Set this value to react to external state control
+    parent: undefined,      // If this is set, exit ensures the parent state is reactivated
+
+    onenter: function(init) {
+
+        if(selectCursor) selectCursor.visible = false;
+        clearSelection();
+        enableControls();
+        hidePopups();
+    },
+
+    onupdate: function(dt) {
+        // Dont do much - its an init state, nothing to see here.
+    },
+
+    onexit: function() {
+
+    }
+};

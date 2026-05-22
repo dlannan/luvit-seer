@@ -1,0 +1,11 @@
+
+{% block content %}
+ 
+  {% set query = "[sql-table json]select name,sceneid,projectid from scenes[/sql-table]" %}
+  {% set results = (query|shortcodes) %}
+  {% if results %}
+  {{ results }}
+  {% endif %}
+  
+{% endblock %}
+

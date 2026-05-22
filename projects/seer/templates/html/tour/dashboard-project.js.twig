@@ -1,0 +1,111 @@
+
+    // Define the steps for introduction
+    tourSteps.defineSteps([
+    {
+        element: '#dashboard-title',
+        popover: {
+            title: 'SEER Projects Page',
+            description: 'The SEER Projects page is a summary of the project spaces accessible by you.',
+            position: 'bottom-center'
+        }
+    },
+    {
+        element: '#dashboard-menu',
+        popover: {
+        title: 'SEER Project Main Menu',
+        description: 'The SEER Project Main menu allows you to see and interact with projects, scenes and people within the same project space as you.',
+        position: 'bottom-center'
+        },
+        onNext: () => {
+            $("#pills-home-tab").click();
+        }        
+    },
+    {
+        element: '#pills-home-tab',
+        popover: {
+        title: 'SEER Project',
+        description: '<p>The project summary tab shows a screenshot, description and team members of a project.</p><p>The tab menu provides access to project related panels.</p>',
+        position: 'bottom-center'
+        },
+        onNext: () => {
+            $("#pills-status-tab").click();
+        }        
+    },
+    {
+        element: '#pills-status-tab',
+        popover: {
+        title: 'SEER Project',
+        description: '<p>The project status tab shows the current simulation status of any running projects.</p><p>Simulation can be started, paused, stopped and reset from here.</p>',
+        position: 'bottom-center'
+        },
+        onPrevious: () => {
+            $("#pills-summary-tab").click();
+        },                
+        onNext: () => {
+            $("#pills-scene-module-tab").click();
+        }
+    },
+    {
+        element: '#pills-scene-module-tab',
+        popover: {
+        title: 'SEER Project',
+        description: '<p>The scene module tab allows project members to change the associated simulation module with a scene.</p>',
+        position: 'bottom-center'
+        },
+        onPrevious: () => {
+            $("#pills-status-tab").click();
+        },
+        onNext: () => {
+            $("#pills-scene-data-tab").click();
+        }
+    },
+    {
+        element: '#pills-scene-data-tab',
+        popover: {
+        title: 'SEER Project',
+        description: '<p>The project data ops tab provides information for a scene including object information(position, ids, names) and data mapping settings.</p>',
+        position: 'bottom-center'
+        },
+        onPrevious: () => {
+            $("#pills-scene-module-tab").click();
+        },        
+        onNext: () => {
+            $("#pills-developer-tab").click();
+        }
+    },
+    {
+        element: '#pills-developer-tab',
+        popover: {
+        title: 'SEER Project',
+        description: '<p>The project developer tab is a developer interface for creating and testing software to interact directly with simulations.</p><p>More details can be found in the <a href"/documentation/scenarist-developer-guide">Scenarist Developer Guide.</a></p>',
+        position: 'bottom-center'
+        },
+        onPrevious: () => {
+            $("#pills-scene-data-tab").click();
+        }
+    },
+    {
+        element: '#dashboard-project-scenes',
+        popover: {
+        title: 'SEER Scenes',
+        description: 'A list of available scenes that can be updated and executed for simulation. Click on a scene to enter scenarist.',
+        position: 'top-center'
+        }
+    },
+    {
+        element: '#dashboard-project-messages',
+        popover: {
+        title: 'SEER Messages',
+        description: 'A list of eight messages that have been sent to this user.',
+        position: 'top-center'
+        }
+    },
+    {
+        element: '#dashboard-project-issues',
+        popover: {
+        title: 'SEER Project Issues',
+        description: 'A list of project issues or global issues. This is a top eight summary list - click on the column to sort by project, priority or status.',
+        position: 'top-center'
+        }
+    }
+    ]);

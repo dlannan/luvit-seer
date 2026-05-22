@@ -1,0 +1,232 @@
+{% embed 'partials/base-dashboard.html.twig' %}
+
+{% if config.plugins.login.enabled and grav.user.authorize('site.login') %}
+{% set uservalid = true %}
+{% endif %}
+
+{% set projectid = grav.uri.query('projectid') %}
+{% set query = ("[sql-table json]select * from projects where uid = '" ~ projectid ) ~ "' limit 1[/sql-table]" %}
+{% set project = ((query|shortcodes) | json_decode)[0] %}
+{% set projectvalid = project and uservalid %}
+
+{% block content %}
+{% include 'dashboard/header-edit.html.twig' %}
+
+<div class="my-3 my-md-5">
+<div class="container">
+
+    <div class="col-md-12">
+        <div class="row">
+
+            <div id="dashboard-project-tabs" class="col-sm-12">
+
+{% include "forms/form.html.twig" %}
+                <form id="project-data-two" name="fakeData">
+
+                    <div class="card">
+                        <div class="card-header">
+
+{% include 'html/project/project-summary.html.twig' %}
+
+{% include 'html/project/project-status.html.twig' %}
+
+{% include 'html/project/project-scenemodule.html.twig' %}
+
+{% include 'html/project/project-scenedata.html.twig' %}
+
+{% include 'html/project/project-developer.html.twig' %}
+
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="dashboard-project-scenes" class="col-md-12">
+        <div class="row">
+
+            <div class="col-sm-3">
+                <div class="card new-scene-card">
+                    <div class="card-header">
+                        <div class="">
+                            <h3>New Scene</h3>
+                        </div>
+                    </div>
+                    <div id="newscene" class="card-body scene-new" style="background: #e1e1e1; margin: 20px;">
+                        <i class="fe fe-plus" style="font-size: 4rem;"></i>
+                    </div>
+                </div>
+            </div>
+
+            {% set scenequery = ("[sql-table json]select * from scenes where projectid = '" ~ projectid ) ~ "' [/sql-table]" %}
+            {% set scenedb = ((scenequery|shortcodes) | json_decode) %}
+
+            {% for scene in scenedb %}
+            {% if scene %}
+            {% set iconquery = ("[sql-table json]select * from icons where uid = '" ~ scene.icon ) ~ "' [/sql-table]" %}
+            {% set icondb = ((iconquery|shortcodes) | json_decode)[0] %}
+
+            <div class="col-sm-3">
+                <div class="card scene-body">
+                    <div class="card-header">
+                        <div class="">
+                            <h3>{{ scene.name }}</h3>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <h6>User: {{ scene.edituser }}</h6>
+                        <p><small>{{ scene.edittime }}</small></p>
+                        <div class="scene-card projectscene" sceneid="{{ scene.sceneid }}">
+                            <img src="data:image/png;base64,{{ icondb.data }}" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% set count = count + 1 %}
+            {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
+    <div id="dashboard-project-messages" class="row row-cards row-deck">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Latest Project Messages</h3>
+                </div>
+                {% include 'dashboard/message-list.html.twig' with { 'limit': '8', 'projectset': projectid } %}
+            </div>
+        </div>
+    </div>
+
+    <div id="dashboard-project-issues" class="row row-cards row-deck">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Latest Project Issues</h3>
+                </div>
+                {% include 'dashboard/issue-list.html.twig' with { 'limit': '8', 'projectset': projectid } %}
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<footer class="footer">
+    <div class="container">
+        <div class="row align-items-center flex-row-reverse">
+            <div class="col-auto ml-lg-auto">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                    </div>
+                    <div class="col-auto">
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-lg-auto mt-3 mt-lg-0 text-center">
+            </div>
+        </div>
+    </div>
+</footer>
+</div>
+
+{% include 'sim/net-websocket.html.twig' %}
+
+<script src="{{ theme_url }}/assets/js/object-watch.js"></script>
+{% include 'html/project/project-simstatus.js' %}
+
+{% include 'html/project/project-scenemodule.js.twig' %}
+{% include 'html/project/project-scenedata.js.twig' %}
+{% include 'html/project/project-scenemapping.js.twig' %}
+
+{% include 'html/project/developer-editor.js.twig' %}
+{% include 'html/project/project-developer.js.twig' %}
+
+<script>
+{% if projectvalid == true %}
+var waitClick = true;
+{% else %}
+window.location.href = "/projects";
+{% endif %}
+
+function getDateString() {
+    var d = new Date().toISOString();
+    return d;
+}
+
+$(document).ready(function() {
+
+  {% if projectvalid == true %}
+    //* On edit mode, then enable the description and name editing (will add more later) */
+    $("input[type='checkbox']").on('click', function (e) {
+        if ($(this).is(':checked')) {
+        
+            $("#projectdesc").html('<textarea id="projectdescval" class="form-control" name="desc" rows="8" placeholder="Project description..">{{ project.desc }}</textarea>');
+            $("#projectname").html('<h3><input id="projectnameval" type="text" class="form-control" name="name" placeholder="{{ project.name }}"></h3>');
+        } else {
+
+          var name = $("#projectnameval").val();
+          var desc = $("#projectdescval").val().replace(/\n/g, "<br />");
+
+          /* console.log(name + "      " + desc); */
+          $('#project-data input[name="data[name]"]').val(name);
+          $('#project-data input[name="data[desc]"]').val(desc);
+          $('#project-data input[name="data[where]"]').val(' uid = "{{ projectid }}"');
+          $("#project-data").attr("action", "/project?projectid={{ projectid }}");
+
+          $("#project-data").submit();
+        } 
+    });
+
+    //* Call a manual "insert new scene" into the database, then jump to the editor using the */
+    //*  scenes returned id. */
+    $("#newscene").on('click', function(e) {
+      const params = jQuery.param({ 
+        'projectid': '{{ projectid }}'
+      });
+      window.location.href = "/scenarist-new?" + params;
+    });
+
+    $(".projectscene").on('click', function(e) {
+      const params = jQuery.param({ 
+          'projectid': '{{ projectid }}', 
+          'sceneid': $(this).attr('sceneid')
+      });
+      window.location.href = "/scenarist?" + params;      
+    });
+
+    {% set query = ("[sql-table json]select * from scenes where projectid = '" ~ projectid ) ~ "' [/sql-table]" %}
+    {% set scenedb = ((query|shortcodes) | json_decode) %}
+    {% if scenedb %}
+      {% set randomscene = random(scenedb) %}
+      console.log("Random scene: {{ randomscene.sceneid }}");
+
+      $("#{{ projectid|md5 }}").on('click', function(e) {
+        const params = jQuery.param({ 
+            'projectid': '{{ projectid }}', 
+            'sceneid': '{{ randomscene.sceneid }}'
+        });
+        window.location.href = "/scenarist?" + params;      
+      });   
+      var htmlicon = $("[sceneid='{{ randomscene.sceneid }}']").html();
+      $("#{{ projectid|md5 }}").html( htmlicon );
+    {% endif %}
+
+    var statusUpdate = setInterval( function () {
+
+      if(globalSimUpdate.process == "none") {
+        globalSimUpdate.process = "connecting"; 
+        CheckAlive();
+      }
+    }, 500);
+  {% endif %}
+
+});
+
+</script>
+
+{% include 'dashboard/footer-edit.html.twig' %}
+{% endblock %}
+{% endembed %}

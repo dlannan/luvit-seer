@@ -1,0 +1,12 @@
+$(document).ready(function() {
+
+    console.log("Starting Module SUMO.");
+
+    currentTime = appClock.getElapsedTime();
+
+    simstate.mode = SimulationMode.NONE;
+    simstate.funcinit = undefined;
+    simstate.funcupdate = undefined;
+    simstate.funcreset = undefined;
+    simstate.funckill = undefined;
+});

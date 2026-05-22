@@ -1,0 +1,102 @@
+<div>
+    <ul  class="nav nav-pills">
+        <li class="active"><a  href="#assets-images" data-toggle="tab">Images</a></li>
+        <li><a href="#assets-videos" data-toggle="tab">Videos</a></li>
+        <li><a href="#assets-icons" data-toggle="tab">Icons</a></li>
+    </ul>
+    <div class="tab-content clearfix">
+        <div class="tab-pane active" id="assets-images">
+            <div class="grid-sizer"></div>
+            {%
+            local userassets = _G.USERASSETS
+            local images    = userassets.images
+            local videos    = userassets.videos
+            local icons     = userassets.icons
+            local cache     = userassets.imagecache
+             
+            local count = 0
+            for key, value in pairs(cache) do
+            %}
+            <div class="image-container">
+                <img src="{* cache[key].path *}">
+                <div class="image-text-wrapper">
+                    <div class="image-text">
+                        <button class="assets-delete btn btn-icon btn-sm btn-rounded btn-fill" type="submit">
+                            <span class="icon-bin"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {%
+            count = count + 1
+            end
+            local left = 9-count
+            if left > 0 then
+            for i=1, left do %}
+            <div class="image-container">
+                <div class="assets-delete"><span class="icon-bin"></span></div>
+                <img data-src="holder.js/700x450?auto=yes">
+            </div>
+            {%  end
+            end %}
+        </div>
+        <div class="tab-pane" id="assets-videos">
+            <div class="grid-sizer"></div>
+            {%
+            count = 0 
+            for key, value in pairs(videos) do 
+            %}
+            <div class="image-container">
+                <img src="{* value *}">
+                <div class="image-text-wrapper">
+                    <div class="image-text">
+                        <button class="assets-delete btn btn-icon btn-sm btn-rounded btn-fill" type="submit">
+                            <span class="icon-bin"></span>  
+                        </button>
+                    </div>
+                </div>
+            </div>           
+            {% 
+                count = count + 1 
+            end
+            left = 9-count 
+            if left > 0 then
+                for i=1, left do %}
+            <div class="image-container">
+                <div class="assets-delete"><span class="icon-bin"></span></div>
+                <img data-src="holder.js/700x450?auto=yes">
+            </div>
+            {%  end 
+             end %}
+        </div>
+        <div class="tab-pane" id="assets-icons">
+            <div class="grid-sizer"></div>
+           {% 
+            count = 0
+            for key, value in pairs(icons) do
+            %}
+            <div class="image-container">
+                <img src="{* value.origpath *}">
+                <div class="image-text-wrapper">
+                    <div class="image-text">
+                        <button class="assets-delete btn btn-icon btn-sm btn-rounded btn-fill" type="submit">
+                            <span class="icon-bin"></span>  
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% 
+                count = count + 1 
+            end
+            left = 9-count
+            if left > 0 then
+                for i=1, left do %}
+            <div class="image-container">
+                <div class="assets-delete"><span class="icon-bin"></span></div>
+                <img data-src="holder.js/700x450?auto=yes">
+            </div>
+            {%  end 
+             end %}
+        </div>
+    </div>
+</div>

@@ -1,0 +1,249 @@
+<script type="application/javascript">
+
+{% if editing == true then %}
+var editor;
+var palette;
+var payload;
+var current_module_add;
+var current_module_parent;
+ 
+ // Bind data to the settings form
+// Settings data
+var settingsdata = { 
+    published: "", 
+    publishdate: "",
+    pagename: "",
+    tags: "",
+    metatitle: "",
+    metadesc: "",
+    urlhandle: ""
+}; 
+
+ var settingsmanifest = {
+    data: { 
+        published: "", 
+        publishdate: "",
+        pagename: "",
+        tags: "",
+        metatitle: "",
+        metadesc: "",
+        urlhandle: ""
+    },
+    init: function($node, runtime) {
+        $node.html( $('form.editpage-settings-form').html() );
+    },
+    // Bindings to data
+    ui: {
+        "#page-published" : { init: function($node) {
+                $node.change(function() {
+                    if ($(this).prop('checked')) {
+                        $("#page-setdate").attr("disabled", "disabled").parent().slideUp();
+                    } else {
+                        $("#page-setdate").removeAttr("disabled").parent().slideDown();
+                    }
+                    data.published = $(this).prop('checked');
+                });
+            }
+        },
+        "#page-setdate" : { bind: "publishdate" },
+        "#page-name" : { bind: function (data, val) { data.pagename=val; console.log(val); },  },
+        "#page-tags" : { bind: "tags" },
+        "#page-meta_title" : { bind: "metatitle" },
+        "#page-meta_description" : { bind: "metadesc" },
+        "#page-url" : { bind: "urlhandle" }
+    }
+}; 
+ 
+{(templates/tools/editorpalette.html)}
+{% end %}
+ 
+$( document ).ready(function() {
+
+    $( ".spinner" ).TouchSpin();
+
+    $(".form-group-default input,.form-group-default textarea").on('focus blur', function(){
+        $(this).parent().toggleClass('focused');
+    });
+
+{% if editing == true then %}
+    $("#settings-toggle, #palette-toggle").hide();
+    $("#edit-toggle span").click(function(e){
+        // If the pencil is selected then open the menu
+        if($(this).hasClass("icon-pencil")) {
+            $(this).removeClass("icon-pencil");
+            $(this).addClass("icon-checkmark");
+            $("#settings-toggle, #palette-toggle").slideDown();              
+        }
+        else {
+            e.preventDefault();
+            //var htmlstr = document.documentElement.outerHTML + " ";
+            var htmlstr = { ordered: [], form: settingsdata };
+
+            $('div[class*="module-"]').each( function() {
+                var modulename = $(this).attr('class').split(' ')[0];
+                var id = $(this).attr('id');
+                if(modulename) {
+                    //console.log(modulename);
+                    htmlstr.ordered.push( { id:id, modulename:modulename, data:$(this).html() } );
+                }
+            })
+            
+            var stringData = JSON.stringify(htmlstr);
+            //console.log(stringData);
+            saveModule( stringData );
+        }
+    });
+
+    $( "#tabs" ).tabs({
+        collapsible: true,
+        active: false
+    });
+
+    $( ".edit-nav .ui-tabs-tab a" ).click(function() {
+
+        if ( $( this ).parent().hasClass( "ui-tabs-active" ) ) {
+            $( this ).parent().parent().parent().addClass("tabs-is-open");
+
+        } else {
+            $( this ).parent().parent().parent().removeClass("tabs-is-open")
+        }
+    });
+
+
+    function changepalette(p)
+    {
+        palette = p;
+        $("#color-list").html('<li><button class="reset-button" title="Reser colors">Reset colors</button></li>');
+        for (i = 1; i < palette.length; i++) {
+
+            $("#color-list").append( '<input id="color'+i +'" type="hidden" name="color'+i +'" value="'+palette[i]+'" />' );
+            $("#color-list").append( '<li id="color'+i +'" class="color'+i+'"><div class="drag-element" id="color'+i+'-drag" data-color="'+palette[i]+'"><div class="drop color'+i+' color'+i+'bg" style="background-color:'+palette[i]+'"></div><i class="drop-helper-1 color'+i+'"></i><i class="drop-helper-2 color'+i+'"></i><i class="drop-helper-3 color'+i+'"></i><i class="drop-helper-4 color'+i+'"></i></div></li>' );
+
+//                  <input id="color1" type='color' name='color1' value='#404040' />
+//					<li class="color-1"><div class="drag-element" data-color="#404040"><div class="drop color-1"></div><i class="drop-helper-1 color-1"></i><i class="drop-helper-2 color-1"></i><i class="drop-helper-3 //                   color-1"></i><i class="drop-helper-4 color-1"></i></div></li>
+
+            $("#color" + i).minicolors({
+                control: "wheel",
+                change: function(n) {
+                    var thiscolor = $(this).attr("value");
+                    $("#" + this.name + "-drag").attr("data-color", thiscolor );
+                    $("." + this.name).css("color", thiscolor );
+                    $("." + this.name + "bg").css("background-color", thiscolor );
+                    var thiscolorrgba = $(this).minicolors('rgbaString');
+                    $(this).parent().find('.colorwheeltracker').attr("value", thiscolor);
+                    $(this).parent().find('.colorwheeltrackerrgba').text(thiscolorrgba);
+                }
+            });
+        }
+    }
+
+    $(".colorschemes li").click( function() {
+        var colname = $(this).text();
+        changepalette(eval("palette_" + colname));
+        $(".minicolors").hide();
+        for (i = 1; i < palette.length; i++) {
+           $(".color" + i).show();
+        }
+    });
+
+    changepalette(eval("palette_Reds"));
+
+    //$("#texteditor").addClass("toolbox-inner-selected");
+
+    $(".minicolors").hide();
+    $("#colorchange").click(function(){
+        $(this).toggleClass("selected");
+        $(".minicolors").toggle();
+        for (i = 1; i < palette.length; i++) {
+           $(".color" + i).toggle();
+        }
+    });
+
+    $('main').each(function(i, ele) {
+         $(ele).addClass("paint-area");
+    });
+
+    $(".painttext").each(function(i, ele) {
+         $(ele).addClass("paint-area");
+         $(ele).addClass("paint-area--text");
+    });
+
+    $(".paintarea").each(function(i, ele) {
+         $(ele).addClass("paint-area");
+    });
+
+    $(".module-add").each(function()
+    {
+         $(this).uniqueId();
+    });
+
+    // Init $.my over DOM node
+    //$("form.editpage-settings-form").my( settingsmanifest, settingsdata );
+  
+    // Send the update content to the server to be saved
+    function onGetModuleSuccess(body, code, ev) {
+        // console.log(ev)
+        if(ev.status == 200) {
+            current_module_add.removeUniqueId();
+            current_module_add.uniqueId();
+            current_module_parent.after(current_module_add);
+            current_module_parent.after($(body));
+
+            ApplyMediumEditor(current_module_add.prev());
+            ApplyHolder();
+            InitModules();
+        }
+    }
+
+    function onSettingsDone(body, code, ev) {
+        
+        if( body ) {
+            var obj = jQuery.parseJSON( body );
+            $("form.editpage-settings-form").my("data", {
+                pagename: body.pagename,
+                metatitle: body.metatitle,
+                metadesc: body.metadesc,
+                urlhandle: body.urlhandle,
+                published: body.published,
+                publishdate: body.publishdate
+            });
+        }
+    }
+ 
+     // Include id with module name
+    function getSettings() {
+        $.ajax({
+            url: window.location.pathname + "/settings",
+            processData: false,
+            contentType: false,
+            type: 'GET',
+            success: onSettingsDone
+        });
+    }
+
+    // Include id with module name
+    function getModule(indata) {
+        $.ajax({
+            url: "/functions/getmodule",
+            data: indata,
+            processData: false,
+            contentType: false,
+            type: 'POST',
+            success: onGetModuleSuccess
+        });
+    }
+
+    $(".module-add li").click(function(e){
+        console.log($(this).html());
+        e.preventDefault();
+        current_module_parent = $(this).parent().parent().parent();
+        current_module_add = current_module_parent.clone(true, true);
+        getModule($(this).html());
+    });
+        
+    // Do a request for settings for this page.
+    //getSettings();
+{% end %}
+});
+
+</script>

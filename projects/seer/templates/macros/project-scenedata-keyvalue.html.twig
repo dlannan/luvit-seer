@@ -1,0 +1,21 @@
+<tr>
+    <td>
+    <div>datatable_key</div>
+    </td>
+    <td>
+    <div>datatable_value</div>
+    </td>
+    <td class='text-center'>
+    <div class='item-action dropdown'>
+        <a href='javascript:void(0)' data-toggle='dropdown' class='icon'><i class='fe fe-more-vertical'></i></a>
+        <div class='dropdown-menu dropdown-menu-right'>
+        <a href='javascript:startSim({{ datatable_sceneid }})' class='dropdown-item'><i class='dropdown-icon fe fe-play'></i> Start Sim </a>
+        <a href='javascript:stopSim({{ datatable_sceneid }})' class='dropdown-item'><i class='dropdown-icon fe fe-pause'></i> Pause Sim </a>
+        <a href='javascript:resetSim({{ datatable_sceneid }})' class='dropdown-item'><i class='dropdown-icon fe fe-rotate-ccw'></i> Reset Sim </a>
+        <div class='dropdown-divider'></div>
+        <a href='javascript:killSim({{ datatable_sceneid }})' class='dropdown-item'><i class='dropdown-icon fe fe-power'></i> Kill Sim</a>
+        </div>
+    </div>
+    </td>
+</tr>
+

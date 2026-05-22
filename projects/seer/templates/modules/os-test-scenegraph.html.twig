@@ -1,0 +1,239 @@
+
+// LQ Database setup - this will go into the Sim 
+//   TODO: Move to the Sim
+var center = new Vec3();
+var div = 20.0;
+var divisions = new Vec3Set(div, 1.0, div);
+var diameter = 1000.0; //XXX need better way to get this
+var dimensions = new Vec3Set(diameter, diameter, diameter);
+var GPD = new LQProximityDatabase( center, dimensions, divisions);
+
+// Simple entity management to start with - replacing the scenegraph used in ThreeJS (which is dead messy)
+var population = 0;
+var entities = {};
+// Lookup the entity by name instead of uid
+var entitiesByName = {};
+var selectedEntity;
+
+// Should probably come from the Sim
+//    TODO: Move time control to the Sim control
+var oldTime;
+var currentTime; 
+var elapsedTime;
+
+// --------------------------------------------- Base Entity Object -----------------------------------------------------------
+
+var Entity = function( pd ) {
+
+    // type for a group of Pedestrians
+    this.mover = new SimpleVehicle();
+
+    // allocate one and share amoung instances just to save memory usage
+    // (change to per-instance allocation to be more MP-safe)
+    this.neighbors = [];
+
+    // path to be followed by this pedestrian
+    // XXX Ideally this should be a generic Pathway, but we use the
+    // XXX getTotalPathLength and radius methods (currently defined only
+    // XXX on PolylinePathway) to set random initial positions.  Could
+    // XXX there be a "random position inside path" method on Pathway?
+    this.path = undefined;
+
+    // direction for path following (upstream or downstream)
+    this.pathDirection = 1;
+
+    // a pointer to this boid's interface object for the proximity database
+    this.proximityToken = undefined;
+
+    // switch to new proximity database -- just for demo purposes
+    this.newToken = function( newpd ) {
+
+        // delete this boid's token in the old proximity database
+        if(this.proximityToken) delete this.proximityToken;
+
+        // allocate a token for this boid in the proximity database
+        this.proximityToken = newpd.allocateToken(this);
+    };
+
+    // destructor
+    this.delete = function(){
+        // delete this boid's token in the proximity database
+        delete this.proximityToken;
+    };
+
+    // reset all instance state
+    this.reset = function() {
+
+        this.newToken( pd );
+
+        // reset the vehicle 
+        this.mover.reset ();
+
+        // max speed and max steering force (maneuverability) 
+        this.mover.setMaxSpeed(0.0);
+        this.mover.setMaxForce(0.0);
+
+        // initially stopped
+        this.mover.setSpeed(0.0);
+
+        // size of bounding sphere, for obstacle avoidance, etc.
+        this.mover.setRadius(0.5); // width = 0.7, add 0.3 margin, take half
+
+        // set the path for this Pedestrian to follow
+        // this.path = getTestPath();
+
+        // set initial position
+        // (random point on path + random horizontal offset)
+        // var d = this.path.getTotalPathLength() * frandom01();
+        // var r = this.path.radius;
+        // var randomOffset = randomVectorOnUnitRadiusXZDisk().mult( r );
+        // this.mover.setPosition(this.path.mapPathDistanceToPoint(d).add( randomOffset));
+
+        // randomize 2D heading
+        // this.mover.randomizeHeadingOnXZPlane ();
+
+        // pick a random direction for path following (upstream or downstream)
+        // this.pathDirection = (frandom01() > 0.5) ? -1 : +1;
+
+        // notify proximity database that our position has changed
+        // this.proximityToken.updateForNewPosition( this.mover.position() );
+    };
+
+    // per frame simulation update
+    this.update = function( currentTime, elapsedTime ) {
+               
+        // notify proximity database that our position has changed
+        this.proximityToken.updateForNewPosition( this.mover.position() );
+    };
+
+    // draw this pedestrian into scene
+    this.draw = function()
+    {
+    };
+
+    this.reset();
+};
+
+// Movement Handlers ---------------------------------------------------------------------------------------
+//   TODO: Move this to controllers section. 
+
+// Simple linear tween handler (mainly for pedestrian movement)
+function tweenLinearPosHeading( ent, targetP, targetR ) {
+    ent["tweenpos"] = animateVector3(ent.node, targetP, targetR, {
+            
+        duration: elapsedTime * 1000.0, 
+        easing : TWEEN.Easing.Linear.None,
+        callback : function(){
+            //console.log("Completed");
+        }
+    });
+}
+
+// Immediate position and rotation setting - updates the ThreeJS model immediately.
+//    
+function immediatePosHeading( ent, targetP, targetR ) {
+    ent.node.position.set( targetP.x, targetP.y, targetP.z );
+    ent.node.rotation.set( 0.0, targetR, 0.0);
+}
+
+function addEntityToScenegraph( threeObj ) {
+
+    population++;    
+    var ent = new Entity( GPD );
+    ent['node'] = threeObj;
+    ent['handler'] = tweenLinearPosHeading;
+    ent['updatetime'] = currentTime;
+
+    var uid = threeObj.userData.uid;
+    entities[uid] = ent;
+    entitiesByName[ent.node.name] = ent;
+
+    updateEntityPosition( uid, threeObj.position.x, threeObj.position.y, threeObj.position.z );
+    
+    var fwd = new THREE.Vector3();
+    threeObj.getWorldDirection(fwd);
+    updateEntityForward( uid, -fwd.x, -fwd.y, -fwd.z );
+}
+
+// Expect a ThreeJS XYZ for updating the entity (convert internally)
+function updateEntityPosition( id, x, y, z ) {
+
+    //if(!(id in Object.keys(entities))) { return; }
+    var pos = Vec3Set( x, y, z);
+    entities[id].mover.setPosition( pos );
+}
+
+// Expect a ThreeJS Heading Pitch Roll for updating the entity (convert internally)
+//  TODO: Get pitch and roll working too.
+function updateEntityForward( id, x, y, z ) {
+
+    //if(!(id in Object.keys(entities))) { return; }
+    entities[id].mover.regenerateOrthonormalBasis( Vec3Set( x, y, z) );
+}
+
+function sceneUpdater() {
+
+    oldTime = currentTime;
+    currentTime = appClock.getElapsedTime();
+    elapsedTime = currentTime - oldTime;
+
+    // update each Entity
+    //   Push opensteer mover positions and rotations into threeJS
+    var ekeys = Object.keys(entities);
+    for (var i = 0; i < ekeys.length; i++) {
+
+        var ent = entities[ekeys[i]];
+
+        // Update using OpenSteer controllers if needed
+        ent.update(currentTime, elapsedTime);
+
+        // Get OpenSteer position and direction
+        var pos = ent.mover.position();
+        var fwd = ent.mover.forward();
+
+        // Convert to ThreeJS for rendering
+        var targetP = new THREE.Vector3( pos.x, pos.y, pos.z );
+        var targetR = Math.atan2( -fwd.x, -fwd.z );
+
+        // If an object has speed, then animate towards target position (smoothly)
+        var distance = targetP.distanceToSquared(ent.node.position);
+        //console.log(targetP, ent.node.position);
+
+        ent.updatetime = currentTime;
+        ent.handler( ent, targetP, targetR );
+    }
+
+    //console.log(entities[].mover.position());
+    setTimeout( sceneUpdater, 200 );
+}
+
+$(document).ready(function() {
+
+    console.log("Testing OpenSteer for Scenegraph.");
+    console.log("LQDB:", GPD);
+
+    scenestatus.watch("loaded", function (id, oldval, newval) {
+        
+        //console.log("State:" + oldval+' '+ newval);
+        if(newval == true ) {
+
+            // Add the ThreeJS models, actors and sensors to the entity scenegraph
+            population = 0;
+            for (var j = 0; j < models.children.length; j++) {
+                addEntityToScenegraph( models.children[j] );    
+            }
+
+            for (var k = 0; k < actors.children.length; k++) {
+                addEntityToScenegraph( actors.children[k] );    
+            }
+
+            for (var l = 0; l < sensors.length; l++) {
+                addEntityToScenegraph( sensors[l] );    
+            }
+
+            currentTime = appClock.getElapsedTime();
+            sceneUpdater();
+        }
+        return newval;
+    });    
+});

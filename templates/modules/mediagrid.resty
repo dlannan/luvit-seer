@@ -1,0 +1,27 @@
+{(templates/modules/mediagrid.html, {
+  id=0,
+  inputmediaset=[[
+  <div class="container">
+      <div class="image-grid">
+          <div class="image-container col-md-4">
+              <img data-src="holder.js/700x450?auto=yes" />
+          </div>
+          <div class="image-container col-md-4">
+              <img data-src="holder.js/700x450?auto=yes" />
+          </div>
+          <div class="image-container col-md-4">
+              <img data-src="holder.js/700x450?auto=yes" />
+          </div>
+          <div class="image-container col-md-4">
+              <img data-src="holder.js/700x450?auto=yes" />
+          </div>
+          <div class="image-container col-md-4">
+              <img data-src="holder.js/700x450?auto=yes" />
+          </div>
+          <div class="image-container col-md-4">
+              <img data-src="holder.js/700x450?auto=yes" />
+          </div>
+      </div>
+  </div>
+  ]]
+})}

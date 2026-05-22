@@ -1,0 +1,90 @@
+<meta charset="utf-8">
+<title>{% if page.title != '' %}{{ page.title }} &#8211; {% endif %}{{ site.title }}</title>
+<meta name="description" content="{% if page.description %}{{ page.description }}{% else %}{{ site.description }}{% endif %}">
+
+{% if page.tags %}
+<meta name="keywords" content="{{ page.tags | join(', ') }}">
+{% endif %}
+
+{% for meta in page.metadata %}
+<meta {% if meta.name %}name="{{ meta.name }}" {% endif %}
+    {% if meta.http_equiv %}http-equiv="{{ meta.http_equiv }}"{% endif %}
+    {% if meta.charset %}charset="{{ meta.charset }}"{% endif %}
+    {% if meta.property %}property="{{ meta.property }}"{% endif %}
+    {% if meta.content %}content="{{ meta.content }}" {% endif %} />
+{% endfor %}
+
+<meta http-equiv="cleartype" content="on">
+
+<!-- http://t.co/dKP3o1e -->
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="shortcut icon" href="{{ theme_url }}/favicon.ico">
+<!-- 32x32 -->
+<link rel="shortcut icon" href="{{ theme_url }}/favicon.png">
+<!-- 57x57 (precomposed) for iPhone 3GS, pre-2011 iPod Touch and older Android devices -->
+<link rel="apple-touch-icon-precomposed" href="{{ theme_url }}/images/apple-touch-icon-precomposed.png">
+<!-- 72x72 (precomposed) for 1st generation iPad, iPad 2 and iPad mini -->
+<link rel="apple-touch-icon-precomposed" sizes="72x72"
+    href="{{ theme_url }}/images/apple-touch-icon-72x72-precomposed.png">
+<!-- 114x114 (precomposed) for iPhone 4, 4S, 5 and post-2011 iPod Touch -->
+<link rel="apple-touch-icon-precomposed" sizes="114x114"
+    href="{{ theme_url }}/images/apple-touch-icon-114x114-precomposed.png">
+<!-- 144x144 (precomposed) for iPad 3rd and 4th generation -->
+<link rel="apple-touch-icon-precomposed" sizes="144x144"
+    href="{{ theme_url }}/images/apple-touch-icon-144x144-precomposed.png">
+
+<!-- Dashboard Core -->
+
+<link rel="stylesheet" href="/css/fontawesome.min.css">
+<link rel="stylesheet" href="/css/hover-min.css">
+<link rel="stylesheet" href="/css/dashboard.css">
+{# <link rel="stylesheet" href="/plugins/charts-c3/plugin.css">
+<link rel="stylesheet" href="/plugins/maps-google/plugin.css"> #}
+
+<link rel="stylesheet" href="/css/quill.code.css">
+<link rel="stylesheet" href="/css/codemirror.css">
+<link rel="stylesheet" href="/css/codemirror-cobalt.css">
+
+<link rel="stylesheet" href="/css/driver.min.css">
+
+
+<script type="text/javascript" src="/js/vendors/jquery-3.2.1.min.js"></script>
+<script type="text/javascript" src="/js/core.js"></script>
+
+<script type="text/javascript" src="/js/vendors/popper.min.js"></script>
+<script type="text/javascript" src="/js/vendors/tooltip.min.js"></script>
+
+<script type="text/javascript" src="/js/vendors/bootstrap.min.js"></script>
+<script type="text/javascript" src="/js/vendors/bootstrap-slider.min.js"></script>
+<script type="text/javascript" src="/js/vendors/modernizr-2.6.2.custom.min.js"></script>
+
+{# <script type="text/javascript" src="/js/vendors/jquery-3.2.1.min.js"></script> #}
+{# <script type="text/javascript" src="/js/vendors/bootstrap.bundle.min.js"></script>  #}
+
+<script type="text/javascript" src="/js/vendors/jquery.sparkline.min.js"></script>
+<script type="text/javascript" src="/js/vendors/selectize.min.js"></script>
+<script type="text/javascript" src="/js/vendors/jquery.tablesorter.min.js"></script>
+<script type="text/javascript" src="/js/vendors/jquery-jvectormap-2.0.3.min.js"></script>
+<script type="text/javascript" src="/js/vendors/jquery-jvectormap-de-merc.js"></script>
+<script type="text/javascript" src="/js/vendors/jquery-jvectormap-world-mill.js"></script>
+<script type="text/javascript" src="/js/vendors/circle-progress.min.js"></script>
+
+<script type="text/javascript" src="/js/vendors/quill.min.js"></script>
+<script type="text/javascript" src="/js/vendors/codemirror.js"></script>
+
+<script type="text/javascript" src="/js/vendors/mode/javascript/javascript.js"></script>
+<script type="text/javascript" src="/js/vendors/mode/css/css.js"></script>
+<script type="text/javascript" src="/js/vendors/mode/lua/lua.js"></script>
+<script type="text/javascript" src="/js/vendors/mode/htmlmixed/htmlmixed.js"></script>
+<script type="text/javascript" src="/js/vendors/mode/xml/xml.js"></script>
+
+<script type="text/javascript" src="/js/vendors/driver.min.js"></script>
+
+
+
+<style type="text/css">
+.phpdebugbar p code, .phpdebugbar li code { white-space: pre;}
+</style>
+

@@ -1,0 +1,172 @@
+<script>
+var sceneidSelected = -1;
+var scenedata = {};
+{% for dkey, dscene in scenedb %}
+{% if dscene %} 
+  scenedata[ "{{ dkey }}" ] = "{{ dscene.data }}";
+{% endif %}
+{% endfor %}
+
+var idx = 1;
+
+// TODO: Move this out to seperate files
+// Table generators for the type of object being loaded
+//     each one here is 'registering' to handle the object table generation for the object
+var tableObjectTextFunc = {};
+
+$(document).ready(function() {
+
+  function makeTable( header, data ) {
+    var html = "<table class='tablehider'>\
+          <thead>\
+            <tr>\
+              <th>" + header[0] + "</th>\
+              <th>" + header[1] + "</th>\
+            </tr>\
+          </thead>\
+          <tbody>";
+
+    for (let key of Object.keys(data)) {  
+      let value = data[key];   
+      if(key != "url") {
+        html += "<tr><td>";
+        html += "<div>" +  key + "</div>";
+        html += "</td><td>";
+        html += "<div>" + value + "</div>";
+        html += "</td></tr>";
+      } else {
+        html += "<tr><td>";
+        html += "<div>" +  key + ".name</div>";
+        html += "</td><td>";
+        html += "<div>" + value.name + "</div>";
+        html += "</td></tr>";    
+      } 
+    }
+    html = html + "</tbody></table>";
+    return html;
+  };
+
+  tableObjectTextFunc['world'] = function( dobj ) {
+    return makeTable( ["Key", "Value"], dobj);
+  };
+
+  tableObjectTextFunc['models'] = function( dobj ) {
+    return makeTable( ["Key", "Value"], dobj);    
+  };
+
+  tableObjectTextFunc['actors'] = function( dobj ) {
+    return makeTable( ["Key", "Value"], dobj);    
+  };
+
+  tableObjectTextFunc['sensors'] = function( dobj ) {
+    return makeTable( ["Key", "Value"], dobj);    
+  };
+
+  tableObjectTextFunc['events'] = function( dobj ) {
+    return makeTable( ["Key", "Value"], dobj);    
+  };
+
+  tableObjectTextFunc['splines'] = function( dobj ) {
+    return makeTable( ["Key", "Value"], dobj);    
+  };
+
+  $('#select-scene').on('click', function (e) {
+    var optionSelected = $("option:selected", this);
+    var valueSelected = this.value;
+    sdata = scenedata[valueSelected];
+
+    sdata = sdata.replace(/'/g, '"');
+    sdata = JSON.parse(sdata);
+
+    var datalist = sdata.data;
+
+//    if( datalist.models.length > 0 ) {
+//      $('#select-module').val(datalist.models);
+//    } else {
+//      $('#select-module').val(0);
+//    }
+    var html = "";
+
+    for (let key of Object.keys(datalist)) {  
+      let value = datalist[key];   
+      var texttype = key.replace(/[0-9]/g, '');
+      var textobject = "";
+      if(texttype in tableObjectTextFunc) {
+        textobject = tableObjectTextFunc[texttype]( value );
+      }
+
+      html += "<tr><td>";
+if(texttype != 'world') {
+  var objurl = "http://localhost/sim/camview?projectid=" + sdata.projectid +"&sceneid=" + sdata.sceneid + "&object=" + value.uid + "&viewmode=RGB";
+      html += "<div><a href='" + objurl + "'>" +  value.name + "</a></div>";
+} else {
+      html += "<div>" +  value.name + "</div>";
+}
+      html += "</td><td>";
+      html += "<div>" + textobject + "</div>";
+      html += "</td><td>";
+      html += "<div>" + texttype + "</div>";
+      html += "</td><td>";
+
+if(texttype != 'world') {
+html += '<div class="custom-control custom-checkbox">';
+html += '<input type="checkbox" class="custom-control-input" id="IOUnchecked'+idx+'">';
+html += '<label class="custom-control-label" for="IOUnchecked'+idx+'">IO</label>';
+html += '</div></td><td>';      
+html += '<div class="custom-control custom-checkbox">';
+html += '<input type="checkbox" class="custom-control-input" id="OUnchecked'+idx+'">';
+html += '<label class="custom-control-label" for="OUnchecked'+idx+'">O</label>';
+html += '</div>';      
+} else {
+html += '</td><td>';      
+html += '</td><td>';      
+}
+      
+      html += "</td></tr>";      
+      idx ++;
+    }
+//    html = html.replace(/;/g, "");
+
+    $('#scene-data-table').html(html);
+
+    $('.tablehider > tbody').toggle();
+    $('.tablehider > thead').on('click', function (e) {
+
+          var myparent = $(this.parentNode); //jquery obj
+          //console.log(myparent);
+          
+          myparent.find('tbody').toggle();
+    });
+  });
+
+  $('#select-module').on('change', function (e) {
+    var optionSelected = $("option:selected", this);
+    var valueSelected = this.value;
+
+    if(valueSelected === '0') { valueSelected = ""; }
+
+    var url = "{{ page.url }}";
+    var params = "{{ uri.query }}&sceneid=" + sceneidSelected + "&models=" + valueSelected;
+
+    var http = new XMLHttpRequest();
+    http.open("POST", url, true);
+
+    // Write this to the DB if possible. Ideally a simple submit would be great!
+    http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    http.setRequestHeader("Content-length", params.length);
+    http.setRequestHeader("Connection", "close");
+
+    http.onreadystatechange = function() {//Call a function when the state changes.
+      if(http.readyState == 4 && http.status == 200) {
+        //$('#error_output').html(http.responseText);
+        //console.log(http.responseText);
+      }
+    };
+    
+    http.send(params);
+
+    initSceneMapping();
+
+  });
+});
+</script>

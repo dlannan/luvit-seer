@@ -1,0 +1,161 @@
+// A collision 
+
+// ------------- Collision Entity Object -----------------------------------------------------------
+
+var ColliderEntity = function( pd, pos ) {
+
+    if( pos ) {
+        this.position = new Vec3Set( pos.x, pos.y, pos.z );
+    } else {
+        this.position = new Vec3Set( 0.0, 0.0, 0.0 );
+    }
+
+    // allocate one and share amoung instances just to save memory usage
+    // (change to per-instance allocation to be more MP-safe)
+    this.neighbors = [];
+
+    // direction for path following (upstream or downstream)
+    this.pathDirection = 1;
+
+    // a pointer to this boid's interface object for the proximity database
+    this.proximityToken = undefined;
+
+    // switch to new proximity database -- just for demo purposes
+    this.newToken = function( newpd ) {
+
+        // delete this boid's token in the old proximity database
+        if(this.proximityToken) delete this.proximityToken;
+
+        // allocate a token for this boid in the proximity database
+        this.proximityToken = newpd.allocateToken(this);
+    };
+
+    // destructor
+    this.delete = function(){
+        // delete this boid's token in the proximity database
+        delete this.proximityToken;
+    };
+
+    // reset all instance state
+    this.reset = function() {
+
+        this.newToken( pd );
+    };
+
+    // per frame simulation update
+    this.update = function( currentTime, elapsedTime ) {
+               
+        // notify proximity database that our position has changed
+        this.proximityToken.updateForNewPosition( this.position() );
+    };
+
+    // draw this token
+    this.draw = function()
+    {
+    };
+
+    this.reset();
+};
+
+var ColliderShape = function( geom ) {
+
+    // LQ Database - this is used for generating shapes for collision
+    this.center = new Vec3();
+    this.div = 20.0;
+    this.divisions = new Vec3Set(this.div, 1.0, this.div);
+    this.diameter =  100.0; //XXX need better way to get this
+    this.dimensions = new Vec3Set(this.diameter, this.diameter, this.diameter);
+    
+    this.world = undefined;
+    this.pts = [];
+
+    // Call this again with different settings to change LQDB setup
+    this.reset = function() {
+
+        this.world = new LQProximityDatabase( this.center, this.dimensions, this.divisions);
+        this.population = 0;
+    };
+
+    this.addPoint = function( pos ) {
+        var ent = new ColliderEntity( this.GPD, pos );
+        this.pts.push(ent);
+        this.population++;
+    };
+
+    this.addGeom = function( g ) {
+        
+        var allverts = utils.collectVertices( geom );
+        
+        for(var i = 0; i<allverts.length; i++) {
+            var pos = allverts[i];
+            this.addPoint( pos );
+        }
+    };
+
+    this.collapseY() {
+        for(var i = 0; i<this.pts.length; i++) {
+            this.pts[i].position.y = 0.0;
+        }
+    }
+
+    // Merge neighboring points together using dist as a threshold
+    this.mergeNeighbors( dist, dir ) {
+
+        // Go through all the points in the DB and fined neighbours.
+        //  Average position of all neighbours
+        //  Remove all neighbours and replace with new Average
+        var newPts = [];
+
+        for(var i = 0; i<this.pts.length; i++) {
+            var ent = this.pts[i];
+            var nearEnts = ent.proximityToken.findNeighbors( ent.position, dist );
+            var rlen = nearEnts.results.length;
+
+            var temp = new THREE.Vector3();
+            if(rlen > 0) {
+                for(var j=0; j<rlen; j++) {
+                    var res = nearEnts.results[j];
+                    temp.x += res.position.x;
+                    temp.y += res.position.y;
+                    temp.z += res.position.z;
+                    res.delete();
+                }
+                temp.x /= rlen;
+                temp.y /= rlen;
+                temp.z /= rlen;
+                newPts.push(temp);
+            }
+        }
+
+        // Add new average points
+        for(var s = 0; s<newPts.length; s++) {
+            this.addPoint( newPts[s] );
+        }
+    };
+
+    this.reset();
+    this.addGeom( goem );
+};
+
+var Collision = {
+
+
+
+    buildShapeFromGeometry: function( geom ) {
+        
+        // Add each vert to the collision world
+
+    },
+
+    buildNamedObject: function( name ) {
+
+
+    },
+
+    monacoRails: function() {
+
+        var monaco = world.children[0]; // Should always be the main environment
+        var roads = utils.getAllMeshesWithName( monaco, "road");
+    }
+};
+

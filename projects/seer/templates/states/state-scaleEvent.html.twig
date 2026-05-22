@@ -1,0 +1,54 @@
+
+function checkEventScaling( ) {
+
+    var ok = (mode.state === EditorMode.EVENTSCALE);
+    if(!ok) return;
+
+    var d =  mouse.x - scaleEventState.startpos;
+    if( d < 0.0 ) d = -d;
+    sc = 1.0 / d * config.scaleSpeed;
+    
+    selectCursor.scale.set( sc, sc, sc );
+    if(mode.object) {
+        mode.object.userData.radius = sc;
+        SceneGraph.updateEntityScale( mode.object.userData.uid, sc, sc, sc );        
+    }
+}
+
+var scaleEventState = {
+
+    name: "scaleEvent",
+    value: 0,              // Set this value to react to external state control
+    parent: undefined,      // If this is set, exit ensures the parent state is reactivated
+    startpos: new THREE.Vector3(),
+
+    onenter: function(init) {
+
+        selectCursor.material.color.setHex(0x0000ff);
+        selectCursor.visible = true;
+        this.startpos = mouse.x;
+
+        disableControls();
+        hidePopups();
+    },
+
+    onupdate: function(dt) {
+
+        // Dont do much - its an init state, nothing to see here.
+        checkEventScaling();
+    },
+
+    onmouse: function( event ) {
+
+        if(event.type === "mouseup") {
+
+            FinishEventPlacement();
+            mode.state = EditorMode.NONE;
+            mode.popup = PopupMode.MAIN;
+        }
+    },
+
+    onexit: function() {
+
+    }
+};

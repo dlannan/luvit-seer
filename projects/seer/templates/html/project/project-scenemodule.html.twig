@@ -1,0 +1,55 @@
+{% set scenequery = ("[sql-table json]select * from scenes where projectid = '" ~ projectid ) ~ "' [/sql-table]" %}
+{% set scenedb = ((scenequery|shortcodes) | json_decode) %}
+
+<div class="tab-pane" id="pills-scene-module" role="tabpanel" aria-labelledby="pills-scene-module-tab">
+  <div class="row row-cards row-deck">
+    <div class="col-12">
+
+	<div class="card-header">
+		<div class="row">
+				<div class="form-group">
+          <label class="form-label">Select Scene</label>
+					<select name="scene-select" id="select-scene-module" class="form-control custom-select">
+{% for key, scene in scenedb %}
+{% if scene %}
+						<option value="{{ key }}">{{ scene.name }}</option>
+{% endif %}
+{% endfor %}
+					</select>
+				</div>
+&nbsp&nbsp&nbsp
+				<div class="form-group">
+          <label class="form-label">Local Scene Module</label>
+					<select name="module-select" id="select-module" class="form-control custom-select">
+						<option value="0">No Module</option>
+            <option value="sumo">SUMO Module</option>
+						<option value="boids">Boid Module</option>
+						<option value="pedestrian">Pedestrians Module</option>
+						<option value="soccer">Soccer Module</option>
+            <option value="vehicle-cannonjs">Vehicle Module</option>
+					</select>
+				</div>
+
+      </div>
+    </div>
+
+  {# <div class="table-responsive"  style="min-height: 18rem;">
+    <table class="table table-hover table-outline table-vcenter text-nowrap card-table">
+      <thead>
+        <tr>
+          <th>Key</th>
+          <th>Data</th>
+          <th class="text-center"><i class="icon-settings"></i></th>
+        </tr>
+      </thead>
+      <tbody id="scene-data-table">
+      </tbody>
+    </table>
+  </div>      #}
+    <div id="error_output">
+    </div>
+
+    </div>
+  </div>           
+</div>
+

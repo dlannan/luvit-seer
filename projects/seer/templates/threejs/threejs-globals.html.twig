@@ -1,0 +1,380 @@
+
+<script>
+// -----------------------------------------------------------------------------------------------------------------------------------------
+
+var isMobile = false; //initiate as false
+// device detection
+if(/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|ipad|iris|kindle|Android|Silk|lge |maemo|midp|mmp|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(navigator.userAgent) 
+    || /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(navigator.userAgent.substr(0,4))) { 
+    isMobile = true;
+}
+
+{% include 'threejs/threejs-camera.html.twig' %}
+{% include 'modules/os-scenegraph.html.twig' %}
+
+// -----------------------------------------------------------------------------------------------------------------------------------------
+
+var config = {
+
+	// How fast the rotation of an object is when setting rotation
+	rotateSpeed: 	10.0,
+	scaleSpeed: 	0.1    
+};
+
+// -----------------------------------------------------------------------------------------------------------------------------------------
+// Uncomment these debug properties to enable debugging features.
+var debug = {
+
+	sceneLoad: 0,
+	sceneObjects: 0,
+	animSkeleton: 0,
+	sensors: 0,
+	nodeLines: 0,
+	// Set to 1 to enable: Beware, this can make a mess of your scene ids!!
+	buildIds: 0
+};
+
+
+// -----------------------------------------------------------------------------------------------------------------------------------------
+// Setup scenegraph
+
+SceneGraph.reset();
+
+// -----------------------------------------------------------------------------------------------------------------------------------------
+
+var appClock = new THREE.Clock(true);
+// These are handles to created instances
+var seerCamera, camera, scene, renderer, composer, uniforms;
+
+// Special depth scene - objects pushed into this scene are rendered with MeshDepthMaterial for a depth
+//  buffer that is readable (attached to all SeerCameras).
+// NOTE: When using this always use the function AddObjectToSceneDepth( obj ) - pass in an Object3D or scene.
+var sceneDepth;
+
+// -----------------------------------------------------------------------------------------------------------------------------------------
+// All currently allocated cameras (so we can "quick switch")
+var cameras 	= {};
+
+// The cameras that are mapped to a channel (onscreen). 
+var cameraMap	= {};
+var cameraDir	= new THREE.Vector3();
+
+var channels 	= [];
+
+// -----------------------------------------------------------------------------------------------------------------------------------------
+
+var icon		= null;
+var iconwidth 	= 640;
+var iconheight 	= 480;
+
+// -----------------------------------------------------------------------------------------------------------------------------------------
+
+var depthRenderTarget;
+var ambientLight;
+
+// -----------------------------------------------------------------------------------------------------------------------------------------
+// Octree is more effective at ray cast and hit detect - doesnt work on all mesh types (not ideal).
+
+var tracker;
+var octree = new THREE.Octree( {
+		// uncomment below to see the octree (may kill the fps)
+		//scene: scene,
+		// when undeferred = true, objects are inserted immediately
+		// instead of being deferred until next octree.update() call
+		// this may decrease performance as it forces a matrix update
+		undeferred: false,
+		// set the max depth of tree
+		depthMax: 10,
+		// max number of objects before nodes split or merge
+		objectsThreshold: 8,
+		// percent between 0 and 1 that nodes will overlap each other
+		// helps insert objects that lie over more than one node
+		overlapPct: 0.15
+	} );
+
+var simpleMeshCount = 5000;
+var radius 			= 100;
+var radiusMax 		= radius * 10;
+var radiusMaxHalf 	= radiusMax * 0.5;
+var radiusSearch 	= radius * 0.75;
+
+// By default we dont use octree - will revisit its use
+var useOctree = false;
+
+// -----------------------------------------------------------------------------------------------------------------------------------------
+
+var container;
+var selectionList 	= {};
+
+// TODO: Remove this, and put in scenegraph as a tag filter system
+var loadedVehicles	= {};
+var vehicleObjects 	= {};
+var vehicleList 	= {};
+
+// A network contains lists of two types - Points/Nodes and Routes (connections of points)
+//  The network will be exported to OSM format for use in SUMO and other OSM
+//  toolkits.
+var network			= {};
+
+var anims 			= {};
+// All the anim instances running - we turn them on/off depending how far away they are.
+var animplayers		= {};
+
+// -----------------------------------------------------------------------------------------------------------------------------------------
+// Sky and environment settings
+
+var controls, lastcontrols;
+var shiftPressed = false;
+var mouseMoveYScale = 10.0;
+
+var dirLight, dirLightTarget, hemiLight;
+var AmbientLightScale = 1.0;
+var DiffuseLightScale = 1.0;
+
+var earth = true;
+var sky, sunSphere, water, waterNormals, grass;
+
+// For handling the ocean surface and the ocean seafloor
+var ocean = {};
+
+var clock = new THREE.Clock(true);
+
+var scenaristMode = "Main";
+var mouse = new THREE.Vector2();
+var raycaster = new THREE.Raycaster();
+raycaster.linePrecision = 3;
+
+// -----------------------------------------------------------------------------------------------------------------------------------------
+// Enums for different state systems
+
+// Mode types for editor changes
+var EditorMode = Object.freeze({
+	"NONE":0, "PLACE":1, 
+	"ROTATE":2, "SCALE":3, 
+	"INITIALPLACE":4, "INITIALROTATE":5,
+	// Nodes
+	"NODENEW":6, "NODENEWROTATE":7,
+	"NODEPLACE":8, "NODEROTATE":9,
+	// Sensors
+	"SENSORNEW":20, "SENSORTYPE":21,
+	"SENSORPLACE":22, "SENSORROTATE":23,
+	"SENSORFOV":24, "SENSORLINK":25,
+	// Events
+	"EVENTNEW":30, "EVENTTYPE":31,
+	"EVENTPLACE":32, "EVENTSCALE":33,
+	"EVENTLINK":34
+});
+
+// Core object types list - expand here for extending new objects
+var ObjectTypes = Object.freeze({
+	NONE:0,	OBJECTS:"objects", 
+	NODES:"nodes", WAYS:"ways", 
+	SPLINES:"splines", EVENTS:"events", 
+	SENSORS:"sensors", MODELS:"models",
+	ACTORS:"actors", OUTDOORS:"outdoors"
+});
+
+// Remap folder parent types to local parentType objects (above)
+//   TODO: All this will be moved out into managers soon.
+//         Toadd a new type in new folder: Add folder to above, and then map in below list.
+var parentTypeMapping = Object.freeze({
+	outdoors: "objects", objects: "objects",
+	nodes: "nodes", ways: "ways", splines: "splines",
+	sensors: "sensors", models: "models", 
+	actors: "actors", environments: "environments"
+});
+
+var ControlMode = Object.freeze({
+	"NONE": 0,  "FPS": 1, "TARGET": 2, "ORTHO": 3, "CHASE": 4
+});
+
+var PopupMode = Object.freeze({
+	"NONE":0,	"MAIN":1, "SPLINE": 2, 	"SENSOR": 3, "EVENT": 4
+});
+
+var SteeringMode = Object.freeze({
+	"NONE":0,	"DIGITAL":1, "PROGRESSIVE": 2
+});
+
+// Scenarist mode and state control
+var mode = {
+	state: null,
+	popup: PopupMode.NONE,
+	intersected: null,
+	mouse: new THREE.Vector2(),
+	clock: new THREE.Clock(true),
+	update: null,
+	object: null,
+	group: null,
+	camera: { lon: 0.0, lat: 0.0, control: 1 }
+};
+
+var scenestatus = {
+	scene: 0,
+	loadtime: '',
+	loaded: false,
+	name: '',
+	actors: 0,
+	models: 0,
+	statics: 0,
+};
+
+// -----------------------------------------------------------------------------------------------------------------------------------------
+// Selection objects
+
+// Selection and placement variables for editor
+var selectCursor, selectPlace, intersected;
+
+// Editor specific objects
+var editor = new THREE.Group();
+var selection = new THREE.Group();
+
+// Selection information
+var selectable = ["objects", "nodes", "sensors", "events", "actors", "models", "cameras", "lights"];
+var mouseMove = false;
+
+// Chosen selected object being edited
+var selectEditorObj = -1;
+var selectEditorSpline = -1;
+
+var gridhelper;
+
+// -----------------------------------------------------------------------------------------------------------------------------------------
+// Object list of all loaded objects for easy search
+var threeloaders = {
+	"utf8": new THREE.UTF8Loader(),
+	"fbx": new THREE.FBXLoader(),
+	"gltf": new THREE.GLTFLoader(),
+	"draco": new THREE.DRACOLoader()
+};
+
+var objects = [];
+var objectsSearch = [];
+
+var totalFaces = 0;
+
+// Environment to be used in scene - sky clouds lights etc
+var env 	= new THREE.Group();
+// World (base world) to be used in scene
+var world 	= new THREE.Group();
+// Props to be used in making a scenario - usually static, non-animated.
+var props 	= new THREE.Group();
+// Actors to be used - characters, animals, machines (mostly animated)
+var actors 	= new THREE.Group();
+// Models to be used - any object with some specific functional behaviour 
+//					 - cars, planes, complex machines.
+var models 	= new THREE.Group();
+
+// Plain static meshes - not intended for anything controlled
+var statics 	= new THREE.Group();
+
+
+// All the important active lights being used
+var lights 	= new THREE.Group();
+
+// All the sensors in the scene (global and local) - sensors with parents are local, with null parent they are globally placed
+//    Sensors can be moved around in the scene hierarchy, so we only keep handles to them in the array.
+var sensors = new THREE.Group();
+
+var simentities = new THREE.Group();
+
+// ----------------------------------------------- Sensor systems -------------------------------------------------------------
+// Sensor lookup for OSM nodes
+var sensorlu 	= {};
+
+// ----------------------------------------------- Event systems -------------------------------------------------------------
+// Event lookup for OSM nodes
+var events 		= new THREE.Group();
+var eventlu 	= {};
+
+
+// ----------------------------------------------- Pathing and routing systems -------------------------------------------------------------
+// Node lookup for OSM nodes
+var nodelu 	= {};
+// Find what way/s this node is associated with - for updating them.
+var nodewaylu 	= {};
+// Way lookup for OSM Ways 
+var waylu 	= {};
+// Lookup for shapes generated
+var shapelu = {};
+
+// Nodes - these are places (points) in the world, that can be used in splines, events, colliders and many other things.
+var nodes 	= new THREE.Group();
+// Ways - these are a node series that define a travel path (for anything). Ways are not roads - roads are made up of ways - see open street map definition for more detail.
+var ways 	= new THREE.Group();
+// Intersections - These are references to nodes that have intersecting ways. Intersections usually map to traffic lights or crossings.
+var intersections	= new THREE.Group();
+
+// Networks - Are a combination of nodes, ways, intersections and other objects to make a traversal network (cars, people, buses etc)
+var networks 	= new THREE.Group();
+
+var cacheNode;
+
+
+// -----------------------------------------------------------------------------------------------------------------------------------------
+
+// This is how we store the asset information for the scene.
+// All data is stored in this tree, and converted to encrypted 
+// json and saved. When loading, decrypt and restore tree.
+var jsonScene 	= {};
+var urls		= {};
+
+// Largest allowable feature
+var largestFeatureSqr = 1000.0 * 1000.0;
+var shapeColor = 0x888888;
+
+var connection;
+var cameraObject;
+
+var parameters = {
+	inclination: 0.4,
+	azimuth: 0.0,
+	coverage: 0.5,
+	cloudHeight: 300.0
+};
+
+var channelCycleList = ["RGB", "NV", "THERMAL", "EDGEFC", "LIDAR128"];
+
+// -----------------------------------------------------------------------------------------------------------------------------------------
+// Mapping for types to threejs groups
+//    - Add mapping to this list for loading and new groups
+var threeMapping = {
+	"objects": statics,
+	"outdoors": statics,
+	"models" : models,
+	"nodes" : nodes,
+	"sensors": sensors,
+	"events": events,
+	"actors": actors
+};
+
+// ----------------------------------------------------------------------------
+// - Global variables -
+//  
+//   Performance and platform specifics
+
+var perf = {
+
+    distances: [ 300.0, 600.0, 2000.0 ],
+
+    mobile: {
+        treeshow: false,
+        buildingshow: true,
+        pplshow: false,
+        debugMonaco: true,
+        viewdist: 0
+    },
+
+    pc: {
+        treeshow: true,
+        buildingshow: true,
+        pplshow: true,
+        debugMonaco: true,
+        viewdist: 2
+    },
+
+    select: "pc",
+};
+
+// -----------------------------------------------------------------------------------------------------------------------------------------
+</script>

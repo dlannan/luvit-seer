@@ -1,0 +1,99 @@
+{% if site.google_analytics %}
+<!-- Asynchronous Google Analytics snippet -->
+<script>
+/*
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', '{{ site.google_analytics }}', 'auto');
+  ga('require', 'linkid', 'linkid.js');
+  ga('send', 'pageview');
+*/
+</script>
+{% endif %}
+
+
+<script>
+// Html helper functions
+$('#scenarist-dulled').hide();
+
+function fitToContainer(canvas){
+  canvas.style.width='100%';
+  canvas.style.height='100%';
+  canvas.width = $(canvas).parent().width();
+  canvas.height = $(canvas).parent().height();
+}
+
+function addColumn( colid, colsize, overlap ) {
+
+  var hidden = "";
+  if(overlap == 1) hidden = "overlap";
+  if(colsize === undefined) colsize = 12;
+  
+  $('.mainrow').append('<div id="column' + colid + '" class="canvascol ' + hidden + ' col-md-' + colsize + ' nopadding"></div>');
+}
+
+function setColumnWidth( colid, colsize ) {
+
+  if(colsize === undefined) colsize = 6;
+  $('#column'+colid).removeClass();
+  $('#column'+colid).addClass("canvascol");
+  $('#column'+colid).addClass("col-md-" + colsize);
+  $('#column'+colid).addClass("nopadding");
+}
+
+function setColumnHeight( colid, colheight ) {
+  $('#column'+colid).css('height', colheight);
+}
+
+function setColumnTop( colid, coltop ) {
+  $('#column'+colid).css('top', coltop);
+}
+
+function setCanvasSize( id, colsz, rowsize ) {
+  console.log(colsz, rowsize);
+  $("#container" + id).css('width', colsz);
+  $("#container" + id).css('height', rowsize);
+}
+
+function setCanvasPos( id, left, top ) {
+  $("#container" + id).css('left', left);
+  $("#container" + id).css('top', top);
+}
+
+function setCanvasNull( id ) {
+  $("#container" + id).css('opacity', 0.0);
+}
+
+
+function removeColumn( colid ) {
+
+  $('#column'+colid).remove();
+}
+
+function addRow( colid, rowsize ) {
+
+  if(rowsize === undefined) rowsize = 6;
+  $('#column'+colid).append('<div id="row' + colid + '" class="canvascol nopadding" style="height: ' + rowsize +'"></div>');
+}
+
+function addCanvasToColumn( id, colid ) {
+
+  var sensor = "sensor";
+  if(id == 0) sensor = "mainview";
+  // Test adding live canvas
+  $('#column'+colid).append('<div class="' + sensor + '"><canvas id="container' + id + '" class="view"></canvas></div>');
+}			
+
+function addEmptyToColumn( id, colid ) {
+  var sensor = "sensor";
+  if(id == 0) sensor = "mainview";
+  // Test adding live canvas
+  $('#column'+colid).append('<div class="' + sensor + '"></div>');
+}
+</script>
+
+{% include 'partials/mobile-scripts.html.twig' %}
+{% include 'partials/performance-scripts.html.twig' %}

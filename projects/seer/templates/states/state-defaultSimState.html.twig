@@ -1,0 +1,30 @@
+var defaultSimState = {
+
+    name: "none",
+    value: 0,              // Set this value to react to external state control
+    parent: undefined,      // If this is set, exit ensures the parent state is reactivated
+    oldid: -1,
+
+    onenter: function(init) {
+    },
+
+    onupdate: function(dt) {
+
+        // Run the sim...
+        simRunner();
+    },
+
+    onmouse: function( event ) {
+
+        //console.log("clicked: ", mode.state, mouseMove);
+        if((mouseMove == false) && (event.type === "mouseup")) {           
+        }
+    },
+
+    onexit: function() {
+
+    }
+};
+
+// Default sim state manager..
+stateManager.AddState("defaultSim", defaultSimState);

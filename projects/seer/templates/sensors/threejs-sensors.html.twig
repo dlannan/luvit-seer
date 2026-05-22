@@ -1,0 +1,343 @@
+function MakeArrowDir( pos, direction, color ) {
+
+    var length = direction.length();
+    var arrow = new THREE.ArrowHelper( direction, pos, length, color, 1.0, 1.0 );
+    return arrow;
+}
+
+function SensorFind( id ) {
+    
+    for(var i=0; i<sensors.children.length; i++) {
+        var sensor = sensors.children[i];
+        if(sensor.userData.uid == id) {
+            return sensor;
+        }
+    }
+    return null;
+}
+
+function uidSensor( node ) {
+
+    if(!node.userData.uid) {
+        node.userData.uid = UID();
+        //console.log("UID:", node.userData.uid);
+    }
+    sensorlu[node.userData.uid] = node;
+}
+
+function ShowSensor( obj ) {
+
+    obj.traverse ( function (child) {
+        if (child instanceof THREE.Mesh) {
+            child.visible = true;
+        }
+    });
+
+    // Show any linked events
+    ShowLinkedObjects(obj);
+}
+
+
+// These should go into a color map - fixed color list that 
+//    is globally shared.
+var LOselcolor = 0x00ff00;
+var LOclearcolor = 0xffff00;
+var LOagroup = undefined; // Arrow group
+
+function ClearLinkedObjects() {
+    if(!LOagroup) return;
+
+    // Remove the arrows!
+    while(LOagroup.children.length > 0){ 
+        LOagroup.remove(LOagroup.children[0]); 
+    }
+    scene.remove(LOagroup);
+}
+
+function ShowLinkedObjects( obj ) {
+
+    ClearLinkedObjects();
+
+    LOagroup = new THREE.Group();
+    for(var okeys = 0; okeys<obj.userData.linked.length; okeys++) {
+
+        var removelink = false;
+        var linkobjid = obj.userData.linked[okeys];
+        var linkobj = SceneGraph.findNodeByUid( linkobjid );
+
+        if(linkobj != undefined) { 
+
+            var linkpos = linkobj.position.clone();
+            var linkdir = new THREE.Vector3(0.0, -1.5, 0.0);
+            linkpos.sub(linkdir);
+            var newArrow = MakeArrowDir( linkpos, linkdir, LOselcolor ); 
+            
+            newArrow.cone.material.depthTest = false;
+            newArrow.cone.material.opacity = 0.65;
+            newArrow.cone.material.transparent = true;
+
+            if(newArrow) {
+                LOagroup.add(newArrow);
+                removelink = false;
+            } else {
+                removelink = true;
+            }
+        } else {
+            removelink = true;
+        }
+
+        if(removelink == true) {
+            // Auto remove links that are not valid
+            obj.userData.linked.splice(okeys,1);
+        }
+    }
+
+    scene.add(LOagroup);
+    LOagroup.visible = true;
+}
+
+
+function FinishSensorMovement() {
+
+    // Ensure the object is visible when finished moving.
+    var obj = SceneGraph.findNodeByUid(selectEditorObj);
+    //if(obj) ShowSensor(obj); 
+    EndSelection();
+}
+
+function FinishSensorPlacement() {
+
+    // if intersection of an object, localise it to the parent
+    //console.log("PLACED:", mode.object);
+
+    //objects.push( mode.object );
+    sensors.add( mode.object );
+
+    EndSelection();
+}
+
+function isSensor( obj ) {
+    var check = obj && (obj.userData.parentType == ObjectTypes.SENSORS);
+    return check;
+}
+
+function getSensorAsset( callback ) { 
+
+    var geometry = new THREE.ConeBufferGeometry( 0.15, 0.3, 8 );
+    var mat1 = new THREE.Matrix4();
+    var mat2 = new THREE.Matrix4();
+    mat1.makeRotationX( Math.PI * 0.5 );
+    mat2.makeTranslation(0.0, -0.15, 0.0);
+    mat1.multiply( mat2 );
+    geometry.applyMatrix(mat1);
+
+    var material = new THREE.MeshBasicMaterial( { color: new THREE.Color(0xffff00),  } );
+    var mesh = new THREE.Mesh( geometry, material );
+    mesh.material.opacity = 0.65;
+    mesh.material.transparent = true;    
+    mesh.visible = true; 
+
+    var obj = new THREE.Object3D();
+    obj.add(mesh);
+    
+    //console.log(ObjectTypes.SENSORS);
+    obj.userData.parentType = ObjectTypes.SENSORS;
+    obj.userData.linked = [];
+
+    sensors.add(obj);
+
+    //ShowSensor(obj);
+    callback(obj, mesh);
+}
+
+function newSensor( callback, newobj ) {
+
+    getSensorAsset( function(object, mesh) {
+
+        if(newobj) {
+
+            var pos = new THREE.Vector3();
+            pos.fromArray(newobj.position);
+            object.position.copy(pos);
+
+            var rot = new THREE.Euler();
+            rot.fromArray(newobj.rotation);
+            object.rotation.copy(rot);
+
+            object.scale = new THREE.Vector3(1, 1, 1);
+
+            object.name = newobj.name;
+            object.userData.uid = newobj.uid;
+            if(debug.buildIds) object.userData.uid = UID();
+            object.userData.effectId = newobj.effectId;    
+            
+            if(newobj.linked) {
+                object.userData.linked = newobj.linked;
+            }
+
+            uidSensor(object);
+
+        } else {
+            
+            uidSensor(object);
+            object.name = "SENSOR_" + object.id;
+        }  
+
+        mesh.userData.parentType = ObjectTypes.SENSORS;
+        mesh.userData.parentId = object.userData.uid;
+
+        object.userData.parentType = ObjectTypes.SENSORS;
+        object.userData.parentId = object.userData.uid;
+
+        SceneGraph.addStaticObject( object );
+        if(object.userData.linked && object.userData.linked.length > 0) {
+            // Remove dead links
+            CleanupLinkedObject(object);
+            var pid = object.userData.linked[0];
+            newChildLink( object.userData.uid, object.userData.uid, pid );
+        }
+
+        // Add mesh to the Pool not the Object3D
+        addNodeToRaycastPool(mesh);
+        callback( object );
+    });
+}
+
+function newSensorSelect() {
+
+    hidePopups();
+
+    newSensor( function(newnode) {
+
+        // clear other Selections first
+        clearSelection();
+        selection.add( newnode );
+
+        // Enable placement first!!
+        mode.state = EditorMode.SENSORNEW;
+        mode.object = newnode;        
+    });
+}
+
+
+function hideSensors() {
+    for(var i=0; i<sensors.children.length; i++) {
+        var sensor = sensors.children[i];
+        sensor.visible = false;
+    }
+}
+
+function showSensors() {
+    for(var i=0; i<sensors.children.length; i++) {
+        var sensor = sensors.children[i];
+        sensor.visible = true;
+    }
+}
+
+function cycleChannelType( obj, id ) {
+    
+    // The object should be a sensor - check first!
+    if(!obj.userData) return;
+
+    // This sensor has a reverse lookup, so its legit!
+    if(obj.userData.uid in sensorlu) {
+
+        var sensorid = 'sensor' + id;
+        var sensor = cameras[sensorid];
+        var effectId = obj.userData.effectId;
+        if(!effectId) effectId = "NV";
+
+        if((sensor != undefined) && (sensor != undefined)) {
+            
+            var index = channelCycleList.indexOf(effectId) + 1;
+            if(index > channelCycleList.length-1) index = 0;
+            var newEffect = channelCycleList[index];
+
+            mapCanvasToCamera( 1, 1, newEffect );
+            LinkCameraToObject( 1, sensor.objectlink );
+            obj.userData.effectId = newEffect;
+        }
+    }
+}
+
+function toggleChannelView( obj ) {
+
+    // The object should be a sensor - check first!
+    if(!obj.hasOwnProperty('userData')) return;
+
+    // This sensor has a reverse lookup, so its legit!
+    if(obj.userData.uid in sensorlu) {
+        var count = Object.keys(mappedChannels).length;
+        var effectId = obj.userData.effectId;
+        if(!effectId) effectId = "NV";
+
+        // if there is only one channel, then only main view has been built
+        if((count == 1) && obj) {
+            // Change channel size, so a second view can be shown 
+            setColumnWidth(0, 12);
+            addColumn( 1, 3, 1 );
+            addCanvasToColumn( 1, 1 );
+            addEmptyToColumn( 2, 1 );
+            addEmptyToColumn( 3, 1 );
+            onWindowResize();
+
+            mapCanvasToCamera( 1, 1, effectId );
+            LinkCameraToObject( 1, obj.userData.uid );
+
+        } else {
+            // Change channel size, so a second view can be shown 
+            setColumnWidth(0, 12);
+            removeColumn(1);
+            onWindowResize();
+
+            delete mappedChannels[1];
+            delete mappedChannels[2];
+            delete mappedChannels[3];
+        }
+
+        obj.userData.effectId = effectId;
+    }
+}
+
+// Go through all the events and remove any links that are not valid anymore
+//   invalid links are: - links point to own object
+//                      - links that no longer have a valid event object
+
+function CleanupLinkedObject(sensor) {
+    
+    for(var j=0; j<sensor.userData.linked.length; j++) {
+        var objectlinked = SceneGraph.findNodeByUid(sensor.userData.linked[j]);
+        
+        if(objectlinked == undefined) {
+            // Remove the dodgy link
+            sensor.userData.linked.splice(j, 1);
+        }
+    }
+}
+
+function CleanupLinkedObjects() {
+
+    for(var i=0; i<sensors.children.length; i++) {
+        var sensor = sensors.children[i];
+        CleanupLinkedObject(sensor);
+    }
+}
+
+// Enables monitoring of contacts for the sensor to listen to
+function SensorContacts( sensorid ) {
+
+    var sensor = SensorFind( sensorid );
+    if( sensor == null) return null;
+
+    var contacts = [];
+    var linked = sensor.userData.linked[0];
+    if(linked != undefined) {
+        for(var i=0; i<models.children.length; i++) {
+            var model = models.children[i];
+            if(linked != model.userData.uid) {
+                contacts.push(model);
+            }
+        }
+    }
+    return contacts;
+}

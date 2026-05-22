@@ -1,0 +1,112 @@
+{% extends 'partials/base-dashboard.html.twig' %}
+
+{% set uservalid = true %}
+
+{% block content %}
+{% include 'dashboard/header.html.twig' %}
+
+<style>
+.single-image {
+    flex: 0 0 100%;
+    max-width: 1000%;    
+}
+</style>
+
+<div class="my-3 my-md-5">
+    <div class="container">
+        <div class="page-header">
+            <h1 class="page-title">
+                Dashboard
+            </h1>
+        </div>
+
+        {% include 'html/project/project-stats.html.twig' %}
+
+        <div id="dashboard-latest" class="col-md-12">
+            <div id="project-four" class="row">
+            </div>
+        </div>
+
+        <div id="dashboard-issues" class="row row-cards row-deck">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Latest Project Issues</h3>
+                    </div>
+                    {% include 'dashboard/issue-list.html.twig' with { limit: '6' } %}
+                </div>
+            </div>
+        </div>
+
+        {% include 'html/project/project-latest-comments.html.twig' %}
+
+        {% include 'html/project/project-latest-activity.html.twig' %}
+
+        {% include 'html/project/project-server-info.html.twig' %}
+
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="row align-items-center flex-row-reverse">
+                <div class="col-auto ml-lg-auto">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                        </div>
+                        <div class="col-auto">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-lg-auto mt-3 mt-lg-0 text-center">
+                </div>
+            </div>
+        </div>
+    </footer>
+</div>
+  
+
+<script>
+$(document).ready(function() {
+
+    {% set query = "select uid from projects where users like Trevor" %}
+    {% set projects = (query|shortcodes)| json_decode %}
+
+    {% set basequery = "select * from scenes where" %}
+    {% for uid in projects %}
+    {% set basequery = (basequery ~ (" projectid = '" ~ uid.uid )) ~ "' or " %}
+    {% endfor %}
+    {% set basequery = basequery ~ (" projectid = '999999'") %}
+    {% set orderquery = " order by edittime desc [/sql-table]" %}
+    {% set query = basequery ~ orderquery %}
+    {% set results = (query|shortcodes)| json_decode %}
+
+    {% for i in range(0, 3) %}  
+    {% set pp = results[i] %}
+    {% set iconquery = ("select * from icons where uid = '" ~ pp.icon ) ~ "' " %}
+    {% if iconquery %}
+    {% set icondb = ((iconquery|shortcodes)| json_decode) %}
+    {% endif %}
+
+    var html = '<div class="col-sm-3">';
+    var html = html + '    <div class="card">';
+    var html = html + '        <div class="card-header">';
+    var html = html + '            <h3 class="card-title">{{ pp.name }}</h3>';
+    var html = html + '        </div>';
+    var html = html + '    <div class="card-body">';
+    var html = html + '        <div class="row">';
+    var clickstring = "onclick=\"location.href='/project?projectid={{pp.projectid}}'\"";    
+    var html = html + '                <div class="col-sm-6 scene-card single-image" ' + clickstring + ' id="Some Id">';
+    var html = html + '                <img src="data:image/png;base64,{{ icondb[0].data }}" />';
+    var html = html + '            </div>';
+    var html = html + '        </div>';
+    var html = html + '    </div>';
+    var html = html + '    </div>';
+    var html = html + '</div>';
+    $('#project-four').append(html);
+
+    {% endfor %}
+});
+</script>
+
+{% include 'dashboard/footer.html.twig' %}
+{% endblock %}

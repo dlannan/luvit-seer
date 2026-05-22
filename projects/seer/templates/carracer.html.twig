@@ -1,0 +1,555 @@
+{% set projectid = page.header.projectid  %} 
+{% set sceneid = page.header.sceneid  %} 
+{# <script>
+console.log("projectid: {{ projectid }}");
+console.log("sceneid: {{ sceneid }}");
+console.log("viewmode: {{ viewmode }}");
+console.log("selectedobject: {{ selectedobject }}");
+console.log("cameraeffect: {{ cameraeffect }}");
+</script> #}
+
+{% embed 'partials/base-nonav.html.twig' with { 'sceneid': sceneid, 'projectid': projectid } %}
+
+{% set viewmode = page.header.viewmode %}
+{% set selectedobject = page.header.selectedobject %}
+{% set cameraeffect = page.header.cameraeffect %}
+
+	{% set collection = page.collection() %}
+	{% set base_url = page.url %}
+    {% set feed_url = base_url %}
+
+    {% if base_url == '/' %}
+        {% set base_url = '' %}
+    {% endif %}
+
+    {% if base_url == base_url_relative %}
+        {% set feed_url = base_url~'/'~page.slug %}
+    {% endif  %}
+
+	{% block content %}
+
+		{% if grav.user.authenticated == true %}
+		
+		{% set times = [
+			{ name: 'Time 01', formatted: "00:00:00", laptime: "0.0" }, 
+			{ name: 'Time 02', formatted: "00:00:00", laptime: "0.0" }, 
+			{ name: 'Time 03', formatted: "00:00:00", laptime: "0.0" }, 
+			{ name: 'Time 04', formatted: "00:00:00", laptime: "0.0" }, 
+			{ name: 'Time 05', formatted: "00:00:00", laptime: "0.0" }, 
+			{ name: 'Time 06', formatted: "00:00:00", laptime: "0.0" }, 
+			{ name: 'Time 07', formatted: "00:00:00", laptime: "0.0" }, 
+			{ name: 'Time 08', formatted: "00:00:00", laptime: "0.0" }, 
+			{ name: 'Time 09', formatted: "00:00:00", laptime: "0.0" }, 
+			{ name: 'Time 10', formatted: "00:00:00", laptime: "0.0" }
+		 ] %}
+
+		{% include 'partials/slideout-data.html.twig' %}
+		{% include 'partials/slideout-times.html.twig' with times %}
+		{% include 'partials/performance-buttons.html.twig' %}
+		{% include 'partials/mobile-buttons.html.twig' %}
+
+		{% include 'threejs/threejs-style-main.html.twig' %}
+		
+    {% if show_sensor_header == true %}
+		{% include 'sensors/sensor-header.html.twig' %}
+    {% endif  %}
+
+		{% include 'partials/simulation-time.html.twig' %}
+		{% include 'partials/gauge-speedo.html.twig' %}
+
+<div class="container-fluid allchannels">
+  	<div class="row mainrow">
+	</div>
+</div>
+
+		<div class="loading">
+			<div class="loadinglogo">
+			<div class="loadingspinner">
+			</div>
+			</div>
+		</div>
+
+		{% include 'threejs/threejs-scripts.html.twig' %}
+        {% include 'threejs/fx/threejs-scripts-fx.html.twig' %}
+
+		{% include 'threejs/scene/scene-loader.html.twig' %}
+		{% include 'threejs/scene/scene-loader-anim.html.twig' %}
+		{% include 'sim/net-websocket.html.twig' with { 'sceneid': sceneid, 'projectid': projectid } %}
+		{% include 'threejs/threejs-mode-statemgr.html.twig' %}
+
+		{% include 'threejs/threejs-globals.html.twig' %}
+		{% include 'threejs/threejs-globals-sim.html.twig' %}
+
+		{% include 'threejs/fx/threejs-sky.html.twig' %}
+		{% include 'threejs/fx/threejs-ground.html.twig' %}		
+		{% include 'threejs/fx/threejs-materials.html.twig' %}
+
+		<script>
+
+			if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+
+			// controllers
+			{% include 'controllers/scenegraph-update.html.twig' %}
+			{% include 'controllers/scenegraph-render.html.twig' %}
+			{% include 'controllers/link-childobject.html.twig' %}
+
+			{% include 'modules/environments.html.twig' %}
+
+			{% include 'threejs/threejs-mode.html.twig' %}
+			{% include 'threejs/threejs-select-objects.html.twig' %}
+
+			{% include 'states/state-defaultSimState.html.twig' %}
+
+			{% include 'sensors/threejs-sensors.html.twig' %}
+			{% include 'threejs/threejs-nodes.html.twig' %}
+			{% include 'threejs/threejs-ways.html.twig' %}
+
+			{% include 'threejs/threejs-events.html.twig' %}
+
+			{% include 'threejs/fx/threejs-effects.html.twig' %}
+			{% include 'threejs/threejs-camview.html.twig' with { 'sceneid': sceneid, 'projectid': projectid } %}
+
+			{% include 'partials/slideout-js.html.twig' %}
+
+			{% include 'modules/vehicle-engine.html.twig' %}
+
+			{% set query = ("[sql-table json]select * from scenes where sceneid = '" ~ sceneid ) ~ "' limit 1[/sql-table]" %}
+			{% set scene = ((query|shortcodes) | json_decode)[0] %}
+			{% if scene.models %}
+			{% set modelmodule = ('modules/' ~ scene.models) ~ '.html.twig' %}
+			{% include modelmodule %}
+			{# {% include 'modules/os-test-pedestrian.html.twig' %} #}
+			{# {% include 'modules/os-test-soccer.html.twig' %} #}
+			{% endif %}
+
+			function loadAnimation(url) {}
+
+			// Initially this is justa per instance table - will pull from db
+			var times = {{ times|json_encode|raw }};
+
+			var initDone = false;
+			var viewmode;
+			var cameraeffect;
+
+			function init() {
+
+				mappedChannels = {};
+
+				createScene(true); 		// Scene with depth scene
+
+				addColumn( 0, 12 );
+				addCanvasToColumn( 0, 0 );
+
+				// Should assert here - must have a viewmode.
+				viewmode = "{{ viewmode }}";
+				
+				// AA needs to be done before camera abberations are made. AA can be various types as needed.
+				//renderEffectPass = applyAntiAliasing( composer );
+				cameraeffect = "{{ cameraeffect }}";
+				if( cameraeffect.length <= 0 ) cameraeffect = undefined;
+
+				mapCanvasToCamera( 0, 0, viewmode, cameraeffect ); 
+				mappedChannels[0].addFXAA();
+				mappedChannels[0].active();
+
+				clearScene();
+				window.addEventListener( 'resize', onWindowResize, false );
+
+				mouseMove = false;
+				mode.camera.control = ControlMode.NONE;
+
+				$("#select-obj").hide();
+				$("#select-spline").hide();
+				initDone = true;
+
+				skyParams( { value: 13.00 } );
+				events.visible = false;
+
+				// 10Hz update for the stats
+				setInterval(updateStats, 100);
+			}
+
+			// Completely clear out the scene
+			function clearScene() {
+
+				clearLookups();
+				clearAllObjects();
+
+				initSky();
+				//initGround();
+
+				initTools();
+				finalizeTools();				
+
+				nodes.visible = false;
+				ways.visible = false;
+				
+				mode.state = EditorMode.NONE;
+			}
+
+
+			function onMouseClick( event ) {
+
+				mouseMove = false;
+				// console.log("clicked: ", mode.state);
+				stateManager.MouseEvent( event );
+			}
+
+			function onMouseUp( event ) {
+
+				// check object is spline
+				stateManager.MouseEvent( event );
+
+				mouseMove = false;
+			}
+
+			function onKeyDown( event ) {
+
+				if(event.key === "Shift") { 
+					shiftPressed = true; 
+					//console.log("SHIFT PRESSED");
+				}
+			}
+
+			function onKeyUp( event ) {
+
+				//console.log("KEY RAISED", event);				
+				if(event.key === "Shift") { 
+					shiftPressed = false; 
+					//console.log("SHIFT RELEASED");
+				}
+				if(event.key === "`") {
+					debugMonaco = !debugMonaco;
+					utils.hideMonaco(debugMonaco);
+				}
+			}			
+
+			function onWindowResize() {
+
+				$('.view').each( function(idx, obj) {
+					fitToContainer($(obj).get(0));
+				});				
+
+				mapCanvasToCamera( 0, 0, viewmode, cameraeffect ); 
+				mappedChannels[0].addFXAA();
+				mappedChannels[0].active();
+
+				mode.camera.control = ControlMode.NONE;
+				controls = undefined;
+
+				render();
+				console.log("Resizing...");
+			}
+
+			// Reorganize the rendering with the new layout.
+			//     Each layout is fixed with 4 views. 1 large and 3 small in most cases with the exception
+			//     of all four the same size.
+			function onSensorLayout() {
+
+			}
+
+			// Render all the view channels per camera 
+			function renderMultiViews() {
+
+				$('.view').each( function( idx, obj ) {
+
+					var width = $(obj).outerWidth();
+					var height = $(obj).outerHeight();
+
+					// set the viewport
+					var seerCam = mappedChannels[idx];
+					if(seerCam) {
+						seerCam.active();
+						seerCam.w = width;
+						seerCam.h = height;
+						renderer.setViewport(0, 0, width, height);
+						if(seerCam.effectUpdate) seerCam.effectUpdate( seerCam.renderEffectPass, simstate.deltat, seerCam );
+						if(seerCam.cameraUpdate) seerCam.cameraUpdate( seerCam, seerCam.objectlink );
+					} 
+
+					camera.aspect = width / height;
+					camera.updateProjectionMatrix();
+
+					composer.render(scene, camera);
+				});
+			}
+
+			function animate() {
+
+				requestAnimationFrame( animate );
+
+				if(water) {
+					water.material.uniforms.time.value += simstate.deltat;
+					water.material.uniforms.size.value = parameters.size;
+					water.material.uniforms.distortionScale.value = parameters.distortionScale;
+					water.material.uniforms.alpha.value = parameters.alpha;
+				}
+				
+				render();
+			}
+
+			function render() {
+
+				if(initDone === false) return;
+				
+				simstate.deltat = clock.getDelta();
+
+				stateManager.Update(simstate.deltat);
+				updateAnims(simstate.deltat);		
+				
+				if(sky) {
+					//sky.material.uniforms.time.value = simstate.realt * 0.0002;
+					sky.material.uniforms.time.value = simstate.simt * 0.0002;
+					sky.material.uniforms.cloudHeight.value = parameters.cloudHeight;
+					sky.material.uniforms.coverage.value = parameters.coverage;
+					skyUpdate(parameters);
+				}
+
+				if(ocean) {
+					ocean.material.uniforms.sunDirection.value.copy( dirLight.position ).normalize();
+					ocean.material.uniforms.time.value += simstate.deltat * 0.2;
+				}
+
+				if(controls) {
+					//console.log(simstate.deltat, models.children[0]);
+					mode.camera.lon = controls.lon;
+					mode.camera.lat = controls.lat;
+					
+					controls.target = models.children[0]; // THIS IS A LITTLE DODGY!! TODO: FIX!!
+					controls.update(simstate.deltat);
+				} else {
+					//console.log("No Controls!!");
+					mode.camera.control = ControlMode.CHASE;
+					enableControls();
+				}
+
+				//camera.getWorldDirection( cameraDir );
+				//camera.updateProjectionMatrix();
+
+				checkLapEvents();
+
+				//if((selectEditorObj != -1) && (mode.state == EditorMode.NONE)) {
+				//	handleObjectSelect( SceneGraph.findNodeByUid(selectEditorObj));
+				//}
+
+				//renderer.toneMappingExposure = Math.pow( 0.95, 4.0 );
+
+				//if(effectMode == "DEPTH") {
+				//	camera.far = 500.0;
+				//	depthEffect.uniforms.cameraNear = camera.near;
+				//	depthEffect.uniforms.cameraFar = camera.far;
+				//}
+
+				renderMultiViews();
+			
+				// update octree post render
+				// this ensures any objects being added
+				// have already had their matrices updated
+				if(useOctree) {
+					octree.update();
+				}
+
+				TWEEN.update();
+			}
+
+			var startEvent;
+			var currEvent;
+
+			// This is MESSY and EXPENSIVE!! Need to fix.
+			function checkLapEvents() {
+
+				if(!Physics.vehicleNode) return;
+				if(!currEvent) return;
+				var neighbors = Physics.vehicleNode.proximityToken.findNeighbors(Physics.vehicleNode.mover.position(), 20.0);
+				var foundMatch = true;
+
+				for( var i=0; i<neighbors.length; i++) {
+					var node = neighbors[i];
+					var startLine = false;
+
+					// TODO: This is looking disturbingly large - need to simplify
+					if(node.node.userData.parentType == "events") {
+						
+						var target = Vec3FromTJS(node.node.position);
+						var distToNode = Vec3.distance (Physics.vehicleNode.mover.position(), target);
+						var sumOfRadii = Physics.vehicleNode.mover.radius() + node.node.userData.radius;
+
+						// Check that the car radius is within the event node radius
+						if(distToNode < sumOfRadii) {
+
+							if(currEvent.userData.uid != node.node.userData.uid) {
+
+								if(node.node.name == "EVENT_STARTLINE") {
+									
+									var roughlaptime = simstate.simt;
+
+									// Add time to high score list if it is good enough
+									var beaths = -1;
+									for(var t=times.length-1; t>=0; t--) {
+										if((times[t].laptime > roughlaptime) || (times[t].laptime == 0.0)) {
+											beaths = t;
+										}
+									}
+									// Have a position, replace it.
+									var flaptime = msToTime(roughlaptime);
+									times.splice(beaths, 0, { name: "{{ grav.user.username }}", formatted: flaptime, laptime: roughlaptime });
+									times.pop();
+									updateLapTimes();
+
+									// console.log("START_LINE RESET");
+									// Need to flag time to check "exact line position" for timing.									
+									simstate.simt = 0.0;
+									startLine = true;
+								}
+
+								if(currEvent.userData.linked.includes(node.node.userData.uid) || startLine) {
+									
+									//console.log("EVENT: ", currEvent);
+									currEvent = eventlu[node.node.userData.uid];
+									//console.log("EXPECTED EVENT: ", currEvent);									
+									foundMatch = true;
+									break;
+								}
+								else
+								{
+									foundMatch = false;
+								}
+							}
+						}
+					}
+
+					// Check if event hit was valid
+					if(foundMatch == false) {
+						console.log("Invalid Event Hit!");
+					}
+				}
+			}
+
+			function updateStats() {
+
+				if(!Physics.vehicle) return;
+
+				var body = Physics.vehicle.chassisBody;
+				if(body) {
+			        var frontdir = new CANNON.Vec3(0.0, 0.0, 1.0);
+        			var fwd = Physics.vehicle.chassisBody.vectorToWorldFrame(frontdir);
+					var pspeed = Physics.vehicle.currentVehicleSpeedKmHour;
+					var hdg = Math.atan2( fwd.z, fwd.x ) * 180 / Math.PI;
+					var az = Math.atan2( fwd.y, fwd.z ) * 180 / Math.PI;
+
+					if(simstate.mode === SimulationMode.PLAY) {
+						simstate.telet = Date.now();
+						series[0].append(simstate.telet, pspeed);
+						series[1].append(simstate.telet, Physics.vehicle.currSteerVal);
+						series[2].append(simstate.telet, Physics.vehicle.currEngineForce);
+						series[3].append(simstate.telet, Physics.vehicle.currBrakeForce);
+					}
+
+					$('#sensorHeading').html('<p>HDG: ' + hdg.toFixed(2) + "</p>");
+					$('#sensorAltitude').html('<p>ALT: ' + body.position.y.toFixed(2) + "</p>");
+					$('#sensorTilt').html('<p>AZ: ' + az.toFixed(2) + "</p>");
+					$('#sensorSpeed').html('<p>SPD: ' + pspeed.toFixed(2) + "</p>");
+
+					$('#gauge-speed').text(pspeed.toFixed(0) + ' kmh');
+
+					var rpm = Math.max(Physics.vehicleEngine.getRpm()-1000.0, 0.0);
+					var ticks = Math.round(rpm/143.0);
+					var maxticks = Math.round(8000.0/143.0);
+					for(var i=0; i<maxticks; i++) {
+						if(i < ticks) {
+							$("#XMLID_" + (154-i) + "_").children().first().css({ fill: "#ff0000" });
+						} else {
+							$("#XMLID_" + (154-i) + "_ ").children().first().css({ fill: "#909092" });
+						}
+					}
+				}
+			}
+
+			var series = [ new TimeSeries(), new TimeSeries(), new TimeSeries(), new TimeSeries()];
+			var charts = [];
+			function SetupTelemetry( cname, sid, color ) {
+
+				// Graph setup for the telemetry
+				var canvas = document.getElementById(cname);
+				var chart = new SmoothieChart( { millisPerPixel: 100 } );
+				chart.addTimeSeries(series[sid], { strokeStyle: color });
+				chart.streamTo(canvas, 500);				
+				charts.push(chart);
+			}
+
+			function updateLapTimes() {
+				var laptimes = $(".laptimes");
+				var currenthtml = "";
+				for(var t=0; t<times.length; t++) {
+		      		currenthtml = currenthtml + "<p>" + times[t].name + " : " + times[t].formatted + "</p>";
+				}
+				laptimes.html(currenthtml);
+			}
+
+			$(document).ready( function() {
+			    {% if sceneid  %}
+					scenestatus.scene = {{ sceneid }};
+				{% endif %}
+				
+				// Setup high score times
+				updateLapTimes();
+
+				// Should enable/disable this when mode changes
+				$(document.documentElement).keydown( onKeyDown );
+				$(document.documentElement).keyup( onKeyUp );
+
+				$.get("{{theme_url}}/assets/images/cardashboard.svg", null, function(data){
+					var svgNode = $("svg", data);
+					var docNode = document.adoptNode(svgNode[0]);
+					var pageNode = $(".speedoGauge");
+					pageNode.html(docNode);
+					$(".speedoGauge > svg").css('width', '500px');
+					$(".speedoGauge > svg").css('height', '350px');
+				}, 'xml');				
+
+				if(!isMobile) {
+
+					SetupTelemetry('chartSPD', 0, 'rgba(0, 0, 255, 1)' );
+					SetupTelemetry('chartSTEER', 1, 'rgba(255, 255, 0, 1)' );
+					SetupTelemetry('chartACCEL', 2, 'rgba(0, 255, 0, 1)' );
+					SetupTelemetry('chartBRAKE', 3, 'rgba(255, 0, 0, 1)' );
+
+					$(".mobileBtnSet").hide();
+				}
+
+				simstate.watch("simt", function (id, oldval, newval) {
+					$("#status-simtime").text( " "  + msToTime(newval) + " ");
+					return newval;
+				});
+
+				simstate.watch("realt", function (id, oldval, newval) {
+					//$("#status-realtime").html("<p>TIME: " + msToTime(newval) + "</p>");
+					return newval;
+				});
+
+			}); // document ready
+
+			function scenePostLoad() {
+				
+				// Race lap keeping...
+				startEvent = eventlu[SceneGraph.findByName("EVENT_STARTLINE").node.userData.uid];
+
+				// While racing check the next linked event, and if it hits, then 
+				// jump to next event.
+				currEvent = startEvent;
+
+				// Check events
+				{# for( var i=0; i<Object.keys(eventlu).length; i++) {
+					var event = eventlu[Object.keys(eventlu)[i]];
+					console.log(event);
+				} #}
+			};
+		</script>
+
+	{% endif %}
+
+{% include 'sensors/sensor-js.html.twig' %}
+        
+	{% endblock %}
+
+{% endembed %}

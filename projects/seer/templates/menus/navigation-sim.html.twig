@@ -1,0 +1,75 @@
+{% set pid = projectid %}
+{% set sid = sceneid %}
+
+{% set query = ("[sql-table json]select name from projects where uid = '" ~ pid ) ~ "' limit 1[/sql-table]" %}
+{% set pname = ((query|shortcodes) | json_decode)[0] %}
+
+{% set modelq = ("[sql-table json]select models from scenes where sceneid = '" ~ sid ) ~ "' [/sql-table]" %}
+{% set modelres = ((modelq|shortcodes) | json_decode(true))[0] %}
+
+<nav class="navbar navbar-default nav-pills nav-justified" id="top-menu" role="navigation" style="display: none;">
+
+    <a id="menu-mode" class="nav-link active" data-toggle="tooltip" data-placement="top" title="Select Editing Mode">Main</a>
+    <a id="menu-main-project" class="nav-link active btn-info">
+    {{ pname.name }}
+    </a>
+
+    <a id="menu-editor-models" class="nav-link threed-selection menu-editor" collection="models" data-toggle="tooltip" data-placement="top" title="Add 3D Vehicle to Scene">
+        <i class="fa fa-car"></i>
+    </a>
+    <a id="menu-editor-models-naval" class="nav-link threed-selection menu-editor" collection="models-naval" data-toggle="tooltip" data-placement="top" title="Add 3D Vessel to Scene">
+        <i class="fa fa-ship"></i>
+    </a>
+    <a id="menu-editor-objects" class="nav-link threed-selection menu-editor" collection="objects" data-toggle="tooltip" data-placement="top" title="Add 3D Buildings to Scene">
+        <i class="fa fa-cube"></i>
+    </a>
+    <a id="menu-editor-actors" class="nav-link threed-selection menu-editor" collection="actors" data-toggle="tooltip" data-placement="top" title="Add 3D Actors to a Scene">
+        <i class="fa fa-male"></i>
+    </a>
+
+    <a id="menu-spline-new" class="nav-link menu-spline">
+        <i class="fa fa-edit"></i>
+    </a>
+    <a id="menu-spline-test" class="nav-link menu-spline">
+        <i class="fa fa-road"></i>
+    </a>
+    <a id="menu-spline-scatter" class="nav-link menu-spline">
+        <i class="fa fa-ellipsis-h"></i>
+    </a>
+    <a id="menu-spline-extrude" class="nav-link menu-spline">
+        <i class="fa fa-external-link-alt"></i>
+    </a>
+
+    <a id="menu-simulator-start" class="nav-link menu-simulator">
+        <i class="fas fa fa-play"></i>
+    </a>
+    <a id="menu-simulator-pause" class="nav-link menu-simulator">
+        <i class="fas fa fa-pause"></i>
+    </a>
+    <a id="menu-simulator-reset" class="nav-link menu-simulator">
+        <i class="fa fa-repeat"></i>       
+    </a>
+    <a id="menu-simulator-kill" class="nav-link menu-simulator">
+        <i class="fas fa fa-close"></i>
+    </a>
+
+    <div id="scene-title" class="scene-title menu-main">
+    <form class="navbar-form navbar-left">
+        <div class="form-group">
+            <input type="text" class="form-control" placeholder="Scene 01" value="Scene 01">
+        </div>
+    </form>
+    </div>
+
+    <a id="menu-main-snapshot" class="nav-link threed-selection menu-main" collection="scenes" data-toggle="tooltip" data-placement="top" title="Screenshot for Icon">
+        <i class="fa fa-camera-retro"></i>
+    </a>    
+
+    <a id="menu-main-savescene" class="nav-link threed-selection menu-main" collection="scenes" data-toggle="tooltip" data-placement="top" title="Save the current Scene">
+        <i class="fa fa-save"></i>
+    </a>
+
+    <a id="menu-main-close" class="nav-link threed-selection menu-main" collection="scenes" data-toggle="tooltip" data-placement="top" title="Return to Project page">
+        <i class="fa fa-power-off"></i>
+    </a>
+</nav>

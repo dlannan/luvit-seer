@@ -1,0 +1,3 @@
+<html><h2>OOTS - Artists Information Form Automated Email.</h2>
+                    <p>A message for artists</p>
+                            <p> From: David Lannan</p></html>

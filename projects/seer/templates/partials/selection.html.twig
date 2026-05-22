@@ -1,0 +1,38 @@
+// Iterate collection and fill div with items - this isnt right. will fix							
+var id = 0;
+selectionList = {};
+
+{% set ppage = page.find(envpages) %}
+{% set gloader = ppage.header.gloader %}
+
+{% for env in ppage.children %}
+
+    {% set mediaasset = env.header.asset|striptags %}
+
+    {# var child = "<div class='selection-item' uid='" + id + "'>";
+    child = child + '{{ env.media["icon.png"].cropZoom(110,80) }}' + "<div>{{ env.header.name }}</div></div>"; #}
+
+    var child = "<div class='d-md-inline-block'>";
+    child = child + "<div class='selection-item clearfix d-none d-md-block' uid='" + id + "'>";
+    child = child + '<div class="card">';
+
+    var img = '{{ env.media["icon.png"].cropZoom(200,150) }}';
+    if(img.length < 1) { img = '<img width=200 height=150 src="{{theme_url}}/assets/images/placeholder.jpg">'; }
+    child = child + img;
+    child = child + '<div class="select-card-body">' + "{{ env.header.name }}</div></div></div></div>";
+
+    // Add click for loading in the data
+    var data = {
+        name: "{{ env.header.name }}",
+        format: "{{ env.header.format }}",
+        json: "{{ env.header.json }}",
+        loadscene: "{{ env.header.loadscene }}",
+        url: "{{ env.media[mediaasset].url }}",
+        gloadscene: "{{ gloader }}",
+        child: child
+    };
+
+    selectionList[id] = data;
+    id = id + 1;
+{% endfor %}
+

@@ -1,0 +1,12 @@
+
+
+var cUpdateDefault = function(ent, currentTime, elapsedTime){
+
+    // Update using OpenSteer controllers if needed
+    ent.update(currentTime, elapsedTime);
+    
+    // Copy the mover position and rotation so that its "kind of" double buffered
+    //    ie: any mover changes after this wont impact the render.            
+    ent.renderdata.pos = ent.mover.position().clone();
+    ent.renderdata.rot = ent.mover.forward().clone();           
+};

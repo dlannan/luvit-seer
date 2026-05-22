@@ -1,0 +1,78 @@
+
+// Clear before using  
+stateManager.unwatch();
+
+stateManager.watch("ready", function (id, oldval, newval) {
+
+    if(newval == true) {
+
+        simstate.mode = SimulationMode.PLAY;
+        onWindowResize();
+        animate();
+    }
+});
+
+
+Math.fmod = function (a,b) { return Number((a - (Math.floor(a / b) * b)).toPrecision(8)); };
+
+// This method handles both the movement of the vehicle with the sensor,
+// and the sensor itself (so that it stays synced)
+function objectCameraRender( ent, targetP, targetR, distance, elapsedTime ) {
+
+    //console.log("-----> here" );
+    var hdg = Math.atan2( targetR.z, targetR.x );
+
+    {# $('#sensorHeading').text('HDG: ' + Math.fmod(Math.floor(hdg * 360.0 / Math.PI), 360.0) );
+    $('#sensorAltitude').text('ALT: ' + targetP.y);
+    $('#sensorTilt').text('AZ: ' + targetR.x); #}
+
+    ent["tweenpos"] = animateVector4(ent.node, targetP, targetR, {
+            
+        duration: elapsedTime * 1000.0, 
+        easing : TWEEN.Easing.Linear.None,
+        callback : function(){
+            //console.log("Completed");
+        }
+    });
+
+    var targetR = new THREE.Vector3( -targetR.x, -targetR.y, -targetR.z );
+    ent.tweenposlinked = animateVector4(ent.renderdata.object, targetP, targetR, {
+            
+        duration: elapsedTime * 1000.0, 
+        easing : TWEEN.Easing.Linear.None,
+        callback : function(){
+            //console.log("Completed");
+        }
+    });
+}
+
+
+function setupCameraMapping() {
+
+    //console.log("Models:", models.children.length);
+
+    
+    mode.camera.control = ControlMode.NONE;
+    disableControls();
+    enableControls();
+}
+
+// Once document is ready then load scene and attach to obejct
+$(document).ready(function(){
+
+    init();
+
+    $(".loading").show();
+    loadSceneFromId( function() {
+
+        setupCameraMapping();
+        //startWebSocket();
+        
+        $(".loading").hide();  
+        scenestatus.loaded = true;     
+        scenestatus.loadtime = Date.now();     
+        console.log("Loading Done....");
+
+        if(typeof scenePostLoad !== 'undefined') scenePostLoad();
+    });
+});

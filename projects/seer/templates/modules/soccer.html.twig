@@ -1,0 +1,447 @@
+
+
+// Test the OpenSteer soccer demo.
+//    - start testing as soon as document loaded. Include this to test.
+
+// ----------------------------------------------------------------------------
+//
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the "Software"),
+// to deal in the Software without restriction, including without limitation
+// the rights to use, copy, modify, merge, publish, distribute, sublicense,
+// and/or sell copies of the Software, and to permit persons to whom the
+// Software is furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+// THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+// FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+// DEALINGS IN THE SOFTWARE.
+//
+//
+// ----------------------------------------------------------------------------
+//
+// Simple soccer game by Michael Holm, IO Interactive A/S
+//
+// I made this to learn opensteer, and it took me four hours. The players will
+// hunt the ball with no team spirit, each player acts on his own accord.
+//
+// I challenge the reader to change the behavour of one of the teams, to beat my
+// team. It should not be too hard. If you make a better team, please share the
+// source code so others get the chance to create a team that'll beat yours :)
+//
+// You are free to use this code for whatever you please.
+//
+// (contributed on July 9, 2003)
+//
+// ----------------------------------------------------------------------------
+
+var selectedVehicle;
+var soccer;
+var context;
+
+var zscale = 2.35;
+var xscale = 2.85;
+var checkRadius = 30.0;
+
+{# var playerPosition = [
+    Vec3Set(0,0,4),
+    Vec3Set(-5,0,7),
+    Vec3Set(5,0,7),
+    Vec3Set(-3,0,10),
+    Vec3Set(3,0,10),
+    Vec3Set(-8,0, 15),
+    Vec3Set(0,0,15),
+    Vec3Set(8,0,15),
+    Vec3Set(0,0,4)
+];
+ #}
+
+// Get the initial position of the vehicles and set them here
+var playerPositionStore = [];
+var playerPosition = [];
+
+function ScaleVector( v ) {
+
+    v.x = v.x * xscale;
+    v.z = v.z * zscale;
+    return v;
+}
+
+// ----------------------------------------------------------------------------
+// a box object for the field and the goals.
+var AABBox = function(_min, _max) {
+
+    this.m_min = _min;
+    this.m_max = _max;
+
+    this.InsideX = function(p){ if((p.x < this.m_min.x) || (p.x > this.m_max.x)) { return false;} else {return true;} }
+    this.InsideZ = function(p){ if((p.z < this.m_min.z) || (p.z > this.m_max.z)) {return false;} else {return true;} }
+    this.draw = function(ctx) {
+        var b = Vec3Set(this.m_min.x, 0, this.m_max.z);
+        var c = Vec3Set(this.m_max.x, 0, this.m_min.z);
+    }
+};
+
+// The ball object
+var Ball = function(bbox) {
+
+    this.spin = 0.0;   
+    this.distance = 0.0;
+    this.lastfwd = new Vec3();
+    this.lastpos = new Vec3();
+
+    this.m_bbox = bbox;
+    this.mover = new SimpleVehicle();
+
+    this.customData = {};
+
+    // reset state
+    this.reset = function() {
+
+        this.mover.reset (); // reset the vehicle 
+        this.mover.setSpeed(0.0);         // speed along Forward direction.
+        this.mover.setMaxForce(30.0);      // steering force is clipped to this magnitude
+        this.mover.setMaxSpeed(30.0);         // velocity is clipped to this magnitude
+        this.mover.setRadius(1.2);
+
+        this.mover.setPosition(Vec3Set(0.0, 0.0, 0.0));
+        //this.mover.clearTrailHistory ();    // prevent long streaks due to teleportation 
+        //this.mover.setTrailParameters (100, 6000);
+        this.lastpos = this.mover.position().clone();
+    }
+
+    // per frame simulation update
+    this.update = function( currentTime, elapsedTime) {
+
+        this.mover.applyBrakingForce(3.5, elapsedTime);
+        this.mover.applySteeringForce(this.mover.velocity(), elapsedTime);
+        // are we now outside the field?
+        if(!m_bbox.InsideX(this.mover.position())) {
+            var d = this.mover.velocity();
+            this.mover.regenerateOrthonormalBasis(Vec3Set(-d.x, d.y, d.z));
+            this.mover.applySteeringForce(this.mover.velocity(), elapsedTime);
+        }
+        if(!m_bbox.InsideZ(this.mover.position())) {
+            var d = this.mover.velocity();
+            this.mover.regenerateOrthonormalBasis(Vec3Set(d.x, d.y, -d.z));
+            this.mover.applySteeringForce(this.mover.velocity(), elapsedTime);
+        }
+
+
+        if(m_TeamAGoal.InsideZ(m_Ball.mover.position()) && m_TeamAGoal.InsideX(m_Ball.mover.position())) {
+            m_Ball.reset();	// Ball in blue teams goal, red scores
+            m_blueScore++;
+        }
+        if(m_TeamBGoal.InsideZ(m_Ball.mover.position()) && m_TeamBGoal.InsideX(m_Ball.mover.position())) {
+            m_Ball.reset();	// Ball in red teams goal, blue scores
+            m_redScore++;
+        }
+
+        this.distance += Vec3.distance( this.lastpos, this.mover.position() );
+        var pos = this.mover.position();
+        this.mover.setPosition( Vec3Set(pos.x, 0.0, pos.z));
+        this.lastpos = this.mover.position().clone();
+    }
+
+    this.kick = function( dir, elapsedTime ){
+        this.mover.setSpeed(dir.length());
+        this.mover.regenerateOrthonormalBasis(dir);
+    }
+
+    this.reset();
+};
+
+var Player = function( others, allplayers, ball, isTeamA, id) {
+
+    // constructor
+    this.mover = new SimpleVehicle();
+
+    this.m_others = others;
+    this.m_AllPlayers = allplayers;
+    this.m_Ball = ball;
+    this.b_ImTeamA = isTeamA;
+    this.m_MyID = id;
+
+    // reset state
+    this.reset = function() {
+        this.mover.reset(); // reset the vehicle 
+        this.mover.setSpeed (0.0);         // speed along Forward direction.
+        this.mover.setMaxForce (20.7);      // steering force is clipped to this magnitude
+        this.mover.setMaxSpeed (10);         // velocity is clipped to this magnitude
+        this.mover.setRadius(1.25);
+
+        // Place me on my part of the field, looking at oponnents goal
+        this.mover.setPosition( (this.b_ImTeamA === true) ? frandom01()*20 : -frandom01()*20, 0, (frandom01()-0.5)*20);
+        if(this.m_MyID < 9) {
+            if(this.b_ImTeamA == true)
+                this.mover.setPosition(playerPosition[this.m_MyID]);
+            else
+                this.mover.setPosition(playerPosition[this.m_MyID+7]);
+        }
+
+        this.m_home = this.mover.position().clone();
+    }
+
+    // per frame simulation update
+    // (parameter names commented out to prevent compiler warning from "-W")
+    this.update = function( currentTime, elapsedTime) {
+
+        // if I hit the ball, kick it.
+        var distToBall = Vec3.distance (this.mover.position(), this.m_Ball.mover.position());
+        var sumOfRadii = this.mover.radius() + this.m_Ball.mover.radius();
+        if(distToBall < sumOfRadii) {
+            this.m_Ball.kick((this.m_Ball.mover.position().sub(this.mover.position())).mult(10.0), elapsedTime);
+        }
+
+        // otherwise consider avoiding collisions with others
+        var collisionAvoidance = this.mover.steerToAvoidNeighbors(1.0, this.m_AllPlayers);
+        if(collisionAvoidance.neq(Vec3.zero)) {
+            this.mover.applySteeringForce (collisionAvoidance, elapsedTime);
+        }
+        else {
+            var distHomeToBall = Vec3.distance (this.m_home, this.m_Ball.mover.position());
+            if( distHomeToBall < checkRadius) {
+                
+                // go for ball if I'm on the 'right' side of the ball
+                var testplayer = this.mover.position().z < this.m_Ball.mover.position().z;
+                if( this.b_ImTeamA ) { testplayer = this.mover.position().z > this.m_Ball.mover.position().z; }
+
+                if( testplayer === true ) {
+                    var seekTarget = this.mover.xxxsteerForSeek(this.m_Ball.mover.position());
+                    this.mover.applySteeringForce(seekTarget, elapsedTime);
+                } else {
+                    var Z = this.m_Ball.mover.position().x - this.mover.position().x > 0 ? -1.0 : 1.0;
+                    var behindBall = this.m_Ball.mover.position().add( (this.b_ImTeamA ? Vec3Set(Z,0,3) : Vec3Set(Z,0,-3)) );
+                    var behindBallForce = this.mover.xxxsteerForSeek(behindBall);
+                    //annotationLine (position(), behindBall , Vec3(0,1,0));
+                    var evadeTarget = this.mover.xxxsteerForFlee(this.m_Ball.mover.position());
+                    this.mover.applySteeringForce(behindBallForce.mult(5.0).add(evadeTarget), elapsedTime);
+                }
+            }
+            else { // Go home
+                var seekTarget = this.mover.xxxsteerForSeek(this.m_home);
+                //var seekHome = this.mover.xxxsteerForSeek(this.m_home);
+                this.mover.applySteeringForce (seekTarget.mult(2.0), elapsedTime);
+            }
+        }
+    }
+
+    // per-instance reference to its group
+    //const std::vector<Player*>	m_others;
+    //const std::vector<Player*>	m_AllPlayers;
+    //Ball*	m_Ball;
+    //bool	b_ImTeamA;
+    //int		m_MyID;
+    //Vec3		m_home; 
+
+    this.reset();
+};
+
+
+
+// ----------------------------------------------------------------------------
+
+var ballobj;
+
+var	m_PlayerCountA = 0;
+var m_PlayerCountB = 0;
+var TeamA = [];
+var TeamB = [];
+var m_AllPlayers = [];
+
+var     m_Ball;
+var     m_bbox;
+var     m_TeamAGoal;
+var	    m_TeamBGoal;
+var     junk;
+var		m_redScore;
+var		m_blueScore;
+
+// TODO: This should be a helper!!! Move it!!!
+function setBodyMaterial( obj, newmaterial ) {
+    
+    obj.traverse( function( node ) {
+
+        if ( node.material ) { 
+            if(node.material.length > 1) {
+                for(var i = 0; i<node.material.length; i++) {
+                    var material = node.material[i];
+                    if(material.name.indexOf( "body" ) > -1)                     {
+                        node.material[i] = newmaterial;
+                        console.log("Changing material");
+                    }
+                }
+            } else {
+                var material = node.material;
+                if(material.name.indexOf( "body" ) > -1) 
+                {
+                    node.material = newmaterial;
+                    console.log("Changing material");
+                }
+            }
+        }
+    });
+}
+
+function soccerSetup() {
+
+    simstate.resetStarted = true;
+
+    // Make a field
+    m_bbox = new AABBox(ScaleVector(Vec3Set(-10,0,-20)), ScaleVector(Vec3Set(10,0,20)));
+    // Red goal
+    m_TeamAGoal = new AABBox(ScaleVector(Vec3Set(-2,0,-21)), ScaleVector(Vec3Set(2,0,-19)));
+    // Blue Goal
+    m_TeamBGoal = new AABBox(ScaleVector(Vec3Set(-2,0,19)), ScaleVector(Vec3Set(2,0,21)));
+    // Make a ball
+    m_Ball = new Ball(m_bbox);
+    m_Ball['node'] = ballobj;
+    SceneGraph.replaceMover(ballobj.userData.uid, m_Ball.mover);
+    SceneGraph.setRenderData(ballobj.userData.uid, 'offset', Vec3Set(0.0, 1.0, 0.0));
+    models.add( m_Ball['node'] );
+
+    // Build team A
+    m_PlayerCountA = 7;
+
+    for(var i=0; i < m_PlayerCountA ; i++) {
+        var pMicTest = new Player(TeamA, m_AllPlayers, m_Ball, true, i);
+        var node = models.children[i];
+
+        SceneGraph.replaceMover(node.userData.uid, pMicTest.mover);
+        setBodyMaterial(node, carmaterials['blue-metal']);
+
+        selectedVehicle = pMicTest;
+        TeamA.push(pMicTest);
+        m_AllPlayers.push(pMicTest);
+    }
+    // Build Team B
+    m_PlayerCountB = 7;
+    for(var i=0; i < m_PlayerCountB ; i++)  {
+        var pMicTest = new Player(TeamB, m_AllPlayers, m_Ball, false, i);
+        var node = models.children[i+m_PlayerCountA];
+
+        SceneGraph.replaceMover(node.userData.uid, pMicTest.mover);
+        setBodyMaterial(node, carmaterials['red-metal']);
+
+        selectedVehicle = pMicTest;
+        TeamB.push(pMicTest);
+        m_AllPlayers.push(pMicTest);
+    }
+    // initialize camera
+    m_redScore = 0;
+    m_blueScore = 0;
+    simstate.resetStarted = false;
+}
+
+function close() {
+    for(var i=0; i < m_PlayerCountA ; i++) {
+        models.remove(TeamA[i].node);
+        delete TeamA[i];
+    }
+    TeamA = [];
+    for(var i=0; i < m_PlayerCountB ; i++) {
+        models.remove(TeamB[i].node);
+        delete TeamB[i];
+    }
+    TeamB = [];
+    models.remove(m_Ball.node);
+    m_AllPlayers = [];
+}
+
+function reset() {
+
+    // reset vehicle
+    for(var i=0; i < m_PlayerCountA ; i++)
+        TeamA[i].reset ();
+    for(var i=0; i < m_PlayerCountB ; i++)
+        TeamB[i].reset ();
+    m_Ball.reset();
+
+    // initialize camera
+    m_redScore = 0;
+    m_blueScore = 0;
+
+    oldTime = 0.0;
+    currentTime = 0.0;
+}
+
+// ----------------------------------------------------------------------------
+
+var selectedVehicle;
+
+var oldTime;
+var currentTime; 
+var elapsedTime;
+
+function soccerUpdater( dt ) {
+
+    oldTime = currentTime;
+    currentTime += dt ;
+    elapsedTime = dt;
+
+    // update simulation of test vehicle
+    for( var i=0; i < m_PlayerCountA ; i++)
+        TeamA[i].update (currentTime, elapsedTime);
+    for( var i=0; i < m_PlayerCountB ; i++)
+        TeamB[i].update (currentTime, elapsedTime);
+    m_Ball.update(currentTime, elapsedTime);
+}
+
+$(document).ready(function() {
+
+    console.log("Testing OpenSteer Soccer Demo.");
+    // Watch the statemanager, when its good to start, initiate the rendering loop
+    simstate.watch("resetStarted", function (id, oldval, newval) {
+
+        console.log("simstate.resetStarted", newval);
+        
+        if(newval == true) {
+
+            if(playerPositionStore.length == 0) {
+                var t1idx = 0;
+                var t2idx = 7;
+                for(var i=0; i < 7 + 7; i++) {
+                    var node = models.children[i];
+                    var idx = 0;
+                    if(node.position.z < 0)
+                        idx = t1idx++;
+                    else 
+                        idx = t2idx++;
+                    playerPositionStore[idx] = Vec3Set(node.position.x, 0.0, node.position.z);
+                }
+            }
+            playerPosition = JSON.parse(JSON.stringify(playerPositionStore));
+        }
+        return newval;
+    });
+
+    var soccerball = { 
+
+        parentType: "models",
+        format: "glb",
+        url: "{{ theme_url }}/assets/content/models/soccerball/soccerball.glb"
+    };
+
+    loadScene( soccerball, UID(), function(newobj) {
+        ballobj = newobj;
+        SceneGraph.addMoverObject(ballobj);
+    });
+    currentTime = appClock.getElapsedTime();
+
+    simstate.resetStarted = false;
+
+    simstate.mode = SimulationMode.NONE;
+    simstate.funcinit = soccerSetup;
+    simstate.funcupdate = soccerUpdater;
+    simstate.funcreset = reset;
+    simstate.funckill = close;
+});
+
+

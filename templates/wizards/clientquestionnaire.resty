@@ -1,0 +1,244 @@
+{% 
+function drawSlider(number)
+
+    local outdata = "<span style='font-family: monospace;'>"
+    for i=1,number do outdata=outdata.."-" end
+    outdata=outdata.."|"
+    for i=number+1,6 do outdata=outdata.."-" end
+    outdata=outdata.."</span>"
+    return outdata
+end
+%}
+<div class="fs-title">
+    <h4>Web Design Plan</h4>
+</div>
+<div class="container">
+
+
+
+    <h2>Background Information</h2>
+    <label>Business name</label><br>
+    {* d.businessname *}<br>
+    <label>Tell us a little about the business</label><br>
+    <p>{* d.businessservices *}</p><br>
+    <label>What is the businesses competitive edge? What sets it apart from other comparitive businesses?</label><br>
+    <p>{* d.businessedge *}</p>
+
+
+
+
+    <h2>Target Audience</h2>
+    <div class="col-md-6">
+        <label>Age: </label> {* d['targetaudience_age'] *}<br>
+    </div>
+    <div class="col-md-6">
+        <label>Gender: </label> {* d.targetaudience_gender *}<br>
+    </div>
+    <div class="col-md-12">
+    <label>Geography</label>
+        <div class="checkbox small">
+        <ul>
+            <li><label>Local: </label>
+            {* d['targetaudience_geography-local'] *}</li>
+            <li><label>National: </label>
+            {* d['targetaudience_geography-national'] *}</li>
+            <li><label>International: </label>
+            {* d['targetaudience_geography-international'] *}</li>
+        </ul>
+        </div> 
+    </div>
+    <div class="col-md-12">
+    <label>Any other demographics you'd like to include</label><br>
+    <p>{* d['targetaudience_other'] *}</p>
+    </div>
+
+
+
+    <h2>Redesign</h2>
+    <label>Do you already own the domain name you would like to use?  </label> {* d['current-domain'] *}
+    {% if d['current-domain'] == "true" then %}
+    <div>
+        <label>What is the domain name?</label><br>
+        <p>{* d['current-domainname'] *}</p>
+    </div>
+    {% else %}
+    <div>
+        <p>We'll help you purchase a domain. To see if the domain you're interested in is available to purchase, <a target="_blank" href="https://au.godaddy.com/domains/domain-name-search">search here</a></p>
+    </div>
+    {% end %}
+    <label>Do you have an existing site that you would like redesigned?  </label> {* d['redesign'] *}<br>
+    {% if d['redesign'] == "true" then %}
+    <div>
+        <label>When was the current design created?  </label>
+        {* d['current-created'] *}<br>
+        <label>What do you like and dislike about the current design?</label>
+        <div class="col-md-6 nopadding">
+            <h5>Likes:</h5>
+            <p>{* d['current-likes'] *}</p>
+        </div>
+        <div class="col-md-6 nopadding">
+            <h5>Dislikes:</h5>
+            <p>{* d['current-dislikes'] *}</p>
+        </div>
+        <label>Is there anything you’d like to carry over from the current design?  </label><br>
+        <p>{* d['current-carryover'] *}</p>
+        <label>How is the site hosted?</label><br>
+        {* d['current-hosted'] *}<br>
+        <label>Who maintains the current site?</label><br>
+        {* d['current-maintains'] *}<br>
+    </div>
+    {% end %}
+
+
+
+    <h2>Purpose &amp; Goals</h2>
+    <label>What action(s) would you like visitors to take when they visit the website?</label><br>
+    <div class="checkbox small">
+        <label for="050">Search for information: </label>
+        {* d['actions-searchforinfo'] *}<br>
+        <label for="051">Join mailing list: </label>
+        {* d['actions-joinmailinglist'] *}<br>
+        <label for="052">Make a purchase: </label>
+        {* d['actions-makepurchase'] *}<br>
+        <label for="053">Contact the business: </label>
+        {* d['actions-contact'] *}<br>
+        <label for="054">Fill out a form: </label>
+        {* d['actions-fillform'] *}<br>
+        <label for="055">Other: </label>
+        {* d['actions-other'] *}<br>
+    </div><br>
+    <label>Which of the following are goals of the website</label>
+    <div class="checkbox checkbox-custom small">
+        Increase Traffic: {* d['goals-increasetraffic'] *}<br>
+        Generate Analytics: {* d['goals-generateanalytics'] *}<br>
+        Generate Business: {* d['goals-generatebusiness'] *}<br>
+        Increase Memberships: {* d['goals-increasememberships'] *}<br>
+        Increase Sales: {* d['goals-increasesales'] *}<br>
+        Explore Marketing: {* d['goals-exploremarketing'] *}<br>
+        Establish Interet Presence: {* d['goals-establishinternetpresence'] *}<br>
+        Enquires: {* d['goals-enquiries'] *}<br>
+        Increase Interaction: {* d['goals-increaseinteraction'] *}<br>
+        Increase Social Following: {* d['goals-increasesocialfollowing'] *}<br>
+        Collect Data: {* d['goals-collectdata'] *}<br>
+        Certification: {* d['goals-certification'] *}<br>
+    </div>
+
+
+
+    <h2>Visual Identity</h2>
+    <label>Do you require a new logo design?  </label>
+    {* d['visualidentity-logo'] *}<br>
+    <label>Does the business have an existing branding guide?  </label>
+    {* d['visualidentity-brandingguide'] *}<br>
+    <div>
+        <label>Are there any print materials (brouchers, business cards, letterheads etc.) that we need to match?  </label>
+        {* d['visualidentity-printmaterials'] *}<br>
+    </div>
+    <label>The style and feel you'd like the website to have:</label><br>
+    <p>Simple {* drawSlider(d['sld_simple_complex']) *} Complex</p>
+    <p>Classic {* drawSlider(d['sld_classic_modern']) *} Modern</p>
+    <p>Mature {* drawSlider(d['sld_mature_youth']) *} Youthful</p>
+    <p>Feminine {* drawSlider(d['sld_female_male']) *} Masculine</p>
+    <p>Playful {* drawSlider(d['sld_playful_sophisticated']) *} Sophisticated</p>
+    <p>Economical {* drawSlider(d['sld_economical_lux']) *} Luxorious</p>
+    <p>Geometric {* drawSlider(d['sld_geom_organic']) *} Organic</p>
+
+
+    <h2>Requirements &amp; Features</h2>
+    <label>Do you require domain name hosting? </label>
+    {* d['hosting'] *}<br>
+    <label>Do you require email hosting? </label>
+    {* d['emailhosting'] *}<br>
+    <br />
+    <label >Add your requirements and features you'd like on the site below, and drag to rank them in order of importance</label>
+    <ul>
+    {% for k,v in pairs(d) do %}
+        {% if string.match(k, 'feature%-.*') then %}
+            <li>{* v *}</li>
+        {% end %}
+    {% end %}
+    </ul>
+
+
+
+    <h2>Content</h2>
+    <label>Do you need us to provide any content?</label>
+    {* d['content-designerprovided'] *}
+    <p>By default, we provide icon suites, an SIL open license font library, and royalty-free stock photography via unsplash.com</p>
+    <div class="content-designerprovided-yes">
+        <label>What content would you need us to provide?</label>
+        <p>{* d['content-provide'] *}</p>
+    </div>
+    <label>Do you have pre-existing content?</label>
+    {* d['content-pages'] *}
+    {% if d['content-pages'] == "true" then %}
+    <div>
+        <label>The pages and sections of content:</label>
+        <ul>
+        {% for k,v in pairs(d) do %}
+            {% if string.match(k, 'page%-.*') then %}
+                <li>{* v *}</li>
+            {% end %}
+        {% end %}
+        </ul>
+    </div>
+    {% end %}
+
+
+    <h2>Maintenance</h2>
+    <label>Will there be sections that need regular updating?</label>
+    {* d['maintenance'] *}
+    {% if d['maintenance'] == 'true' then %}
+    <div>
+        <label>Please describe the sections and how often will these need updating</label>
+        <p>{* d['maintenance-sections'] *}</p>
+        <label>Would you like to do the updating yourself?</label>
+        {* d['maintenance-selfmaintenance'] *}
+    </div>
+    {% end %}
+
+    <h2>References</h2>
+    <label for="reference">What websites do you like?</label>
+    <ul>
+    {% for k,v in pairs(d) do %}
+        {% local cap = string.match(k, "(reference%-%d+)%-text")
+        if cap then %}
+            <li>Site: {* d[cap] *}</li>
+            <li>Info: {* v *}</li>
+        {% end %}
+    {% end %}
+    </ul>
+    <br />
+    <h2>Competitors</h2>
+    <label for="competitor">Competitors' websites below and we'll analyze what they're doing right, what they're doing wrong, and how we can make your site standout</label>
+    <ul>
+    {% for k,v in pairs(d) do %}
+        {% if string.match(k, "competitor%-%d+") then %}
+            <li>Site: {* v *}</li>
+        {% end %}
+    {% end %}
+    </ul>
+
+
+    <h2>Budget</h2>
+    <label>What's your budget?</label>
+    ${* d['budget'] *}
+    <br />
+    <h2>Deadline</h2>
+    <label>Do you have a deadline or launch date in mind? </label>
+    {* d['deadline'] *}<br>
+    {% if d['deadline'] == "true" then %}
+    Launch Date: {* d['deadline_date'] *}<br>
+    {% end %}
+
+
+    <h2>Extra Information</h2>
+    <label>Anything we missed?</label>
+    <p> {* d['othertext'] *}</p>
+    <label >Receive a copy of the Web Design Plan? </label>
+    {* d['businessemail'] *}<br>
+
+
+
+</div>
+

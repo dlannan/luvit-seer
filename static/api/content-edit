@@ -1,0 +1,1452 @@
+<!DOCTYPE HTML>
+<html lang="en" prefix="og: http://ogp.me/ns#">
+
+    <head>
+        <title>ContentEdit API documentation · ContentTools</title>
+
+        <!-- Meta data -->
+        <meta http-equiv="x-ua-compatible" content="IE=edge">
+        <meta
+            name="description"
+            content="A JavaScript library for building editable HTML elements."
+            >
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta name="author" content="Anthony Blackshaw">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+        <meta name="HandheldFriendly" content="true">
+        <meta name="MobileOptimized" content="320">
+        <meta name="csrf-token" content="1471948622##8e32f0624ebaab633de6e9c67fa05fdc52371ced">
+        
+        
+
+        <!-- Favicon -->
+        <link rel="icon" type="image/x-icon" href="/favicon.ico">
+        <link rel="apple-touch-icon-precomposed" href="/favicon-152.png">
+        <meta name="msapplication-TileColor" content="#2980b9">
+        <meta name="msapplication-TileImage" content="/favicon-144.png">
+
+        
+            <!-- Twitter card -->
+            <meta name="twitter:card" content="summary">
+            <meta name="twitter:url" content="http://getcontenttools.com/api/content-edit">
+            <meta name="twitter:title" content="ContentEdit API documentation · ContentTools">
+            <meta name="twitter:description" content="A JavaScript library for building editable HTML elements.">
+            <meta name="twitter:image" content="http://getcontenttools.com//images/twitter-card-logo.png">
+        
+
+        
+            <!-- Facebook Open Graph -->
+            <meta property="og:type" content="website">
+            <meta property="og:site_name" content="ContentTools">
+            <meta property="og:title" content="ContentEdit API documentation">
+            <meta property="og:description" content="A JavaScript library for building editable HTML elements.">
+            <meta property="og:url" content="http://getcontenttools.com/api/content-edit">
+            <meta property="og:image" content="http://getcontenttools.com/images/facebook-share-logo.png">
+            <meta property="og:image:type" content="image/png">
+            <meta property="og:image:width" content="470">
+            <meta property="og:image:height" content="250">
+        
+
+        <!-- CSS -->
+        <link rel="stylesheet" type="text/css" href="/styles/site.css">
+        
+        
+
+        <!-- Google Analytics -->
+        
+            <script>
+              (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+              (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+              m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+              })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+              ga('create', 'UA-66406639-1', 'auto');
+              ga('send', 'pageview');
+            </script>
+        
+    </head>
+
+    <body class="page">
+        
+            <header class="page__header">
+                <nav class="site-nav">
+                    <a href="/" class="site-nav__logo">
+                        <img
+                            src="/images/logo@2x.png"
+                            alt="ContentTools logo"
+                            width="168"
+                            height="36"
+                            >
+                    </a>
+                    <div class="site-nav__toggle">
+                        <span class="sr-only">Toggle navigation</span>
+                    </div>
+                    <ul class="site-nav__items">
+                        <li class="site-nav__item">
+        
+        <a
+            href="/demo"
+            class="
+                site-nav__link
+                
+                "
+            >
+            Demo
+        </a>
+    </li>
+                        <li class="site-nav__item">
+        
+        <a
+            href="/getting-started"
+            class="
+                site-nav__link
+                
+                "
+            >
+            Getting&nbsp;started
+        </a>
+    </li>
+                        <li class="site-nav__item">
+        
+        <a
+            href="/tutorials"
+            class="
+                site-nav__link
+                
+                "
+            >
+            Tutorials
+        </a>
+    </li>
+                        <li class="site-nav__item">
+        
+        <a
+            href="/api"
+            class="
+                site-nav__link
+                site-nav__link--you-are-here
+                "
+            >
+            API
+        </a>
+    </li>
+                        <li class="site-nav__item">
+        
+        <a
+            href="https://github.com/GetmeUK"
+            class="
+                site-nav__link
+                
+                "
+            >
+            GitHub
+        </a>
+    </li>
+                    </ul>
+                </nav>
+                <div class="page__container">
+                    
+    <div data-editable data-name="page__heading">
+
+<h1 class="page__heading">
+    ContentEdit
+</h1>
+
+    </div>
+
+                    
+    <div data-editable data-name="page__opening">
+
+<p class="page__opening">
+    A JavaScript library that provides a set of classes for building content-editable HTML elements.
+</p>
+
+</div>
+
+                </div>
+            </header>
+        
+
+        
+            <main class="page__main">
+                <div class="page__container">
+                    
+    <section
+        class="[ page__content ]  [ formatted ]"
+        data-editable
+        data-name="page__content"
+        >
+
+<p>
+    <b>ContentEdit</b>&nbsp;makes sections of an HTML page editable, it does this by converting block-level elements within a container element (referred to as a region) into&nbsp;<i>editable elements</i>. Each type of editable element provides a set of editing interactions based on its content type, for example images and videos can be dragged to a new location and resized, text can be altered and formatted, tables can be reordered and so on.
+</p>
+<p>
+    When converting the content of a container element,&nbsp;<b>ContentEdit</b> looks for element types it understands (e.g &lt;img ...&gt;, &lt;h2&gt;, etc). When it finds an element it can't convert it uses a special <b>Static</b> class which can't be interacted with but can sit within other editable elements.
+</p>
+<p>
+    The advantage of this approach is that at any point in time only a small section of the content is in an editable state, which improves performance.
+</p>
+<p>
+    The&nbsp;<b><a href="https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Content_Editable">contenteditable</a></b>&nbsp;attribute (which is often treated as a dirty word) is used to make the contents of text elements editable. Elements with the&nbsp;<b>contenteditable</b>&nbsp;attribute set can output messy HTML - to solve this the&nbsp;<b><a href="/api/html-string">HTMLString</a></b>&nbsp;parser is used to clean and optimize content output.
+</p>
+<h2 id="usage">
+    Usage
+</h2>
+<p>
+    To make a region of your page editable the following code is all you need:
+</p>
+<pre><code class="language-javascript">var element = document.getElementById('my-region');
+var region = new ContentEdit.Region(element);</code></pre>
+<p>
+    Your HTML this should look something like this:
+</p>
+<pre><code class="language-markup">&lt;html&gt;
+    &lt;head&gt;
+        ...
+        &lt;link rel="stylesheet" type="text/css" href="content-edit.min.css"&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        ...
+        &lt;div id="my-region"&gt;
+            &lt;p&gt;Insert content here...&lt;/p&gt;
+        &lt;/div&gt;
+        &lt;script src="/scripts/content-edit.min.js"&gt;&lt;/script&gt;
+        &lt;script&gt;
+            var element = document.getElementById('my-region');
+            var region = new ContentEdit.Region(element);
+        &lt;/script&gt;
+    &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<p>
+    Once that's in place, open the HTML page in a browser and you'll be able to start editing content. What you can do will be a little limited as there's no editor <i>(see <b><a href="/api/content-tools">ContentTools</a></b>)</i>. However, if you want to play with other types of element just add them into the <b>&lt;div id="my-region"&gt;</b> and refresh the page.
+</p>
+<p>
+    Included in the <b>/sandbox</b>&nbsp;folder of the repo is a full demo of all the currently supported editable elements, just open the <b>index.html</b> page in your browser.
+</p>
+<h3 id="html-output">
+    HTML output
+</h3>
+<p>
+    To get the HTML for a region you've been editing you call the <b>html</b> method, for example:
+</p>
+<pre><code class="language-javascript">function saveHTML() {
+    html = region.html()
+    // Send html to the server to be saved...
+}</code></pre>
+<p class="note" id="reference">
+    Always use the <b>html</b>&nbsp;method as this outputs clean HTML. Avoid using the built-in&nbsp;<b>innerHTML</b>&nbsp;method which will result in HTML flavoured to the output of the browser and also mean scaffolding CSS classes used by <b>ContentEdit</b>&nbsp;whilst a region is editable are included.
+</p>
+<h2 id="reference">
+    Reference
+</h2>
+<p>
+    The library consists of a collection of classes namespaced under <b>ContentEdit</b>:
+</p>
+<ul>
+    <li>
+        <b><a href="#settings">Settings</a></b>
+    </li>
+    <li>
+        <b><a href="#events">Events</a></b>
+    </li>
+    <li>
+        <b><a href="#translations">Translations</a></b>
+    </li>
+    <li>
+        <b><a href="#functions">Functions</a></b>
+    </li>
+    <li>
+        <b><a href="#behaviours" target>Behaviours</a></b>
+    </li>
+    <li>
+        <b><a href="#node">ContentEdit.Node</a></b>
+    </li>
+    <li>
+        <b><a href="#node-collection">ContentEdit.NodeCollection</a></b>
+    </li>
+    <li>
+        <b><a href="#element">ContentEdit.Element</a></b>
+    </li>
+    <li>
+        <b><a href="#element-collection">ContentEdit.ElementCollection</a></b>
+    </li>
+    <li>
+        <b><a href="#resizable-element">ContentEdit.ResizableElement</a></b>
+    </li>
+    <li>
+        <b><a href="#fixture" target>ContentEdit.Fixture</a></b>
+    </li>
+    <li>
+        <b><a href="#region">ContentEdit.Region</a></b>
+    </li>
+    <li>
+        <b><a href="#root">ContentEdit.Root</a></b>
+    </li>
+    <li>
+        <b><a href="#tag-names">ContentEdit.TagNames</a></b>
+    </li>
+    <li>
+        <b><a href="#image">ContentEdit.Image</a></b>
+    </li>
+    <li>
+        <b><a href="#list">ContentEdit.List</a></b>
+    </li>
+    <li>
+        <b><a href="#list-item">ContentEdit.ListItem</a></b>
+    </li>
+    <li>
+        <b><a href="#list-item-text">ContentEdit.ListItemText</a></b>
+    </li>
+    <li>
+        <b><a href="#static">ContentEdit.Static</a></b>
+    </li>
+    <li>
+        <b><a href="#table">ContentEdit.Table</a></b>
+    </li>
+    <li>
+        <b><a href="#table-section">ContentEdit.TableSection</a></b>
+    </li>
+    <li>
+        <b><a href="#table-row">ContentEdit.TableRow</a></b>
+    </li>
+    <li>
+        <b><a href="#table-cell">ContentEdit.TableCell</a></b>
+    </li>
+    <li>
+        <b><a href="#table-cell-text">ContentEdit.TableCellText</a></b>
+    </li>
+    <li>
+        <b><a href="#text">ContentEdit.Text</a></b>
+    </li>
+    <li>
+        <b><a href="#pre-text">ContentEdit.PreText</a></b>
+    </li>
+    <li>
+        <b><a href="#video">ContentEdit.Video</a></b>
+    </li>
+</ul>
+<h3 id="settings">
+    Settings
+</h3>
+<p>
+    A number of settings are provided against the <b>ContentEdit</b> namespace. These can be set directly.
+</p>
+<p class="definition">
+    ALIGNMENT_CLASS_NAMES
+</p>
+<p>
+    The CSS class names used when an element is drag aligned to the left or&nbsp;right of another element.
+</p>
+<p>
+    <i>Defaults to <b>{left: 'align-left',</b> <b>right:&nbsp;'align-right'}</b></i>
+</p>
+<p class="definition">
+    DEFAULT_MAX_ELEMENT_WIDTH,&nbsp;DEFAULT_MIN_ELEMENT_WIDTH
+</p>
+<p>
+    The default min/max constraints (in pixels) for elements that can be&nbsp;resized. The default values are used when&nbsp;a min/max width has not been set.
+</p>
+<p>
+    <i>Defaults to <b>800</b> and <b>80</b></i>
+</p>
+<p class="definition">
+    DRAG_HOLD_DURATION
+</p>
+<p>
+    Some elements are draggable simply by clicking on them and&nbsp;moving the mouse. Others like <b>Text</b> elements handle click events differently, these elements support&nbsp;dragging behaviour when a user clicks and holds (without moving the&nbsp;mouse). For some elements holding for twice as long will allow the parent element to be dragged, this is how list items can be dragged, or an entire list. The duration of the hold is determined in milliseconds.
+</p>
+<p>
+    <i>Defaults to <b>500</b></i>
+</p>
+<p class="definition">
+    DROP_EDGE_SIZE
+</p>
+<p>
+    The size (in pixels) of the edge used to detect a switch in horizontal placement when dragging an element over another, such as when an <b>Image</b> is dragged to the right edge of a <b>Text</b> element.
+</p>
+<p>
+    <i>Defaults to <b>50</b></i>
+</p>
+<p class="definition">
+    HELPER_CHAR_LIMIT
+</p>
+<p>
+    The maximum number of characters to insert into a helper (the helper tool that appears when dragging elements). It can be useful to change this when customizing the appearance of helper elements.
+</p>
+<p>
+    <i>Defaults to&nbsp;<b>250</b></i>
+</p>
+<p class="definition">
+    INDENT
+</p>
+<p>
+    The string used to indent HTML output from elements. For example if you wanted the HTML output to be indented using tabs instead of spaces you could set this to ' '. I prefer spaces, but I wont go to war (again) with anyone about it!
+</p>
+<p>
+    <i>Defaults to <b>4 spaces</b></i>
+</p>
+<p class="definition">
+    LANGUAGE
+</p>
+<p>
+    The current language. Must be a 2 digit <a href="https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes">ISO_639-1</a> code.
+</p>
+<p>
+    <i>Defaults to <b>en</b></i>
+</p>
+<p class="definition">
+    PREFER_LINE_BREAKS
+</p>
+<p>
+    By default a new paragraph <code>&lt;p&gt;</code> is created when the <i>enter/return</i> key is pressed, to insert a line-break <code>&lt;br&gt;</code> the <i>shift key</i> can be held down when pressing enter. This behaviour can be reversed by setting the preference to be for line-breaks.
+</p>
+<p>
+    <i>Defaults to <b>false</b></i>
+</p>
+<p class="definition">
+    RESIZE_CORNER_SIZE
+</p>
+<p>
+    The size (in pixels) of the corner region used to detect a resize event against an element. To resize an element the user must click in a corner region of an element. The size is automatically reduced for very small elements, where the corner size represents more than a 1/4 of the total size, to allow users to click the center of the element to trigger a drag event.
+</p>
+<p>
+    <i>Defaults to <b>15</b></i>
+</p>
+<h3 id="events">
+    Events
+</h3>
+<p>
+    All <b>Node</b>/<b>Element</b> classes support a shared set of events. These are triggered against&nbsp;the <b>Root</b>&nbsp;and not the individual <b>Node</b>/<b>Element</b>s, so to listen for an event you bind to <b>Root</b> like so:
+</p>
+<pre><code class="language-javascript">// Listen for any new element being added to the editable tree
+ContentEdit.Root.get().bind('attach', function (element) {
+    console.log(element, 'just got added');
+});</code></pre>
+<p class="definition">
+    attach
+</p>
+<p>
+    Triggered when an element is attached to another node as a child.
+</p>
+<p class="definition">
+    blur
+</p>
+<p>
+    Triggered when an element looses focus.
+</p>
+<p class="definition">
+    commit
+</p>
+<p>
+    Triggered when <b>commit</b> is called against an node. This event and method are provided to help manage the save state of a document but aren't actually used or triggered by <b>ContentEdit</b>.
+</p>
+<p class="definition">
+    detach
+</p>
+<p>
+    Triggered when a node is detached from a parent node.
+</p>
+<p class="definition">
+    drag
+</p>
+<p>
+    Triggered when an element is dragged.
+</p>
+<p class="definition">
+    drop
+</p>
+<p>
+    Triggered when an element is dropped. The event receives the <code>element</code> being dropped, the <code>target</code> element being dropped onto and the <code>placement</code>&nbsp;of the drop <i>(see <a href="#element-drop">element.drop</a>)</i>.
+</p>
+<p>
+    If the drop fails, for example because the element wasn't dropped on to another element, the event will trigger with <i>null</i> values for <b>target</b> and <b>placement</b>.
+</p>
+<p class="definition">
+    focus
+</p>
+<p>
+    Triggered when an element is given focus.
+</p>
+<p class="definition">
+    mount
+</p>
+<p>
+    Triggered when an element is mounted in the DOM.
+</p>
+<p class="definition">
+    native-drop
+</p>
+<p>
+    Triggered when a user attempts to native drag-drop content into an element.
+</p>
+<p class="definition">
+    next-region
+</p>
+<p>
+    Triggered when the user uses the right arrow or <i>down</i> arrow key whilst the caret is at the end of the last node that supports content in a region. This allows external code to manage the transition from one region to the next.
+</p>
+<p class="definition">
+    paste
+</p>
+<p>
+    Triggered when a user attempts to paste content into an element.
+</p>
+<p class="definition">
+    previous-region
+</p>
+<p>
+    Triggered when the user uses the left arrow or <i>up</i> arrow key whilst the caret is at the start of the first node that supports content in a region. This allows external code to manage the transition from one region to the previous.
+</p>
+<p class="definition">
+    ready
+</p>
+<p>
+    Specific to the Region element, this event is triggered when the region has been initialized.
+</p>
+<p class="definition">
+    taint
+</p>
+<p>
+    Triggered whenever a node is modified.
+</p>
+<p class="definition">
+    unmount
+</p>
+<p>
+    Triggered when an element is removed from the DOM.
+</p>
+<h3 id="translations">
+    Translations
+</h3>
+<p>
+    <b>ContentEdit</b> supports multiple languages though a simple set of translation functions. <a href="/api/content-tools">ContentTools</a> also uses these functions to support for multiple languages.
+</p>
+<p class="definition">
+    _(s)
+</p>
+<p>
+    The <i>underscore</i> function translates the given string to the currently set <code>ContentEdit.LANGUAGE</code>, if not translation is available the string will be returned unchanged.
+</p>
+<p class="definition">
+    addTranslations(language, translations)
+</p>
+<p>
+    Add translations for the given <b>language</b>, where <b>translations</b> is an object containing a map of English strings to and their translated counterparts (e.g <code>{'Hello', 'Bonjour'}</code>). <b>language</b> must&nbsp;be a 2 digit <a href="https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes">ISO_639-1</a> code.
+</p>
+<h3 id="functions">
+    Functions
+</h3>
+<p>
+    A number of utility functions are provided in the <b>ContentEdit</b> namespace.
+</p>
+<p class="definition">
+    ContentEdit.addCSSClass(domElement, className)
+</p>
+<p>
+    Add a CSS class to a DOM element.
+</p>
+<p class="definition">
+    ContentEdit.attributesToString(attributes)
+</p>
+<p>
+    Convert an object into an HTML attribute string (e.g {key: value} to key="value").
+</p>
+<p class="definition">
+    ContentEdit.removeCSSClass(domElement, className)
+</p>
+<p>
+    Remove a CSS class from a DOM element.
+</p>
+<h3 id="behaviours">
+    Behaviours
+</h3>
+<p>
+    Behaviours provide a mechanism to allow the behaviour of elements to be configured, for example you can prevent an image from being dragged, a heading tag from being removed and so on.
+</p>
+<p>
+    Whilst behaviours are designed to be extensible the following behaviours are by default flagged as allowed for all elements:
+</p>
+<ul>
+    <li>
+        <b>drag</b> - true if an element can be dragged.
+    </li>
+    <li>
+        <b>drop</b> - true if an element will accept another element being dropped on it.
+    </li>
+    <li>
+        <b>merge</b> - true if an element will allow another element to be merged with it.
+    </li>
+    <li>
+        <b>remove</b> - true if an element can be removed, e.g text elements are by default removed when empty.
+    </li>
+    <li>
+        <b>resize</b> - true if an element can be resized.
+    </li>
+    <li>
+        <b>spawn</b> - true if an element can spawn new elements, for example hitting return in a list item to generate a new list item.
+    </li>
+    <li>
+        <b>indent</b> (for list items only) - true if a list item can be indented <i>or unindented.</i>
+    </li>
+</ul>
+<p>
+    An element's behaviour is defined and queried through the <b>can</b> method, for example:
+</p>
+<pre><code class="language-javascript">// Check to see if an element can be removed
+if (element.can('remove')​​) {
+    ...remove the element...
+}​​
+
+// Prevent an element from being dragged
+element.can('drag', false);​​​</code>​​</pre>
+<p class="note">
+    Not all behaviours defined against an element will necessarily be applicable, (for example you can't resize a Text element), behaviours don't indicate what actions are possible only whether an action is allowed. Further there is no way to ensure external code will respects behaviour flags, even if you disallow remove an element can still be detached from it's parent and not reattached (e.g removed) - it's up to the external code to respect ContentEdit behaviours.
+</p>
+<h3 id="node">
+    Node
+</h3>
+<p>
+    Editable content is structured as a tree, each node in the tree is an instance of a class that inherits from the base <b>Node</b> class. However higher-level element classes typically inherit from <b>Element</b> or <b>ElementCollection</b> (which in turn inherit from <b>Node</b>).
+</p>
+<p class="definition">
+    node = new ContentEdit.Node()
+</p>
+<p>
+    Create a new <b>Node</b>.
+</p>
+<p class="definition">
+    node.lastModified()
+</p>
+<p>
+    Return null if the <b>node</b>&nbsp;is unmodified, else return the date/time the <b>node</b> was last modified.
+</p>
+<p class="definition">
+    node.parent()
+</p>
+<p>
+    Return the parent of the <b>node</b>.
+</p>
+<p class="definition">
+    node.parents()
+</p>
+<p>
+    Return a list of ancestors for the <b>node</b> (in ascending order).
+</p>
+<p class="definition">
+    node.bind(eventName, callback)
+</p>
+<p>
+    Bind a callback to an event against the <b>node</b>. See <a href="#events">Events</a>.&nbsp;You should only ever bind to the <b>Root</b>.
+</p>
+<p class="definition">
+    node.closest(testFunc)
+</p>
+<p>
+    Find and return the first parent of the <b>node</b> that meets the <b>testFunc</b> condition.
+</p>
+<p id="test-func">
+    The <b>testFunc</b> can be any function that accepts a <b>Node</b> as an argument and returns&nbsp;<b>true</b>&nbsp;or <b>false</b> based on whether the <b>Node</b> meets the condition, for example:
+</p>
+<pre><code class="language-javascript">// Find the closest TableSection instance (where th is a TableCell instance)
+var section = th.closest(function (node) {
+    return node.constructor.name == 'TableSection';
+}</code></pre>
+<p class="definition">
+    node.commit()
+</p>
+<p>
+    Mark the <b>node</b> as being unmodified.
+</p>
+<p class="definition">
+    node.html(indent='')
+</p>
+<p>
+    Return an HTML string for the <b>node.</b>&nbsp;Optionally an <b>indent</b> argument can be supplied which is prefixed to the output so that the indentation structure can preserved.
+</p>
+<p class="definition">
+    node.next()
+</p>
+<p>
+    Return the next <b>Node</b> in the tree regardless of depth.
+</p>
+<p class="definition">
+    node.nextContent()
+</p>
+<p>
+    Return the next <b>Node</b> that supports the <b>content</b> property.
+</p>
+<p class="definition">
+    node.nextSibling()
+</p>
+<p>
+    Return the <b>node</b>'s next sibling; the sibling&nbsp;<b>Node</b> must share the same parent.
+</p>
+<p class="definition">
+    node.nextWithTest(testFunc)
+</p>
+<p>
+    Find and return the next <b>Node,</b> regardless of depth, that meets the <b>testFunc</b> condition <i>(see <a href="#test-func">testFunc</a>)</i>.
+</p>
+<p class="definition">
+    node.previous()
+</p>
+<p>
+    Return the previous <b>Node</b> in the tree regardless of depth.
+</p>
+<p class="definition">
+    node.previousContent()
+</p>
+<p>
+    Return the previous <b>Node</b> that supports the <b>content</b> property.
+</p>
+<p class="definition">
+    node.previousSibling()
+</p>
+<p>
+    Return the <b>node</b>'s previous sibling; the sibling <b>Node</b> must share the same parent.
+</p>
+<p class="definition">
+    node.previousWithTest(testFunc)
+</p>
+<p>
+    Find and return the previous&nbsp;<b>Node,</b> regardless of depth, that meets the <b>testFunc</b> condition<i> (see <a href="#test-func">testFunc</a>)</i>.
+</p>
+<p class="definition">
+    node.taint()
+</p>
+<p>
+    Mark the <b>node</b> as being modified.
+</p>
+<p class="definition">
+    node.trigger(eventName, args...)
+</p>
+<p>
+    Trigger an event against the <b>node</b>.
+</p>
+<p class="definition">
+    node.unbind(eventName, callback)
+</p>
+<p>
+    Unbind a <b>callback</b> from an event.
+</p>
+<p class="definition">
+    Node.extend(cls)
+</p>
+<p>
+    This class method allows <b>Node</b>&nbsp;and derived classes to be extended by more than one class.
+</p>
+<p class="definition">
+    Node.fromDOMElement(domElement)
+</p>
+<p>
+    Convert a DOM element to an instance of this class.
+</p>
+<h3 id="node-collection">
+    NodeCollection (inherits from <a href="#node">Node</a>)
+</h3>
+<p>
+    The <b>NodeCollection</b> class is a base class for nodes that act as a parent for other child nodes, for example <b>Region</b> inherits from <b>NodeCollection</b>. However, higher-level element classes typically inherit from <b>ElementCollection</b> (which in turn inherits from <b>NodeCollection</b>).
+</p>
+<p class="definition">
+    collection = new ContentEdit.NodeCollection()
+</p>
+<p>
+    Create a new node <b>NodeCollection</b>.
+</p>
+<p class="definition">
+    collection.children
+</p>
+<p>
+    The <b>collection</b>'s&nbsp;<b>children</b>.
+</p>
+<p class="definition">
+    collection.descendants()
+</p>
+<p>
+    Return a flattened list all the descendants that belong to the <b>collection</b>.
+</p>
+<p class="definition">
+    collection.isMounted()
+</p>
+<p>
+    Return <b>true</b> if the <b>collection</b> is mounted in the DOM.
+</p>
+<p class="definition">
+    collection.attach(node, index)
+</p>
+<p>
+    Attach a <b>node</b> to the <b>collection</b>, optionally at the given <b>index</b>. If no <b>index</b> is specified the <b>node</b> is appended as the last child.
+</p>
+<p class="definition">
+    collection.detach(node)
+</p>
+<p>
+    Detach the specified <b>node</b> from the <b>collection</b>.
+</p>
+<h3 id="element">
+    Element (inherits from <a href="#node">Node</a>)
+</h3>
+<p>
+    The <b>Element</b> class is used to implement nodes that appear as HTML elements.
+</p>
+<p class="definition">
+    element = new ContentEdit.Element(tagName, attributes)
+</p>
+<p>
+    Create a new <b>Element</b> with the given&nbsp;<b>tagName</b> and <b>attributes</b>. The&nbsp;<b>attributes</b> should be provided as an object.
+</p>
+<p class="definition">
+    element.cssTypeName()
+</p>
+<p>
+    Return the CSS type modifier name for the element (e.g ce-element--type-...). This typically follows the name of the class itself, for example a <b>Text</b> element will return&nbsp;<b>ce-element--type-Text</b>. This method must be overwritten when writing your own classes.
+</p>
+<p class="definition">
+    element.domElement()
+</p>
+<p>
+    Return the DOM element associated with the <b>element</b>.
+</p>
+<p class="definition">
+    element.isFocused()
+</p>
+<p>
+    Return <b>true</b> if the <b>element</b> currently has focus.
+</p>
+<p class="definition">
+    element.isMounted()
+</p>
+<p>
+    Return <b>true</b> if the <b>element</b> is mounted in the DOM.
+</p>
+<p class="definition">
+    element.type()
+</p>
+<p>
+    Returns the type name for an element, this should always be the same as the elements class name.
+</p>
+<p class="note">
+    The <b>type</b> method was introduced to resolve <a href="https://github.com/GetmeUK/ContentTools/issues/95">issue #95</a>&nbsp;which caused the library to break if minified using <a href="http://lisperator.net/uglifyjs/">uglify</a> with name mangling on.
+</p>
+<p class="definition">
+    element.typeName()
+</p>
+<p>
+    Return a user friendly name for the element's type (e.g Image, Table row). This is currently used to provide a label for the element's drag helper.
+</p>
+<p class="definition">
+    element.addCSSClass(className)
+</p>
+<p>
+    Add a CSS class to the <b>element</b>.
+</p>
+<p class="definition">
+    element.attr(name, value)
+</p>
+<p>
+    Get/Set the value of the <b>name</b>d attribute for the <b>element.</b>&nbsp;If a <b>value</b> is given then the attribute is set, otherwise its value is returned.
+</p>
+<p class="definition">
+    element.can(behaviour, allowed)
+</p>
+<p>
+    Get/Set the <a href="#behaviours" target><b>behaviour</b></a> allowed for an element. If a value for <b>allowed</b> is provided then the flag for the given <b>behaviour</b> is set, otherwise it is returned.
+</p>
+<p class="definition">
+    element.createDraggingDOMElement()
+</p>
+<p>
+    Returns a new DOM element that visually aids the user in dragging the <b>element</b> to a new location in the editiable tree structure.
+</p>
+<p class="definition">
+    element.drag(x, y)
+</p>
+<p>
+    Start dragging the <b>element;</b>&nbsp;<b>x</b>, <b>y</b>&nbsp;are the start coordinates in pixels of the drag interaction. This method controls if an element can be dragged and any additional behaviour such as a prolonged hold allowing the element's parent to be dragged.
+</p>
+<p class="definition" id="element-drop">
+    element.drop(targetElement, placement)
+</p>
+<p>
+    Drop the <b>element</b> into a new position in the editable structure. If no <b>targetElement</b> is provided, or a method to manage the drop isn't defined, drop is cancelled.
+</p>
+<p>
+    Dropper functions are defined against the element class's <b>droppers</b> property. The <b>droppers</b> property is an object that maps the names of classes that can be dropped on to functions that can handle the drop.
+</p>
+<p>
+    Drops are typically triggered when a user drags one element onto another.
+</p>
+<p class="note">
+    Dropper functions are called with 2 elements and a placement <i>('above', 'below', 'left', 'right').</i>&nbsp;They must handle the drop no matter the order of the elements.
+</p>
+<p class="definition">
+    element.focus()
+</p>
+<p>
+    Give the <b>element</b> focus.
+</p>
+<p class="definition">
+    element.hasCSSClass(className)
+</p>
+<p>
+    Return <b>true</b> if the ele<b>m</b>ent has the specified CSS class.
+</p>
+<p class="definition">
+    element.merge(otherElement)
+</p>
+<p>
+    Attempt to merge <b>otherElement</b> with this <b>element</b>. <b>Element</b>s can only merge if a merger function has been defined to handle the merge.
+</p>
+<p>
+    Merger functions are defined against the element class's&nbsp;<b>mergers</b>&nbsp;property. The <b>mergers</b>&nbsp;property is an object that maps the names of classes that can be merged with functions that can handle the merge.
+</p>
+<p>
+    Merges typically happen when the caret is at the first or last character of a content element and the backspace or delete key is pressed, triggering a merge attempt between the focused element and the previous or next element.
+</p>
+<p class="note">
+    Merger functions are called with 2 elements and must handle merging no matter the order.
+</p>
+<p class="definition">
+    element.mount()
+</p>
+<p>
+    Mount the <b>element</b> on to the DOM.
+</p>
+<p>
+    This method is not designed to be called against the&nbsp;<b>Element</b> class, however it is typically called using <b>Element.prototype.mount.call(this)</b>&nbsp;<i>(or&nbsp;<b>super</b> in CoffeScript)</i>&nbsp;when overridden in a derived class, for example:
+</p>
+<pre><code class="language-javascript">// Taken from the Text element class
+mount: function () {
+    // Create the DOM element to mount
+    this._domElement = document.createElement(this._tagName);
+
+    // Set the attributes
+    for (name in this._attributes) {
+        this._domElement.setAttribute(name, this._attribute[name]);
+    }
+
+    // Set the content in the document
+    this.updateInnerHTML();
+
+    // With `_domElement` defined we use `super` to mount it to the DOM
+    Element.prototype.mount.call(this);
+}</code></pre>
+<p class="definition">
+    element.removeAttr(name)
+</p>
+<p>
+    Remove the <b>name</b>d attribute from the <b>element</b>.
+</p>
+<p class="definition">
+    element.removeCSSClass(className)
+</p>
+<p>
+    Remove a CSS class from the <b>element</b>.
+</p>
+<p class="definition">
+    element.tagName(name)
+</p>
+<p>
+    Get/Set the tag <b>name</b> for the <b>element</b>, if a <b>name</b> is given then the tag name is set, otherwise it is returned.
+</p>
+<p class="definition">
+    Element.getDOMElementAttributes(domElement)
+</p>
+<p>
+    Return a map of attributes for the <b>domElement</b>.
+</p>
+<h3 id="element-collection">
+    ElementCollection (inherits from <a href="#element">Element</a>, <a href="#node-collection">NodeCollection</a>)
+</h3>
+<p>
+    The <b>ElementCollection</b> class is used to implement elements that parent other elements (e.g a <b>List</b>&nbsp;parents <b>ListItem</b>s, a <b>TableRow</b>&nbsp;parents <b>TableCell</b>s, etc.).
+</p>
+<p class="definition">
+    collection = new ContentEdit.ElementCollection(tagName, attributes)
+</p>
+<p>
+    Create a new <b>ElementCollection</b> with the given&nbsp;<b>tagName</b> and <b>attributes</b>. The <b>attributes</b> should be provided as an object.
+</p>
+<h3 id="resizable-element">
+    ResizableElement (inherits from <a href="#element">Element</a>)
+</h3>
+<p>
+    The <b>ResizableElement</b> class provides a base for elements that can be resized (e.g <b>Image</b>s and <b>Video</b>s).
+</p>
+<p>
+    <b>ResizableElement</b>s support 2 special data attributes to help constrain the element to a minimum/maximum width;&nbsp;<b>data-ce-min-width</b>, <b>data-ce-max-width</b>. Often the maximum is set to the size of the original image. The default constraints are set by the&nbsp;<b>DEFAULT_MAX_ELEMENT_WIDTH</b> and&nbsp;<b>DEFAULT_MIN_ELEMENT_WIDTH</b> settings. For example an image's min/max width can be set like so:
+</p>
+<pre><code class="language-markup">&lt;img
+    src="image.png"
+    alt="Something interesting"
+    data-ce-min-width="100"
+    data-ce-max-width="1000"
+    &gt;</code></pre>
+<p class="definition">
+    resizable = new ContentEdit.ResizableElement(tagName, attributes)
+</p>
+<p>
+    Create a new <b>ResizableElement</b> element with the given&nbsp;<b>tagName</b> and <b>attributes</b>. The <b>attributes</b> should be provided as an object.
+</p>
+<p class="definition">
+    resizable.aspectRatio()
+</p>
+<p>
+    Return the aspect ratio of the <b>resizable</b> (ratio = height / width).
+</p>
+<p class="note">
+    The aspect ratio is typically set when the element is constructed. It is down to the inheriting element to determine if, when and how it may be updated after that. It is not safe to calculate the aspect ratio on the fly as casting the width/height of the element to an integer (for example when resizing) can alter the ratio.
+</p>
+<p class="definition">
+    resizable.maxSize()
+</p>
+<p>
+    Return the maximum size the <b>resizable</b> can be set to.
+</p>
+<p class="definition">
+    resizable.minSize()
+</p>
+<p>
+    Return the minimum size the element can be set to (use the data-ce-min-width attribute to set this).
+</p>
+<p class="note">
+    By default max/minSize only considers the width and calculates the height based on the element's aspect ratio. For elements that support a non-fixed aspect ratio this method should be overridden to support querying for a maximum/minimum height.
+</p>
+<p class="definition">
+    resizable.resize(corner, x, y)
+</p>
+<p>
+    Start resizing the resizable. The&nbsp;<b>x</b>, <b>y</b>&nbsp;are the start coordinates of the resize,&nbsp;<b>corner</b> is the corner of the <b>resizable</b> the resize started in <i>(corners are specified as a 2 element array in the form [top|bottom, left|right])</i>.
+</p>
+<p class="definition">
+    resizable.size(newSize)
+</p>
+<p>
+    Get/Set the size of the <b>resizable</b>, if a <b>newSize</b>&nbsp;is given then the size is set, otherwise the current size is returned.
+</p>
+<h3 id="fixture">
+    Fixture (inherits from <a href="#node-collection" target>NodeCollection</a>)
+</h3>
+<p>
+    <b>Fixture</b>s take a DOM element and convert it to a single editable element, this allows the creation of field like regions within a page.&nbsp;<b>Fixtures</b> sit directly below the <b>Root</b> in the editable tree and along with <a href="#region" target>Regions</a> are the highest level element that directly represents a DOM element.
+</p>
+<p class="note">
+    The output of the <b>html</b> method for fixtures does not include the surrounding element, for example if a <b>Fixture</b> is created using a H1 element the HTML output will not contain the H1 element only its content. For non-block elements such as images the entire IMG element is returned.
+</p>
+<p class="definition">
+    fixture = new ContentEdit.Fixture(domElement)
+</p>
+<p>
+    Create a new <b>Fixture</b> from the given <b>domElement</b>.
+</p>
+<h3 id="region">
+    Region (inherits from <a href="#node-collection">NodeCollection</a>)
+</h3>
+<p>
+    <b>Region</b>s convert the content of a DOM element into a collection of editable elements. <b>Region</b>s sit directly below the <b>Root</b>&nbsp;in the editable tree and along with <a href="#fixture" target>Fixtures</a> are the highest level element that directly represents a DOM element.
+</p>
+<p class="definition">
+    region = new ContentEdit.Region(domElement)
+</p>
+<p>
+    Create a new <b>Region</b> from the given <b>domElement</b>.
+</p>
+<p class="definition">
+    region.setContent(domElementOrHTML)
+</p>
+<p>
+    Set the contents of the region using a DOM element or HTML string. The method accepts content as either a DOM element or HTML string.
+</p>
+<p>
+    <i>All previous content will be removed from the region and replaced with the new content.</i>
+</p>
+<h3 id="root">
+    Root (inherits from <a href="#node">Node</a>)
+</h3>
+<p>
+    The <b>Root</b> node manages state and listens for events from all elements in the editable tree, it is the root only in name as it doesn't directly represent &nbsp;a DOM element.
+</p>
+<p>
+    The R<b>oot</b> node actually has no specific knowledge of any other element in the tree, in this respect it is perhaps more useful to visualise it as a shared context that all element nodes talk to (and through).
+</p>
+<p class="definition">
+    root = ContentEdit.Root.get()
+</p>
+<p>
+    The <b>Root</b> node is a singleton and access is provided through the <b>get</b> method which returns the single&nbsp;<b>root</b>&nbsp;instance.
+</p>
+<p class="definition">
+    root.dragging()
+</p>
+<p>
+    Return the element currently being dragged.
+</p>
+<p class="definition">
+    root.dropTarget()
+</p>
+<p>
+    Return the element under the element currently being dragged.
+</p>
+<p class="definition">
+    root.focused()
+</p>
+<p>
+    Return the element currently focused.
+</p>
+<p class="definition">
+    root.resizing()
+</p>
+<p>
+    Return the element currently being resized.
+</p>
+<p class="definition">
+    root.cancelDragging()
+</p>
+<p>
+    Cancel the current dragging interaction.
+</p>
+<p class="definition">
+    root.startDragging(element, x, y)
+</p>
+<p>
+    Set <b>element</b> as dragging, starting from the position <b>x</b>, <b>y</b>&nbsp;in pixels.
+</p>
+<p class="definition">
+    root.startResizing(element, corner, x, y, fixed)
+</p>
+<p>
+    Set <b>element</b> as resizing starting from the position <b>x</b>, <b>y</b> in pixels, using the <b>corner</b>&nbsp;(corners are specified as a 2 element array in the form [top|bottom, left|right]). The <b>fixed</b> flag determines if the resize will retain the <b>element</b>'s aspect ratio or allow independent resizing of the width and height.
+</p>
+<p class="note">
+    Only one element can be dragged or resized at any time.
+</p>
+<h3 id="tag-names">
+    TagNames
+</h3>
+<p>
+    The <b>TagNames</b> class allows DOM tag names to be associated with <b>Element</b> classes. When a <b>Region</b> is initialized it uses this association to determine how best to handle each child DOM element it converts to an editable element.
+</p>
+<p>
+    Tag names are associated with <b>Element</b> classes through the <b>register</b> method. To handle cases where the same tag name is used for more than one element class, the <b>data-ce-tag</b> attribute can be used to specify a tag name. This is also useful when you want to specify a tag name that is conceptual. Perhaps you're using the &lt;p&gt; tag as the wrapper for your newly written editable Date element, here the <b>data-ce-tag</b> attribute needs to be used to indicate which class is relevant <i>(e.g data-ce-tag="date" assuming we mapped date to our Date class)</i>.
+</p>
+<p>
+    As a concrete example, let's say we wanted to associate a <b>&lt;p&gt;</b> tag with the <b>PreText</b> element class instead of with the <b>Text</b> class it's normally associated with. To do so we just need to use the&nbsp;<b>data-ce-tag</b> like so:
+</p>
+<pre><code class="language-markup">&lt;p data-ce-tag="pre"&gt;
+   ...insert preformatted text here...
+&lt;/p&gt;</code></pre>
+<p class="definition">
+    tagNames = ContentEdit.TagNames.get()
+</p>
+<p>
+    The <b>TagNames</b> class is a singleton and access is provided through the <b>get</b> method which returns the single <b>tagNames</b> instance.
+</p>
+<p class="definition">
+    tagNames.register(cls, tagNames...)
+</p>
+<p>
+    Register an element class with one or more <b>tagNames</b>.
+</p>
+<p class="definition">
+    tagNames.match(tagName)
+</p>
+<p>
+    Return an element class for the specified <b>tagName</b> (case insensitive), if we can't find an associated class the <b>Static</b>&nbsp;element class will be returned.
+</p>
+<h3 id="image">
+    Image (inherits from&nbsp;<a href="#resizable-element">ResizableElement</a>)
+</h3>
+<p>
+    <b>Image</b> is the standard element&nbsp;class for <b>&lt;img&gt;</b> tags. Images can be defined in the HTML standalone or may be wrapped with an anchor tag:
+</p>
+<pre><code class="language-markup">&lt;!-- Standalone --&gt;
+&lt;img src="image.png" alt="Something interesting"&gt;
+
+&lt;!-- Wrapped with an anchor --&gt;
+&lt;a href="/something-interesting" data-ce-tag="img"&gt;
+    &lt;img src="image.png" alt="Something interesting"&gt;
+&lt;/a&gt;</code></pre>
+<p class="definition">
+    image = new ContentEdit.Image(attributes, a)
+</p>
+<p>
+    Create a new <b>Image</b>&nbsp;element with the given <b>attributes</b>&nbsp;(as an object), optionally an <b>a</b>&nbsp;can be specified as an object providing a set of attributes for an anchor tag <b>&lt;a&gt;</b> that will wrap the image, for example:
+</p>
+<pre><code class="language-javascript">var image = new ContentEdit.Image(
+    {src: 'somthing-interesting.png', alt='Something interesting'},
+    {href='/something-interesting'}
+    );</code></pre>
+<p class="definition">
+    image.a
+</p>
+<p>
+    The <b>a</b> property will be <b>null</b> for the <b>image</b>&nbsp;if not wrapped in an&nbsp;<b>&lt;a&gt;</b> and will be a populated object for an image wrapped in an <b>&lt;a&gt;</b> (where each property represents an attribute of the anchor).
+</p>
+<h3 id="list">
+    List (inherits from <a href="#element-collection">ElementCollection</a>)
+</h3>
+<p>
+    <b>List</b> is the standard element class for <b>&lt;ol&gt;</b> and <b>&lt;ul&gt;</b> tags.
+</p>
+<p class="definition">
+    list = new&nbsp;ContentEdit.List(tagName, attributes)
+</p>
+<p>
+    Create a new <b>ListElement</b>&nbsp;for the given <b>tagName</b> and <b>attributes</b>. The <b>attributes</b> should be provided as an object.
+</p>
+<h3 id="list-item">
+    ListItem (inherits from <a href="#element-collection">ElementCollection</a>)
+</h3>
+<p>
+    <b>ListItem</b> is the standard element class for <b>&lt;li&gt;</b> tags.&nbsp;<b>ListItem</b>s can contain both text content and another sub-list, for this reason they are implemented as a collection which contains at most 2 elements; a <b>ListItemText</b> element and sub-<b>List</b> element.
+</p>
+<p class="definition">
+    item = new ContentEdit.ListItem(attributes)
+</p>
+<p>
+    Create a new <b>ListItem</b>&nbsp;element with the given&nbsp;<b>attributes</b>. The <b>attributes</b> should be provided as an object.
+</p>
+<p class="definition">
+    item.list()
+</p>
+<p>
+    Return the <b>List</b> for this list <b>item</b>.
+</p>
+<p class="definition">
+    item.listItemText()
+</p>
+<p>
+    Return the <b>ListTextItem</b>&nbsp;for this <b>item</b>.
+</p>
+<h3 id="list-item-text">
+    ListItemText (inherits from <a href="#text">Text</a>)
+</h3>
+<p>
+    <b>ListItemText</b> is used to support text within a <b>List</b> element and has no direct association to any tag.
+</p>
+<p class="definition">
+    itemText = new ContentEdit.ListItem(content)
+</p>
+<p id="static">
+    Create a new <b>ListItemText</b>&nbsp;element with the given <b>content</b>. The <b>content</b> can be specified as a native string or <b><a href="/api/html-string#string">HTMLString.String</a></b> instance.
+</p>
+<h3 id="static">
+    Static (inherits from <a href="#element">Element</a>)
+</h3>
+<p>
+    <b>Stactic</b> elements sit within a region but cannot be edited.&nbsp;Their purpose is to provide a fallback for when a DOM element within a region could not be converted (e.g because there was no <b>Element</b> class associated with the tag).
+</p>
+<p>
+    By default the only form of interaction&nbsp;<b>Static</b> elements support is allowing other element types to be dropped on them so that content can be organized around them. However if you want a <b>Static</b> element to support dragging then you can add the <b>data-ce-moveable</b>&nbsp;attribute. It's only a good idea to do this if you're confident there wont be a conflict with the element or its content for the <b>mouseup</b> and <b>mousedown</b> events.
+</p>
+<p class="note">
+    A known problem with the <b>Static</b> elements is that we rely on the browser's interpretation of the content (because we rely on innerHTML); this can lead to differences in the output as well as inconsistencies between browsers.
+</p>
+<p class="definition" id="table">
+    static = new ContentEdit.Static(tagName, attributes, content)
+</p>
+<p>
+    Create a new <b>Static</b> element with given <b>tagName</b>, <b>attributes</b> and inner <b>content</b>.&nbsp;The <b>attributes</b> should be provided as an object. The <b>content</b> should be a native string.
+</p>
+<h3 id="table">
+    Table (inherits from <a href="#element-collection">ElementCollection</a>)
+</h3>
+<p>
+    <b>Table</b> is the standard element class for <b>&lt;table&gt;</b> tags.
+</p>
+<p class="definition">
+    table = new&nbsp;ContentEdit.Table(attributes)
+</p>
+<p>
+    Create a new <b>Table</b> element with the given <b>attributes</b>. The <b>attributes</b> should be provided as an object.
+</p>
+<p class="definition">
+    table.firstSection()
+</p>
+<p>
+    Return the first <b>TableSection</b> for the <b>table</b>.
+</p>
+<p class="definition">
+    table.lastSection()
+</p>
+<p>
+    Return the last <b>TableSection</b> for the <b>table</b>.
+</p>
+<p class="definition">
+    table.tbody()
+</p>
+<p>
+    Return the body <b>TableSection</b> for the <b>table</b>.
+</p>
+<p class="definition">
+    table.tfoot()
+</p>
+<p>
+    Return the footer <b>TableSection</b> for the <b>table</b>.
+</p>
+<p class="definition">
+    table.thead()
+</p>
+<p>
+    Return the header <b>TableSection</b> for the <b>table</b>.
+</p>
+<h3 id="table-section">
+    TableSection (inherits from <a href="#element-collection">ElementCollection</a>)
+</h3>
+<p>
+    <b>TableSection</b> is the standard element class for <b>&lt;thead&gt;</b>, <b>&lt;tbody&gt;</b> and <b>&lt;tfoot&gt;</b> tags.
+</p>
+<p class="definition">
+    section = new ContentEdit.TableSection(tagName, attributes)
+</p>
+<p>
+    Create a new&nbsp;<b>TableSection</b> element with the given <b>tagName</b> and <b>attributes</b>. The <b>attributes</b> should be provided as an object.
+</p>
+<h3 id="table-row">
+    TableRow (inherits from <a href="#element-collection">ElementCollection</a>)
+</h3>
+<p>
+    <b>TableRow</b> is the standard element class for <b>&lt;tr&gt;</b> tags.
+</p>
+<p class="definition">
+    row = new&nbsp;ContentEdit.TableRow(attributes)
+</p>
+<p>
+    Create a new&nbsp;<b>TableRow</b>&nbsp;element with the given <b>attributes</b>. The <b>attributes</b> should be provided as an object.
+</p>
+<p class="definition">
+    row.isEmpty()
+</p>
+<p>
+    Return <b>true</b> if every cell in the table row is empty.
+</p>
+<h3 id="table-cell">
+    TableCell (inherits from <a href="#element-collection">ElementCollection</a>)
+</h3>
+<p>
+    TableCell is the standard element class for <b>&lt;th&gt;</b> and <b>&lt;td&gt;</b> tags. Whilst <b>TableCell</b>s are a collection they only ever hold one child, a <b>TableCellText</b> element.
+</p>
+<p class="definition">
+    cell = new ContentEdit.TableCell(tagName, attributes)
+</p>
+<p>
+    Create a new&nbsp;<b>TableCell</b> element with the given <b>tagName</b> and <b>attributes</b>. The <b>attributes</b> should be provided as an object.
+</p>
+<h3 id="table-cell-text">
+    TableCellText (inherits from <a href="#text">Text</a>)
+</h3>
+<p>
+    <b>TableCellText</b> is used to support text within a <b>TableCell</b> element, and has no direct association to any tag.
+</p>
+<p class="definition">
+    cellText = new&nbsp;ContentEdit.TableCellText(content)
+</p>
+<p>
+    Create a new <b>TableCellText</b>&nbsp;element with the given <b>content</b>. The <b>content</b> can be specified as a native string or <b><a href="/api/html-string#string">HTMLString.String</a></b> instance.
+</p>
+<h3 id="text">
+    Text (inherits from <a href="#element">Element</a>)
+</h3>
+<p>
+    <b>Text</b> is the standard element class for <b>&lt;address&gt;</b>, <b>&lt;blockquote&gt;</b>, <b>&lt;h1-6&gt;</b> and <b>&lt;p&gt;</b>&nbsp;tags.
+</p>
+<p>
+    By default when a text element is empty the CSS will insert three dots (<b>...</b>) within the element as a placeholder, this value can be overridden however by setting the&nbsp;<b>data-ce-placeholder</b> attribute against the text element (e.g &lt;p&nbsp;<i>data-ce-placeholder="Insert title..."&gt;&lt;/p&gt;)</i>.
+</p>
+<p class="definition">
+    text = new&nbsp;ContentEdit.Text(tagName, attributes, content)
+</p>
+<p>
+    Create a new <b>Text</b> element with the given <b>tagName</b>, <b>attributes</b> and <b>content</b>. The <b>attributes</b> should be provided as an object.&nbsp;The <b>content</b> can be specified as a native string or <b><a href="/api/html-string#string">HTMLString.String</a></b> instance.
+</p>
+<p class="definition">
+    text.restoreState()
+</p>
+<p>
+    Restore the <b>text</b> element's state after <b>storeState</b> has been called. This restores the caret position and content selection.
+</p>
+<p class="definition">
+    text.selection(selection)
+</p>
+<p>
+    Get/Set the content <b>selection</b>&nbsp;(<b><a href="/api/content-select#range">ContentSelect.Range</a></b>) for the&nbsp;<b>text</b> element. If <b>selection</b> is given then the selection is set, else the current selection is returned.
+</p>
+<p class="definition">
+    text.storeState()
+</p>
+<p>
+    Save the selection state of the <b>text</b> element so that it can be restored (with <b>restoreState</b>) after being unmounted and re-mounted.
+</p>
+<p class="definition">
+    text.updateInnerHTML()
+</p>
+<p>
+    Update the inner HTML of the DOM element with the <b>text</b> element's content.
+</p>
+<h3 id="pre-text">
+    PreText (inherits from <a href="#text">Text</a>)
+</h3>
+<p>
+    <b>PreText</b> is the standard element class for <b>&lt;pre&gt;</b> tags.
+</p>
+<p class="definition">
+    preText = new ContentEdit.PreText(tagName, attributes, content)
+</p>
+<p>
+    Create a new <b>preText</b> element with the given <b>tagName</b>, <b>attributes</b> and <b>content</b>. The <b>attributes</b> should be provided as an object. The <b>content</b> can be specified as a native string or <b><a href="/api/html-string#string">HTMLString.String</a></b> instance.
+</p>
+<h3 id="video">
+    Video (inherits from <a href="#resizable-element">ResizableElement</a>)
+</h3>
+<p>
+    <b>Video</b> is the standard element class for <b>&lt;video&gt;</b> and <b>&lt;iframe&gt;</b> tags. Since <i>YouTube</i>, <i>Vimeo</i> and other online video sharing sites embed videos in pages using <b>&lt;iframe&gt;</b>s, and since the <b>&lt;video&gt;</b> tag is not all that commonly used at present, I took the view that <b>&lt;iframe&gt;</b>s should be associated with videos.
+</p>
+<p class="note">
+    If you don't want <b>&lt;iframe&gt;</b>s to be associated with video tags either add <b>data-ce-tag="static"</b> to the <b>&lt;iframe&gt;</b> itself or re-register just <b>&lt;video&gt;</b> with the <b>Video</b> class using the <b>TagNames</b> class (e.g.&nbsp;<b>ContentEdit.TagNames.get().register(ContentEdit.Video, 'video')</b>).
+</p>
+<p class="definition">
+    video = new&nbsp;ContentEdit.Video(tagName, attributes, sources)
+</p>
+<p>
+    Create a new <b>Video</b> element with the given <b>tagName</b>, <b>attributes</b> and <b>sources</b>. The <b>attributes</b> should be provided as an object. The <b>sources</b> should be provided as an array of objects.
+</p>
+<p class="definition">
+    video.sources
+</p>
+<p>
+    List of <b>sources</b> for <b>video</b>&nbsp;element. The <b>sources</b> should be specified in the form of an array of objects like so:
+</p>
+<pre><code class="language-javascript">video.sources = [{'src': 'foo.ogg', 'type': 'video/ogg'}, ...];</code></pre>
+
+    </section>
+
+                </div>
+            </main>
+        
+
+        
+            <footer class="page__footer">
+                <div class="page__container">
+                    <p class="sign-off">
+                        ContentTools was created by Anthony Blackshaw - a founder of and
+                        developer at <a href="http://getme.co.uk">getme</a>.
+                        The project is maintained by the crew at <a href="https://github.com/orgs/GetmeUK/people">getme</a>
+                        along with <a href="https://github.com/GetmeUK/ContentTools/graphs/contributors">our contributors</a>.
+                        The code is licensed under <a href="https://github.com/GetmeUK/ContentTools/blob/master/LICENSE">MIT</a>.
+                    </p>
+                    <p class="social-handles">
+                        <a href="https://twitter.com/contenttoolsjs" class="[ twitter-follow-button ]  [ social-handles__handle ]" data-show-count="true" data-dnt="true">Follow @contenttoolsjs</a>
+                        <a href="https://github.com/getmeuk/ContentTools" class="[ github-button ]  [ social-handles__handle ]" data-count-href="/getmeuk/ContentTools/stargazers" data-count-api="/repos/getmeuk/ContentTools#stargazers_count" data-count-aria-label="# stargazers on GitHub" aria-label="Star getmeuk/ContentTools on GitHub">Star</a>
+                        <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+                        <script async defer id="github-bjs" src="https://buttons.github.io/buttons.js"></script>
+                    </p>
+                </div>
+            </footer>
+        
+
+        <script src="/scripts/site.js"></script>
+        
+            <script src="/scripts/prism.js"></script>
+        
+        
+    </body>
+</html>

@@ -1,0 +1,75 @@
+
+
+
+  .edit-nav .ui-tabs-vertical .ui-tabs-nav {
+        width: auto;
+    }
+    .edit-nav .ui-tabs-vertical .ui-tabs-panel {
+        width: 250px;
+        border: 0px;
+        padding: 0;
+    }
+    .ui-tabs-inner {
+        position: fixed;
+        right: 0px;
+        top: 50%;
+        transition: all 0.2s
+    }
+    .ui-tabs-inner ul {
+        transform: translateY(-50%);
+    }
+    .ui-tabs-inner.tabs-is-open{
+        right: 250px;
+    }
+    .edit-nav .ui-tabs .ui-tabs-nav a {
+height: 45px;
+    width: 45px;
+    background: hsla(0,0%,91%,.9);
+    border: 0;
+        padding: 0;
+        text-align: center;
+        color: #464646;
+        text-decoration: none !important;
+    }
+    .edit-nav .ui-tabs .ui-tabs-nav a span {
+        display: table;
+        height: 45px;
+        width: 100%;
+    }
+    .edit-nav .ui-state-default:hover {
+        background: transparent;
+    }
+    .edit-nav .ui-state-default:hover a {
+        background: hsla(0,0%,91%,1);
+    }
+    .edit-nav .ui-tabs-vertical .ui-tabs-nav li {
+        margin: 0; padding: 0;
+    }
+    .edit-nav .ui-tabs-vertical .ui-tabs-nav li.ui-tabs-active {
+        border: 0;
+        background: transparent;
+        right: 0;
+        padding:0;
+    }
+    .edit-nav .ui-tabs-vertical .ui-tabs-nav li.ui-tabs-active a {
+        background: #f5f5f5;
+    }
+    .ui-tabs-panel[aria-hidden="true"] {
+        margin-right: -200px;
+    }
+    .ui-tabs-panel[aria-hidden="false"] {
+        margin-right: 0;
+    }
+    .ui-tabs-panel {
+        transition: margin-right 0.2s;
+    }
+    .edit-nav .toggle {
+        border: 0px;
+        border-radius: 0px;
+    }
+    .edit-nav .toggle .toggle-handle {
+        margin-top: 0px;
+    }
+    .edit-nav .toggle .toggle-group .btn {
+        padding: 14px 18px;
+    }

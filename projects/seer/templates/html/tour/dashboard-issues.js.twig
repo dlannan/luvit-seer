@@ -1,0 +1,40 @@
+
+
+    // Define the steps for introduction
+    tourSteps.defineSteps([
+    {
+        element: '#dashboard-title',
+        popover: {
+            title: 'SEER Projects Page',
+            description: 'The SEER Projects page is a summary of the project spaces accessible by you.',
+            position: 'bottom-center'
+        }
+    },
+    {
+        element: '#dashboard-menu',
+        popover: {
+        title: 'SEER Project Main Menu',
+        description: 'The SEER Project Main menu allows you to see and interact with projects, scenes and people within the same project space as you.',
+        position: 'bottom-center'
+        },
+        onNext: () => {
+            $("#issues-create").show();
+        },
+    },
+    {
+        element: '#issues-create',
+        popover: {
+        title: 'Issues Creation Panel',
+        description: '<p>Users can create new issues. Add an issue name, select a project or if it effects all, select SEER. Add a subsystem identifier and a description.</p><p>When everything is filled out, press the Raise Issue button',
+        position: 'bottom-center'
+        }
+    },
+    {
+        element: '#issues-list',
+        popover: {
+        title: 'Issues List',
+        description: 'All Issues current to your projects are seen here. Click on an issue to see its description. If you enable edit, you can change priority and status of an isse.',
+        position: 'top-center'
+        }
+    }
+    ]);

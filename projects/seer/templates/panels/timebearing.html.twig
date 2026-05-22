@@ -1,0 +1,259 @@
+
+<script>
+'use strict';
+
+
+const { PI, cos, sin, abs, sqrt, pow, round, random, atan2 } = Math;
+const HALF_PI = 0.5 * PI;
+const TAU = 2 * PI;
+const TO_RAD = PI / 180;
+const floor = n => n | 0;
+const rand = n => n * random();
+const randIn = (min, max) => rand(max - min) + min;
+const randRange = n => n - rand(2 * n);
+const fadeIn = (t, m) => t / m;
+const fadeOut = (t, m) => (m - t) / m;
+const fadeInOut = (t, m) => {
+	let hm = 0.5 * m;
+	return abs((t + hm) % m - hm) / (hm);
+};
+const dist = (x1, y1, x2, y2) => sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2));
+const angle = (x1, y1, x2, y2) => atan2(y2 - y1, x2 - x1);
+
+var pnlTimeBearing = {
+
+	rayCount:  5,
+	rayPropCount:  8,
+	rayPropsLength:  5 * 8,
+	baseLength:  80,
+	rangeLength:  170,
+	baseSpeed:  0.5,
+	rangeSpeed:  0.3,
+	baseWidth:  1.2,
+	rangeWidth:  2,
+	baseHue:  120,
+	rangeHue:  60,
+	baseTTL:  500,
+	rangeTTL:  100,
+	noiseStrength:  70,
+	xOff:  0.0015,
+	yOff:  0.0015,
+	zOff:  0.0015,
+	backgroundColor:  'hsla(220,60%,3%,1)',
+  fps:  30,
+
+	container:  null,
+	canvas:  null,
+	ctx:  null,
+	center:  null,
+	tick:  null,
+	simplex:  null,
+	rayProps:  null,
+	objects:  null,
+
+	sensor:  null
+};
+
+pnlTimeBearing.createCanvas = function( cont, sensorid, objects ) {
+
+  //window.addEventListener('load', pnlTimeBearing.setup);
+  window.addEventListener('resize', pnlTimeBearing.resize);
+
+  var sensor = SensorFind( sensorid );
+  if(sensor == null) return null;
+  pnlTimeBearing.sensor = sensor;
+
+  if(objects == undefined) objects = ["dummy", "dummy"];
+
+  pnlTimeBearing.contname = cont;
+  pnlTimeBearing.objects = objects;
+  pnlTimeBearing.container = $(pnlTimeBearing.contname).parent();
+	pnlTimeBearing.canvas = {
+		a: document.createElement('canvas'),
+		b: $(cont)[0]
+	};
+	//pnlTimeBearing.container.appendChild(pnlTimeBearing.canvas.b);
+	pnlTimeBearing.ctx = {
+		a: pnlTimeBearing.canvas.a.getContext('2d'),
+		b: pnlTimeBearing.canvas.b.getContext('2d')
+  };
+
+  pnlTimeBearing.ctx.a.globalAlpha = 1.0;
+  pnlTimeBearing.ctx.b.globalAlpha = 1.0;
+  pnlTimeBearing.center = [];
+  return true;
+};
+
+pnlTimeBearing.setup = function( cont, sensorid, contacts ) {
+	var res = pnlTimeBearing.createCanvas( cont, sensorid, contacts );
+  if(res == null) return;
+
+  pnlTimeBearing.resize();
+  pnlTimeBearing.initRays();
+	pnlTimeBearing.draw();
+};
+
+pnlTimeBearing.initRays = function() {
+
+  pnlTimeBearing.rayCount = pnlTimeBearing.objects.length;
+  pnlTimeBearing.rayPropsLength = pnlTimeBearing.rayCount * pnlTimeBearing.rayPropCount;
+
+  pnlTimeBearing.tick = 0;
+  pnlTimeBearing.simplex = new SimplexNoise();
+  pnlTimeBearing.rayProps = new Float32Array( pnlTimeBearing.rayPropCount * pnlTimeBearing.rayCount );
+
+  let i;
+  for (i = 0; i < pnlTimeBearing.rayPropsLength; i += pnlTimeBearing.rayPropCount) {
+    pnlTimeBearing.initRay(i);
+  }
+};
+
+pnlTimeBearing.initRay = function(i) {
+  let length, x, y1, y2, n, life, ttl, width, speed, hue;
+
+  length = pnlTimeBearing.baseLength + rand(pnlTimeBearing.rangeLength);
+  x = rand(pnlTimeBearing.canvas.a.width);
+  y1 = 1;
+  y2 = 1;
+  life = 0;
+  ttl = pnlTimeBearing.baseTTL;
+  width = pnlTimeBearing.baseWidth;
+  speed = rand(pnlTimeBearing.baseSpeed) - pnlTimeBearing.baseSpeed * 0.5;
+  hue = pnlTimeBearing.baseHue;
+
+  pnlTimeBearing.rayProps.set([x, y1, y2, life, ttl, width, speed, hue], i);
+};
+
+pnlTimeBearing.drawRays = function() {
+  let i;
+
+  for (i = 0; i < pnlTimeBearing.rayPropsLength; i += pnlTimeBearing.rayPropCount) {
+    pnlTimeBearing.updateRay(i);
+  }
+};
+
+pnlTimeBearing.updateRay = function(i) {
+  let i2=1+i, i3=2+i, i4=3+i, i5=4+i, i6=5+i, i7=6+i, i8=7+i;
+  let x, y1, y2, life, ttl, width, speed, hue;
+
+  var contact = pnlTimeBearing.objects[i/pnlTimeBearing.rayPropCount];
+  if(contact === "dummy") {
+    x = pnlTimeBearing.rayProps[i];
+  } else {
+    var heading = new THREE.Vector3( 0, 0, 1 );
+    heading.applyQuaternion( pnlTimeBearing.sensor.quaternion );
+    var cdir = new THREE.Vector3();
+   
+    cdir.copy(contact.position);
+    cdir = cdir.sub(pnlTimeBearing.sensor.position);
+
+    // Store some information about them for below
+    var dot = heading.dot(cdir);
+    var clen = cdir.length();
+
+    // Now to find the angle
+    var bearing = Math.acos( dot / clen ); // Theta = 3.06 radians or 175.87 
+    x = pnlTimeBearing.canvas.a.width * ( bearing / Math.PI );
+    x = clamp( x, 0.0, pnlTimeBearing.canvas.a.width );
+  }
+
+  y1 = pnlTimeBearing.rayProps[i2];
+  y2 = pnlTimeBearing.rayProps[i3];
+  life = pnlTimeBearing.rayProps[i4];
+  ttl = pnlTimeBearing.rayProps[i5];
+  width = pnlTimeBearing.rayProps[i6];
+  speed = pnlTimeBearing.rayProps[i7];
+  hue = pnlTimeBearing.rayProps[i8];
+
+  pnlTimeBearing.drawRay(x, y1, y2, life, ttl, width, hue);
+
+  // x += speed;
+  //y1 += speed;
+  //y2 += speed;
+  life++;
+
+  if(x <= 0) x = pnlTimeBearing.ctx.a.width;
+  if(x >= pnlTimeBearing.ctx.a.width) x = 0;
+  pnlTimeBearing.rayProps[i] = x;
+  pnlTimeBearing.rayProps[i4] = life;
+
+  //(life > ttl) && pnlTimeBearing.initRay(i);
+};
+
+pnlTimeBearing.drawRay = function(x, y1, y2, life, ttl, width, hue) {
+  let gradient;
+
+  var xl = clamp(x-9.5, 0, pnlTimeBearing.canvas.a.width);
+  var xr = clamp(x+9.5, 0, pnlTimeBearing.canvas.a.width);
+  gradient = pnlTimeBearing.ctx.a.createLinearGradient(xl, y1, xr, y2);
+  gradient.addColorStop(0, `hsla(${hue},20%,5%,100%)`);
+  gradient.addColorStop(0.4, `hsla(${hue},50%,30%,100%)`);
+  gradient.addColorStop(0.5, `hsla(${hue},100%,75%,100%)`);
+  gradient.addColorStop(0.6, `hsla(${hue},50%,30%,100%)`);
+  gradient.addColorStop(1, `hsla(${hue},20%,5%,100%)`);
+
+  pnlTimeBearing.ctx.a.save();
+  //pnlTimeBearing.ctx.a.globalCompositeOperation = 'source-over';
+  pnlTimeBearing.ctx.a.beginPath();
+  pnlTimeBearing.ctx.a.strokeStyle = gradient;
+  pnlTimeBearing.ctx.a.lineWidth = width;
+  pnlTimeBearing.ctx.a.moveTo(xl, y1);
+  pnlTimeBearing.ctx.a.lineTo(xr, y2);
+  pnlTimeBearing.ctx.a.stroke();
+  pnlTimeBearing.ctx.a.closePath();
+  pnlTimeBearing.ctx.a.restore();
+};
+
+pnlTimeBearing.checkBounds = function(x) {
+  return x < 0 || x > pnlTimeBearing.canvas.a.height;
+};
+
+pnlTimeBearing.resize = function() {
+
+    pnlTimeBearing.container = $(pnlTimeBearing.contname).parent();
+    pnlTimeBearing.canvas.a.style.width='100%';
+    pnlTimeBearing.canvas.a.style.height='100%';
+    pnlTimeBearing.canvas.b.style.width='100%';
+    pnlTimeBearing.canvas.b.style.height='100%';
+
+    var width = $(pnlTimeBearing.container).width();
+    var height = $(pnlTimeBearing.container).height();
+
+    pnlTimeBearing.canvas.a.width = width;
+    pnlTimeBearing.canvas.a.height = height;
+
+    pnlTimeBearing.ctx.a.drawImage(pnlTimeBearing.canvas.b, 0, 0);
+
+    pnlTimeBearing.canvas.b.width = width;
+    pnlTimeBearing.canvas.b.height = height;
+
+    pnlTimeBearing.ctx.b.drawImage(pnlTimeBearing.canvas.a, 0, 0);
+
+    pnlTimeBearing.center[0] = 0.5 * pnlTimeBearing.canvas.a.width;
+    pnlTimeBearing.center[1] = 0.5 * pnlTimeBearing.canvas.a.height;
+};
+
+pnlTimeBearing.render = function() {
+
+//  pnlTimeBearing.ctx.b.save();
+  
+  pnlTimeBearing.ctx.b.globalCompositeOperation = 'source-over';
+  var w =  pnlTimeBearing.canvas.a.width;
+  var h = pnlTimeBearing.canvas.a.height;
+  pnlTimeBearing.ctx.b.fillRect(0, 0, pnlTimeBearing.canvas.a.width, 2);
+  pnlTimeBearing.ctx.b.drawImage(pnlTimeBearing.canvas.a, 0, 0, w, 2, 0, 0, w, 2 );
+  pnlTimeBearing.ctx.b.drawImage(pnlTimeBearing.canvas.b, 0, 0, w, h-2, 0, 2, w, h-2 );
+//  pnlTimeBearing.ctx.b.restore();
+};
+
+pnlTimeBearing.draw = function() {
+  pnlTimeBearing.tick++;
+  if(pnlTimeBearing.tick % pnlTimeBearing.fps == 0) {
+  pnlTimeBearing.ctx.a.clearRect(0, 0, pnlTimeBearing.canvas.a.width, 2);
+  pnlTimeBearing.drawRays();
+  pnlTimeBearing.render();
+  }
+	window.requestAnimationFrame(pnlTimeBearing.draw);
+};
+
+</script>

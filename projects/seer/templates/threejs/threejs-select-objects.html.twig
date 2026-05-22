@@ -1,0 +1,345 @@
+
+
+function getParentGroup( object ) {
+    
+    if(object === null)
+        return null;
+    if (object.parent === null) 
+        return null;
+    var prev;
+    var iobj = object;
+    var iobjparent = iobj.parent;
+    while(iobjparent != scene) {
+        prev = iobj.parent;
+        iobj = iobj.parent;
+    }
+    return prev;
+}
+
+function screenXY( obj ){
+
+	// Only care about main window!!
+    var canvaswin = $('.view').get(0);
+
+    var vector = obj.clone();
+    var windowWidth = $(canvaswin).outerWidth();
+
+    var widthHalf = (windowWidth/2);
+    var heightHalf = ($(canvaswin).outerHeight()/2);
+
+    vector.project(camera);
+
+    vector.x = ( vector.x * widthHalf ) + widthHalf;
+    vector.y = - ( vector.y * heightHalf ) + heightHalf;
+    vector.z = 0;
+
+    return vector;
+};
+
+function InView( object ) {
+    
+    if(!object) return false;
+
+    var pt = new THREE.Vector3();
+    pt.copy( object.userData.localCenter );
+    pt = object.localToWorld( pt );
+
+    var dir = new THREE.Vector3();
+    camera.getWorldDirection(dir);
+
+    pt.sub(camera.position);
+    var costheta = pt.dot(dir);
+
+    if(costheta > 0.0) return true;
+    return false;
+}
+
+function getHtmlCoord( object ) {
+
+    var pt = object.position.clone();
+    if(object.userData.localCenter) {
+        pt.copy( object.userData.localCenter );
+        pt = object.localToWorld( pt );
+    }
+    return screenXY( pt );
+}
+
+
+function getNearestObject( intersects ) {
+
+    // Intersections are ordered during raycast. Iterate from front to back.    
+    var obj = undefined;
+    // Get the nearest selected object
+    for( var i=0; i<intersects.length; i++ ) {
+        var id = intersects[i].object.userData.parentId;
+        if(id) obj = SceneGraph.findNodeByUid(id);
+        if(obj) return obj;
+    }
+    return obj;
+}
+
+function handleSplineTargetSelect( spline ) {
+
+    if(!spline) { return; }
+
+    selectEditorObj = spline.id;
+
+    // Change to move mode!
+    // clear other Selections first
+    clearSelection();
+    var obj = SceneGraph.findNodeByUid(selectEditorObj, true);
+    selection.add( obj );
+
+    mode.object = obj;
+    mode.state = EditorMode.NODEPLACE;
+    $("#select-obj").hide();
+    $("#select-spline").hide();
+}
+
+function handleNodeSelect( node ) {
+
+    if(!node) { return; }
+
+    var valid = false;
+    if(node.userData.parentType) {
+        valid = (node.userData.parentType == "nodes");
+        node.visible = true;
+        // updateTargets( spline );
+    }
+
+    if(!InView(node)) {
+        valid = false;
+    }
+
+    if(node && valid) {
+
+        //var up = spline.getObjectByName('arrow_up');
+        //var left = spline.getObjectByName('arrow_left');
+        //var right = spline.getObjectByName('arrow_right');
+
+        //var box = new THREE.Box3().setFromObject(up);
+        //box.expandByObject(left);
+        //box.expandByObject(right);
+
+        //var pt = new THREE.Vector3();
+        //box.getCenter(pt);
+        //var htmlcoord = screenXY( pt );
+
+        var htmlcoord = getHtmlCoord(node);
+        mode.popup = PopupMode.SPLINE;
+        $("#select-spline").css('left', htmlcoord.x-24);
+        $("#select-spline").css('top', htmlcoord.y-24 - 60 - 24);
+    } else {
+        hidePopups();
+    }
+
+    selectEditorObj = node.userData.uid;
+}
+
+function handleSensorSelect( object ) {
+
+    // If no object then the sensor is being placed in the world
+    // Raycast into the world, get position, and set parent (for sensor) to nothing.
+
+    var valid = false;
+    if(object.userData.parentType) {
+        valid = (selectable.indexOf(object.userData.parentType) > -1);
+        object.visible = true;
+    }
+
+    if(!InView(object)) {
+        valid = false;
+    }
+
+    if(object && valid) {
+
+        var htmlcoord = getHtmlCoord(object);
+        mode.popup = PopupMode.SENSOR;
+        $("#select-sensor").css('left', htmlcoord.x-24);
+        $("#select-sensor").css('top', htmlcoord.y-24 - 60 - 24);
+        ShowSensor(object);
+    } else {
+        hidePopups();
+    }
+
+    selectEditorObj = object.userData.uid;
+    $("#sensor-name").val(object.name);
+    $("#sensor-name").on("change", function () {
+        object.name = $("#sensor-name").val().replace(/\s/g,'');
+        $("#sensor-name").val(object.name);
+    });
+}
+
+function handleEventSelect( object ) {
+
+    // If no object then the sensor is being placed in the world
+    // Raycast into the world, get position, and set parent (for sensor) to nothing.
+    var valid = false;
+    if(object.userData.parentType) {
+        valid = (selectable.indexOf(object.userData.parentType) > -1);
+        object.visible = true;
+    }
+
+    if(!InView(object)) {
+        valid = false;
+    }
+
+    if(object && valid) {
+
+        var htmlcoord = getHtmlCoord(object);
+        mode.popup = PopupMode.EVENT;
+        $("#select-event").css('left', htmlcoord.x-24);
+        $("#select-event").css('top', htmlcoord.y-24 - 60 - 24);
+        ShowEvent(object);
+        
+    } else {
+        hidePopups();
+    }
+
+    selectEditorObj = object.userData.uid;
+    $("#event-name").val(object.name);
+    $("#event-name").on("change", function () {
+        object.name = $("#event-name").val().replace(/\s/g,'');
+        $("#event-name").val(object.name);
+    });
+}
+
+
+function handleObjectSelect( object ) {
+
+    if(!object) { return; }
+
+    var valid = false;
+    if(object.userData.parentType) {
+        valid = (selectable.indexOf(object.userData.parentType) > -1);
+        object.visible = true;
+    }
+
+    if(!InView(object)) {
+        valid = false;
+    }
+
+    if(object && valid) {
+
+        var htmlcoord = getHtmlCoord(object);
+        mode.popup = PopupMode.MAIN;
+        $("#select-obj").css('left', htmlcoord.x-24);
+        $("#select-obj").css('top', htmlcoord.y-24 - 60 - 24);
+    } else {
+        mode.popup = PopupMode.NONE;
+    }
+
+    selectEditorObj = object.userData.uid;
+}
+
+function checkHit( parentObjects ) {
+
+    if(!parentObjects) { parentObjects = objects; }
+    raycaster.setFromCamera( mouse, camera );
+    var octreeObjects;
+    var intersections;
+    if ( useOctree === true ) {
+
+        octreeObjects = octree.search( raycaster.ray.origin, raycaster.ray.far, true, raycaster.ray.direction );
+        intersections = raycaster.intersectOctreeObjects( octreeObjects, true );
+    }
+    else {
+
+        intersections = raycaster.intersectObjects( parentObjects, true );
+    }
+    return intersections;
+}
+
+function closestHit( srcobj, intersections ) {
+
+    var result = undefined;
+    // check object isnt the one we are dragging around!!
+    for( var i=0; i<intersections.length; i++ ) {
+        var test = intersections[ i ];
+
+        var testparent = test.object.userData.parentId == srcobj.userData.parentId;
+        var testsrc = test.object.userData.parentId == srcobj.userData.uid;
+        var testparentlocal = test.object.userData.uid == srcobj.userData.parentId;
+        var testlocal = test.object.userData.uid == srcobj.userData.uid;
+        var testall = testparent; // | testsrc | testparentlocal | testlocal;
+
+        if( !testall ) {
+            result = test;
+            break;
+        } 
+    }
+    return result;
+}
+
+function clearSelection() {
+    while(selection.children.length > 0){ 
+        selection.remove(selection.children[0]); 
+    }   
+}
+
+function clearLookups() {
+    // Node lookup for OSM nodes
+    nodelu 	= {};
+    // Find what way/s this node is associated with - for updating them.
+    nodewaylu 	= {};
+    // Way lookup for OSM Ways 
+    waylu 	= {};
+    // Lookup for shapes generated
+    shapelu = {};  
+
+    // Lookups for events
+    eventlu = {};  
+}
+
+function clearAllObjects() {
+
+    objects = [];
+    objectsSearch = [];
+
+    // TODO: Replace with type based deletion
+    while(env.children.length > 0){ 
+        env.remove(env.children[0]); 
+    }
+    while(world.children.length > 0){ 
+        world.remove(world.children[0]); 
+    }
+    while(statics.children.length > 0){ 
+        statics.remove(statics.children[0]); 
+    }
+    while(selection.children.length > 0){ 
+        selection.remove(selection.children[0]); 
+    }
+    while(models.children.length > 0){ 
+        models.remove(models.children[0]); 
+    }
+    while(actors.children.length > 0){ 
+        actors.remove(actors.children[0]); 
+    }
+    while(nodes.children.length > 0){ 
+        nodes.remove(nodes.children[0]); 
+    }
+    while(sensors.children.length > 0){ 
+        sensors.remove(sensors.children[0]); 
+    }
+    while(events.children.length > 0){ 
+        events.remove(events.children[0]); 
+    }
+    while(ways.children.length > 0){ 
+        ways.remove(ways.children[0]); 
+    }
+    while(scene.children.length > 0){ 
+        scene.remove(scene.children[0]); 
+    }
+}
+
+
+$(document).ready(function(){
+    // Hide any selector at start
+    //$('#select-wrap').hide();
+    
+    //console.log("threejs-select-objects: Setup default animations.");
+    loadSeerAnimation("{{theme_url}}/assets/anims/liamIdle.glb", "idle01-male", function(anim) {});
+    loadSeerAnimation("{{theme_url}}/assets/anims/liamWalking.glb", "walk01-male", function(anim) {});
+    loadSeerAnimation("{{theme_url}}/assets/anims/stefaniIdle.glb", "idle01-female", function(anim) {});
+    loadSeerAnimation("{{theme_url}}/assets/anims/stefaniWalking.glb", "walk01-female", function(anim) {});
+});			

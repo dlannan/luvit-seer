@@ -1,0 +1,292 @@
+
+<script>
+
+    {# function loadTexture( url, callback ) {
+
+        var texture = new THREE.TextureLoader().load( url );
+        return texture;
+    } #}
+
+    function loadTexture( url, callback ) {
+
+        var loader = new THREE.TextureLoader();
+        // load a resource
+        loader.load( url, callback,
+
+            // onProgress callback currently not supported
+            undefined,
+
+            // onError callback
+            function ( err ) {
+                console.error( 'Error loading texture:' + url );
+            }
+        );
+    }
+
+    jQuery.loadScript = function (url, callback, error) {
+        return jQuery.ajax({
+            url: url,
+            dataType: 'script',
+            success: callback,
+            error: error,
+            async: true
+        });
+    };
+
+    function splitTest(str) {
+        var res = str.split('\\').pop().split('/').pop();
+        // Remove numeric and hyphens
+        if(res.includes('.')) res = res.split('.').pop();
+        if(res.includes('-')) res = res.split('-')[0];
+        return res;
+    }
+
+    var runpernode = undefined;
+    var runpostload = undefined;
+
+    // Run the associated script files for the model. Global and local files are run.
+    function loadFiles(list, ctx, fn){
+        var cntr = list.length;
+        for(var i=0; i<list.length; i++) {
+
+            var jqxhr = $.ajax(list[i])
+            .done( function( filedata ) {
+                var pernode;
+                var postload;
+
+                eval(filedata);
+                if(typeof pernode === 'function') ctx.data.runpernode = pernode;
+                if(typeof postload === 'function') ctx.data.runpostload = postload;
+                cntr--;
+                if(cntr == 0) fn( ctx.data, ctx.parentId, ctx.parentType, ctx.clickCallback );
+            })
+            .fail( function() {
+                cntr--;
+                if(cntr == 0) fn( ctx.data, ctx.parentId, ctx.parentType, ctx.clickCallback );
+            });
+        }
+    }
+
+    function loadScriptForModel( fullpath, scenedata, callback ) {
+        
+        //console.log("+++++>", scenedata.name);
+        loadScript(fullpath + "/" + scenedata,
+            function() {
+                if(typeof pernode === 'function') runpernode = pernode;
+                if(typeof postload === 'function') runpostload = postload;
+                callback( true );
+            },
+            function() {
+                console.log("Scene Script not found: " + scenedata);
+                callback( undefined );
+            });
+    }
+
+    function loadSceneFromFile( data, parentId, parentType, clickCallback ) {
+
+        // Retain a local handle while data is loading...
+        var origdata = jQuery.extend(true, {}, data);
+
+        var uloader = null;
+        if(data.format.toLowerCase() === "utf8") uloader = threeloaders["utf8"];
+        if(data.format.toLowerCase() === "fbx") uloader = threeloaders["fbx"];
+        if(data.format.toLowerCase() === "gltf") uloader = threeloaders["gltf"];
+        if(data.format.toLowerCase() === "glb") {
+            uloader = threeloaders["gltf"];
+            // Optional: Provide a DRACOLoader instance to decode compressed mesh data
+            THREE.DRACOLoader.setDecoderPath( '{{ theme_url }}/assets/js/threejs/libs/draco' );
+            uloader.setDRACOLoader( threeloaders["draco"] );
+        }
+
+        uloader.load( data.url, function ( inobject ) {
+
+            {# console.log("--------------->", inobject); #}
+            //var maxAnisotropy = renderer.capabilities.getMaxAnisotropy();
+            var sceneTrav = inobject;
+            if((data.format === "gltf") || (data.format === "glb")) {
+                sceneTrav = inobject.scene;
+            }
+
+            sceneTrav.position = new THREE.Vector3(0.0, 0.0, 0.0);
+
+            sceneTrav.traverse( function( node ) {
+
+                node.castShadow = true;
+                node.receiveShadow = true;
+                node.renderDepth = 0;
+                node.userData.parentId = parentId;
+                node.userData.parentType = parentType;
+                node.userData.filename = data.url.substring(data.url.lastIndexOf('/')+1);
+
+                {# if (node instanceof THREE.Object3D) {  
+                    var box = new THREE.Box3().setFromObject(node)
+                    node.userData.localCenter = new THREE.Vector3();
+                    box.getCenter(node.userData.localCenter);
+                } #}
+                
+                if(data.runpernode)  {
+                    data.runpernode( node );
+                }
+
+                if (node.hasOwnProperty('geometry')) {
+                    node.dynamic = false;
+                }
+
+                if (node instanceof THREE.Mesh) {                    
+                    addNodeToRaycastPool(node);
+                }
+            });
+
+            if(data.runpostload) {
+                data.runpostload( sceneTrav );
+            }
+
+            sceneTrav.userData.uid = parentId;
+            clickCallback( sceneTrav );
+            urls[parentId] = origdata;
+        },
+        function() {},
+        function( err ) {
+            console.log("Error: ", err);
+            //var sceneTrav = inobject;
+            clickCallback( undefined );
+        });    
+    }
+
+    function loadScene( data, parentId, clickCallback) {
+
+        var filepath = data.url.substring(0, data.url.lastIndexOf("/"));
+        var parentfilepath = filepath.substring(0, filepath.lastIndexOf("/"));
+        var parentType = splitTest(parentfilepath);
+
+        if(data.parentType) parentType = data.parentType;
+        // Check for parent type mapping
+        parentType = parentTypeMapping[parentType];
+
+        //console.log("ParentType: ", parentType);
+        //console.log(filepath, parentfilepath);       
+
+        var jsFileList = [];
+        if(data.gloadscene) {
+            if((data.gloadscene.length != 0) && (data.gloadscene.length > 0)) {
+                jsFileList.push(parentfilepath +"/" + data.gloadscene);
+            }
+        }
+        if(data.loadscene) {
+            if((data.loadscene.length != 0) && (data.loadscene.length > 0)) {
+                jsFileList.push(filepath + "/" + data.loadscene);
+            }
+        }
+        //console.log(data, jsFileList);
+
+        // if scripts have been added
+        if(jsFileList.length > 0) {
+            var context = { data: data, parentId: parentId, parentType: parentType, clickCallback: clickCallback };
+            // if global scene is set, try loading that, if local is set, then use that!
+            loadFiles( jsFileList, context, loadSceneFromFile );
+        } else {
+            loadSceneFromFile(data, parentId, parentType, clickCallback);
+        }
+    }
+
+    function loadRoadSystem() {
+
+        var uloader = new THREE.UTF8Loader();
+        uloader.load( "{{ theme_url }}/assets/content/envs/roads/roadways.js", 
+            function ( object ) {
+
+            object.position.y = -80.0;
+            scene.add( object );
+            //var maxAnisotropy = renderer.capabilities.getMaxAnisotropy();
+
+            //addDragControl(object);
+
+            object.traverse( function( node ) {
+
+                node.castShadow = true;
+                node.receiveShadow = true;
+                node.renderDepth = 0;
+
+                if ( node.material ) {
+                    
+                    //if(node.material.map)
+                    //    node.material.map.anisotropy = maxAnisotropy;
+
+                    if(( node.material.name === "rp1_orangefence") ||
+                        ( node.material.name === "bp2_chainlinkfence") ||
+                        ( node.material.name === "bp2_barbwire") )
+                    {
+                        node.material.transparent = true;
+                        node.material.blending = THREE[ "NormalBlending" ];
+                        node.castShadow = false;
+                    }
+            
+                    else if ( node.material.name.indexOf( "water" ) > -1 )
+                    {
+
+                        water = new THREE.Water(
+                            node.geometry,
+                            {
+                                textureWidth: 512,
+                                textureHeight: 512,
+                                waterNormals: new THREE.TextureLoader().load( '{{ theme_url }}/assets/content/images/waternormals.jpg', 
+                                function ( texture ) {
+                                    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+                                }),
+                                alpha: parameters.alpha,
+                                sunDirection: dirLight.position.clone().normalize(),
+                                sunColor: 0xffffff,
+                                waterColor: 0x094769,
+                                distortionScale: parameters.distortionScale,
+                                fog: scene.fog !== undefined
+                            }
+                        );
+                        water.receiveShadow = false;
+
+                        node.material = water.material;
+                        node.add( water );
+                        node.castShadow = false;
+                    }
+                    
+                    else if ( node.material.name === "rp1_streetlight_on" )
+                    {
+                        node.material.emissive = new THREE.Color( 0xffffff );
+                    }                        
+                    else if (( node.material.name.indexOf( "road" ) > -1 ) ||
+                                ( node.material.name.indexOf( "curb" ) > -1 ) )
+                    {
+                        //var mesh = new Physijs.ConcaveMesh( node.geometry, ground_material, 0 );
+                        //node.add(mesh);
+                    }
+                    
+                    else if ( node.material.name.indexOf( "decal" ) > -1 )
+                    {
+                        node.material.polygonOffset = true;
+                        node.material.polygonOffsetFactor = -0.1;
+                        
+                        node.material.transparent = true;
+                        node.material.blending = THREE[ "NormalBlending" ];
+                        node.castShadow = false;
+                        node.renderDepth = 1;
+                    }
+                    
+                    else if ( node.material.name.indexOf( "streetarrows" ) > -1) 
+                    {
+                        node.material.polygonOffset = true;
+                        node.material.polygonOffsetFactor = -0.1;
+
+                        node.material.transparent = true;
+                        node.material.blending = THREE[ "AdditiveBlending" ];
+                        node.castShadow = false;
+                        node.renderDepth = 1;
+                    }
+                //	node.material.wrapAround = true;
+                //	node.material.wrapRGB.set( 0.6, 0.2, 0.1 );
+                }
+
+            } );
+
+        }, { normalizeRGB: true } );  
+
+    }
+</script>

@@ -1,0 +1,101 @@
+function rgbToHex(r, g, b) {
+    return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+}
+
+//palette = [
+//"#010026",
+//"#011875",
+//"#005ba8",
+//"#0091d7",
+//"#85c4d4",
+//"#00a6b6",
+//"#548483",
+//"#003d09",
+//"#87b87f",
+//"#cde5c1",
+//"#6b8648",
+//"#96826f",
+//"#d5c3b1" ];	
+
+palette_Neutral = [	
+"#f1f1f1",
+"#ddd",
+"#000",
+"#fff",
+"#777",
+"#f5f5f5"]
+
+palette_Reds = [
+rgbToHex(238, 119, 136),
+rgbToHex(136, 34, 51),
+rgbToHex(187, 85, 102),
+rgbToHex(187, 153, 170),
+rgbToHex(51, 17, 34),
+rgbToHex(102, 68, 85),
+rgbToHex(204, 187, 221),
+rgbToHex(68, 68, 102),
+rgbToHex(153, 153, 187),
+rgbToHex(204, 221, 238),
+rgbToHex(85, 136, 187),
+rgbToHex(221, 204, 170),
+rgbToHex(221, 170, 102),
+rgbToHex(136, 119, 102),
+rgbToHex(187, 51, 34),
+rgbToHex(187, 153, 153),
+rgbToHex(51, 17, 17),
+rgbToHex(136, 68, 68),
+rgbToHex(119, 17, 17),
+rgbToHex(204, 102, 102) ];
+			
+palette_Blues = [						
+rgbToHex(34, 0, 17),
+rgbToHex(170, 153, 187),
+rgbToHex(17, 34, 51),
+rgbToHex(136, 153, 170),
+rgbToHex(68, 85, 102),
+rgbToHex(187, 204, 221),
+rgbToHex(85, 170, 204),
+rgbToHex(17, 85, 102),
+rgbToHex(51, 136, 153),
+rgbToHex(221, 255, 255),
+rgbToHex(85, 119, 102) ];						
+							
+palette_Greens = [																							
+rgbToHex(51, 136, 68),
+rgbToHex(102, 153, 102),
+rgbToHex(17, 102, 17),
+rgbToHex(17, 34, 0),
+rgbToHex(119, 170, 51),
+rgbToHex(221, 238, 187),
+rgbToHex(85, 102, 51),
+rgbToHex(85, 119, 0),
+rgbToHex(153, 153, 102),
+rgbToHex(187, 187, 51),
+rgbToHex(204, 204, 119),
+rgbToHex(153, 153, 0),
+rgbToHex(68, 51, 0),
+rgbToHex(136, 85, 0),
+rgbToHex(34, 0, 0)]
+
+palette_Bright = [																							
+rgbToHex(119, 17, 34),
+rgbToHex(170, 119, 136),
+rgbToHex(51, 17, 34),
+rgbToHex(119, 85, 102),
+rgbToHex(51, 34, 68),
+rgbToHex(68, 85, 102),
+rgbToHex(17, 51, 68),
+rgbToHex(0, 85, 119),
+rgbToHex(102, 136, 136),
+rgbToHex(51, 119, 68),
+rgbToHex(51, 68, 34),
+rgbToHex(255, 238, 204),
+rgbToHex(153, 136, 102),
+rgbToHex(204, 136, 68),
+rgbToHex(238, 187, 153),
+rgbToHex(136, 85, 51),
+rgbToHex(204, 85, 17),
+rgbToHex(68, 34, 17),
+rgbToHex(136, 17, 17),
+rgbToHex(187, 153, 153)]
+

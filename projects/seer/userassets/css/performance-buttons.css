@@ -1,0 +1,57 @@
+/* Performance adjusting buttons */
+  
+.perfBtnSet {
+  margin-top: 0px;
+  z-index: 11;
+  position: absolute;
+  height: 80px;
+  top: 5px;      /* top of the buttons */ 
+}
+
+.perfInner {
+  overflow: hidden;
+  width: 100%;
+}
+
+.perfBtn {
+  float: left;
+  margin: 5px;
+  height: 40px;
+  width: 40px;
+  background: #F2AB34;
+}
+
+.perfBtnToggle {
+  background: rgb(95, 68, 20);
+}  
+
+.mobileBtnSet {
+  margin-bottom: 0px;
+  z-index: 11;
+  position: absolute;
+  height: 50px;
+  width: 100%;
+  bottom: 25px;    
+}
+
+.mobileInnerLeft {
+  width: 100%;
+  float: left;
+}
+
+.mobileInnerRight {
+  float: right;
+}
+
+.mobileBtn {
+  display: inline-block;
+  margin: 5px;
+  height: 40px;
+  width: 40px;
+  background: rgb(137, 145, 255);
+}
+
+.mobileBtnToggle {
+  background: rgb(37, 46, 172);
+}  
+

@@ -1,0 +1,179 @@
+var global = Function('return this')();
+var iconmap = { 
+    "models": '<i class="fa fa-car"></i>\n', 
+    "models-air": '<i class="fa fa-plane"></i>\n', 
+    "models-naval": '<i class="fa fa-ship"></i>\n',  
+    "objects": '<i class="fa fa-cube"></i>\n', 
+    "actors": '<i class="fa fa-male"></i>\n', 
+    "outdoors": '<i class="fa fa-tree"></i>\n', 
+    "sensors": '<i class="fa fa-eye"></i>\n',
+    "events": '<i class="fa fa-chevron-down"></i>\n',
+};
+var objiconcache = {};
+var objicontimer;
+
+function checkObjectIcons( curr, elapsed ) {
+
+    var html = "";
+    var allentities = SceneGraph.entityParents;
+
+    Object.entries(allentities).forEach(entObj => {
+
+        var entity = entObj[1].node;
+        var uid = entity.userData.parentId;
+        var etype = entity.userData.parentType;
+
+        if(entity) {
+
+            // check object type if unselected. If selected, check modes
+            var inview = InView(entity);
+            if(inview) {
+
+                var htmlcoord = getHtmlCoord(entity);
+
+                if(!objiconcache[uid]) {
+                    var icon = iconmap[etype];
+                    if(icon) {
+                        var tooltip = 'data-toggle="tooltip" title="' + entity.name + '"';
+                        var htmlout = '<div id="Entity_' + uid + '" class="entity-icon" ' + tooltip + '>' + icon + '</div>';
+                        $('#scene-icons').append(htmlout);
+                        objiconcache[uid] = htmlout;
+
+                        $('#Entity_' + uid).unbind('mouseup').mouseup( function(event) {
+                            if(mode.state == EditorMode.NONE) {
+                                event.stopPropagation(); 
+                                doPopupMenu(entity)               
+                            } 
+                        });
+                    }
+                } 
+
+                var halfhigh = $('#Entity_'+uid).outerHeight() * 0.5;
+                var halfwide = $('#Entity_'+uid).outerWidth() * 0.5;
+                $('#Entity_'+uid).css('left', htmlcoord.x-halfwide);
+                $('#Entity_'+uid).css('top', htmlcoord.y-halfhigh);
+            }
+        }
+    });
+}   
+
+function doPopupMenu(obj) {
+
+    if(obj != undefined) {
+        if( isParentType( obj, ObjectTypes.OBJECTS) ) {
+            mode.group = statics;
+            handleObjectSelect(obj);
+        } else if( isParentType( obj, ObjectTypes.OUTDOORS) ) {
+            mode.group = statics;
+            handleObjectSelect(obj);
+        } else if( isParentType( obj, ObjectTypes.NODES) ) {
+    console.log(obj);
+            mode.group = nodes;
+            handleNodeSelect(obj);
+        } else if( isParentType( obj, ObjectTypes.SENSORS) ) {
+            mode.group = sensors;
+            handleSensorSelect(obj);
+        } else if( isParentType( obj, ObjectTypes.EVENTS) ) {
+            mode.group = events;
+            handleEventSelect(obj);
+        } else if( isParentType( obj, ObjectTypes.ACTORS) ) {
+            mode.group = actors;
+            handleObjectSelect(obj);
+        } else if( isParentType( obj, ObjectTypes.MODELS) ) {
+            mode.group = models;
+            handleObjectSelect(obj);
+        } else {
+            EndSelection();
+        }
+    } else {
+        EndSelection();
+    }
+}
+
+function checkPopupMenu() {
+
+    if(selectEditorObj != -1)  {
+        var obj = SceneGraph.findNodeByUid(selectEditorObj);
+        // check object type if unselected. If selected, check modes
+        var inview = InView(obj);
+        if(obj && inview) {
+
+            var htmlcoord = getHtmlCoord(obj);
+            if( mode.popup == PopupMode.MAIN ) {
+                $("#select-obj").css('left', htmlcoord.x-24);
+                $("#select-obj").css('top', htmlcoord.y-24 - 60 - 24);
+            }
+            if( mode.popup == PopupMode.SPLINE ) {
+                $("#select-spline").css('left', htmlcoord.x-24);
+                $("#select-spline").css('top', htmlcoord.y-24 - 60 - 24);
+            }
+            if( mode.popup == PopupMode.SENSOR ) {
+                $("#select-sensor").css('left', htmlcoord.x-24);
+                $("#select-sensor").css('top', htmlcoord.y-24 - 60 - 24);
+            }
+            if( mode.popup == PopupMode.EVENT ) {
+                $("#select-event").css('left', htmlcoord.x-24);
+                $("#select-event").css('top', htmlcoord.y-24 - 60 - 24);
+            }
+
+            {# if( isParentType( obj, "nodes") ) {
+                mode.group = nodes;
+                handleNodeSelect(obj);
+            } else if( isParentType( obj, "sensor") ) {
+                mode.group = sensors;
+                handleSensorSelect(obj);
+            } else if( isParentType( obj, "actors") ) {
+                mode.group = actors;
+                handleObjectSelect(obj);
+            } else if( isParentType( obj, "models") ) {
+                mode.group = models;
+                handleObjectSelect(obj);
+            } #}
+        }
+
+        return;
+    }
+}
+
+var noneState = {
+
+    name: "none",
+    value: 0,              // Set this value to react to external state control
+    parent: undefined,      // If this is set, exit ensures the parent state is reactivated
+    oldid: -1,
+
+    onenter: function(init) {
+
+        hidePopups();
+        clearSelection();
+        if(selectCursor) selectCursor.visible = false;
+        enableControls();           
+        shiftPressed = false;  
+
+        $('.entity-icon').css('pointer-events', 'auto');
+    },
+
+    onupdate: function(dt) {
+
+        // Dont do much - its an init state, nothing to see here.
+        //console.log("EditorMode NONE");
+        checkPopupMenu();
+    },
+
+    onmouse: function( event ) {
+
+        //console.log("clicked: ", mode.state, mouseMove);
+        if((mouseMove == false) && (event.type === "mouseup")) {
+            
+            var intersections = checkHit();
+            {# console.log("Object:", intersections); #}
+            var obj = getNearestObject(intersections);
+            {# console.log("Object:", obj); #}
+            doPopupMenu(obj);
+        }
+    },
+
+    onexit: function() {
+        $('.entity-icon').css('pointer-events', 'none');
+    }
+};

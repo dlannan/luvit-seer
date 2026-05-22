@@ -1,0 +1,47 @@
+<!DOCTYPE HTML>
+<html lang="en">
+
+    <head>
+        {% local userassets = _G.USERASSETS %}
+        {(templates/common/head.html)}
+    </head>
+
+    <body>
+        {(templates/common/redis.html)}
+        {(templates/common/loading.html)}
+        
+        {(templates/tools/admintop.html)}
+
+        <main class="page__main">
+            {(templates/modules/menu.resty)}    
+            
+            {(templates/modules/carouselwithtext.resty)}
+            {(templates/wizards/module-add.html)}
+            {(templates/modules/feed.resty)}
+
+            {(templates/wizards/module-add.html)}
+            {(templates/modules/socialmediaaccounts.resty)}
+            {(templates/wizards/module-add.html)}
+            {(templates/modules/spotify.resty)}
+
+            {(templates/wizards/module-add.html)}
+            {(templates/modules/fullscreenmedia.resty)}
+
+            {(templates/wizards/module-add.html)}
+            {(templates/modules/banner.resty)}
+            {(templates/wizards/module-add.html)}
+            {(templates/modules/sidefeatureleft.resty)}
+            {(templates/wizards/module-add.html)}
+            {(templates/modules/sidefeatureright.resty)}
+            {(templates/wizards/module-add.html)}
+            {(templates/modules/mediagrid.resty)}
+            {(templates/wizards/module-add.html)}
+        </main>
+
+        {(templates/modules/footer.resty)}
+
+        {(templates/common/basejs.html)}
+
+        {(templates/tools/adminbottom.html)}
+    </body>
+</html>

@@ -1,0 +1,512 @@
+<script>
+
+
+    function readTextFile(file, callback)
+    {
+        var rawFile = new XMLHttpRequest();
+        rawFile.open("GET", file, false);
+        rawFile.onreadystatechange = function ()
+        {
+            if(rawFile.readyState === 4)
+            {
+                if(rawFile.status === 200 || rawFile.status == 0)
+                {
+                    var allText = rawFile.responseText;
+                    callback(allText);
+                }
+            }
+        }
+        rawFile.send(null);
+    }
+
+    function getTags( tags ) {
+
+        var tagout = [];
+        for(var i=0; i< tags.length; i++) {
+            var key = tags[i]._attr.k._value; 
+            var val = tags[i]._attr.v._value;
+            tagout[""+key] = val; 
+        }
+        return tagout;
+    }
+
+    function calcAngleDegrees(x, y) {
+        return Math.atan2(y, x) * 180 / Math.PI;
+    }
+
+    function DrawCircle( pos, size, col, nonfilled ) {
+        var geometry = new THREE.CircleGeometry( size, 8 );
+        var material = new THREE.MeshBasicMaterial( { color: new THREE.Color(col) } );
+        var circle = null;
+
+        // Remove center vertex
+        if(nonfilled) {
+            geometry.vertices.shift();
+            circle = new THREE.LineLoop( geometry, material );
+        } else {
+            circle = new THREE.Mesh( geometry, material );
+        }
+        circle.rotation.order = 'ZYX';
+        circle.rotation.set(-Math.PI/2, 0.0, 0.0);
+        circle.position.set(pos.x, pos.y, pos.z);
+
+        scene.add(circle);
+        return circle;
+    }
+
+    function DrawLine( p1, p2, col ) {
+
+        var geometry = new THREE.Geometry();
+        var material = new THREE.MeshBasicMaterial( { color: new THREE.Color(col) } );
+        geometry.vertices.push( p1, p2 );
+
+        var line = new THREE.Line( geometry, material );
+        scene.add(line);
+    }
+
+    function DrawShape( shape, col ) {
+
+        if(shape[0] === null) return;
+        if(shape.length == 0) return;
+        for( var i=0; i<shape.length-1; i++) {
+
+            var node = nodelu[shape[i]];
+            var p1 = node.pos;
+            var node2 = nodelu[shape[(i + 1) % shape.length]]
+            var p2 = node2.pos;
+            DrawLine( p1, p2, col );
+        }
+    }
+
+    function Shrink( p1, c, amount ) {
+        var l1 = { x: p1.x - c.x, y: p1.y - c.y, z: p1.z - c.z };
+        ll = Math.sqrt( l1.x * l1.x + l1.y * l1.y + l1.z * l1.z );
+        l1 = { x: l1.x / ll, y: l1.y / ll, z: l1.z / ll };
+        var lm = ll - amount;
+        return { x: l1.x * lm + c.x, y: l1.y * lm + c.y, z: l1.z * lm + c.z };
+    }
+
+    function DrawShrinkShape( shape, col, amount ) {
+
+        if(shape[0] === null) return;
+        if(shape.length == 0) return;
+
+        // Get center first
+        var total = { x: 0, y: 0, z: 0};
+        for( var i=0; i<shape.length; i++) {
+
+            var node = nodelu[shape[i]];
+            var p1 = node.pos;
+            total = { x: total.x + p1.x, y: total.y + p1.y, z: total.z + p1.z };
+        }
+
+        var count = shape.length;
+        var c = { x: total.x/count, y: total.y/count, z: total.z/count };
+
+        for( var i=0; i<shape.length-1; i++) {
+
+            var node = nodelu[shape[i]];
+            var p1 = Shrink(node.pos, c, amount);
+            var node2 = nodelu[shape[(i + 1) % shape.length]]
+            var p2 = Shrink(node2.pos, c, amount);
+            DrawLine( p1, p2, col );
+        }
+    }
+
+    Number.prototype.mod = function(n) {
+        return ((this%n)+n)%n;
+    };
+
+    function GetLines( node ) {
+        
+        var p1 = node.pos;
+        var nkeys = Object.keys(node.use);
+
+        var lines = [];
+        // Iterate the ways, create a list of degrees for each intersection
+        for( var i = 0; i< nkeys.length; i++ ) {
+            
+            var wayid = node.use[i].wid;
+            var way = waylu[ wayid ];
+            var nidx = node.use[i].idx;
+                            
+            var p2 = -1;
+            if(nidx + 1 < way.nd.length) {
+                p2 = nodelu[ "" + way.nd[ nidx + 1 ]._attr.ref._value ].pos;
+                var line1 = { p1: p1, p2: p2, dir: 1, nid: nidx, wid: wayid };
+                lines.push( line1 );
+            }
+            
+            if(nidx - 1 >= 0) {
+                p2 = nodelu[ "" + way.nd[ nidx - 1 ]._attr.ref._value ].pos;
+                var line1 = { p1: p1, p2: p2, dir: -1, nid: nidx, wid: wayid };
+                lines.push( line1 );                             
+            }
+        }
+
+        if(!node.anglelu)
+            node.anglelu = [];
+
+        // Have all the lines, calc their angles and order them.
+        linedegrees = [];
+        for( var i = 0; i< lines.length; i++) {
+            var line = lines[i];
+            var angle = calcAngleDegrees(line.p2.x-line.p1.x, line.p2.z-line.p1.z);
+            line.deg = angle;
+            node.anglelu[angle] = line;
+            linedegrees.push( angle );
+        }                        
+        linedegrees.sort( function(a, b){return a-b} );
+
+        var akeys = Object.keys(node.anglelu);
+        akeys.sort();
+        // Fill out the lines with next/prev index links
+        for(var i=0; i<akeys.length; i++) {
+
+            var idx = (i + 1).mod( akeys.length );
+            var idx2 = (i - 1).mod( akeys.length );
+            node.anglelu[akeys[i]].next = akeys[idx];
+            node.anglelu[akeys[i]].prev = akeys[idx2];
+        }
+
+        return linedegrees;
+    }
+
+    function MakeEdgeNodes( node, linedegrees ) {
+
+        // Now sorted, step through, double the list, by dividing each
+        // pair by half. Ie. index 0 and 1 are 30 and 50 degrees. 
+        // The resulting new value is 40. And this is a new "road edge"
+        // point.
+
+        var p1 = node.pos;
+        var radii = 3.0;
+        node.edges = [];
+
+        for( var i=0; i< linedegrees.length; i++) {
+
+            var next;
+            if( i+1 >= linedegrees.length ) {
+                next = linedegrees[0] + 360.0;
+            } else {
+                next = linedegrees[i+1];
+            }
+
+            var newedge = (next - linedegrees[i]) * 0.5 + linedegrees[i];
+            var rad = newedge * Math.PI / 180.0;
+            var pt = { x: p1.x + Math.cos(rad) * radii, y: 0.0, z: p1.z + Math.sin(rad) * radii};
+            
+            node.edges.push( pt );
+
+            DrawLine( p1, pt, 0xff00ff);
+            var circle = DrawCircle( {x: pt.x, y: 0.0, z: pt.z }, 2, 0x00ff00);
+        }
+    }
+
+    function GetCurrentAngle( node, wid, nidx, dir ) {
+
+        var akeys = Object.keys(node.anglelu);
+        akeys.sort();
+
+        // Sorted by degrees. When we get to current one return it
+        for( var i=0; i< akeys.length; i++ ) {
+
+            var line = node.anglelu[akeys[i]];
+            // Found the line we are on.
+            if((line.wid == wid) && (line.nid == nidx)) {
+                return line;
+            }
+        }
+        // Should NEVER get here - otherwise invalid node!
+        console.log("INVALID NODE: ", wid, nidx, dir, node);
+        return null;
+    }
+
+    function GetNextAngle( node, nextline ) {
+
+        return node.anglelu[ nextline.next ];
+    }
+
+    function GetNextIntersectionOnWay( line, shape, isectnodes ) {
+
+        // Iterate along way until a new intersection is hit.
+        var way = waylu[line.wid];
+        var step = Number(line.dir);
+        var starti = Number(line.nid) + step;
+        var endi = way.nd.length-1;
+
+        if( line.dir < 0) {
+            endi = 0;           
+            if(starti < endi) return null;
+            for( var i=starti; i >= endi; i+= step ) {
+                var nid = "" + way.nd[i]._attr.ref._value;
+                if( isectnodes.hasOwnProperty(nid) ) {
+                    console.log("FOUND ISECT 1:", nid);
+                    return { node: nodelu[nid], nidx: i };
+                } else {
+                    DrawCircle( nodelu[nid].pos, 5, shapeColor, 1 );
+                    shape.push(nid);
+                }
+            }
+        } else {
+
+            if(starti > endi) return null;
+            for( var i=starti; i <= endi; i+= step ) {
+                var nid = "" + way.nd[i]._attr.ref._value;
+                if( isectnodes.hasOwnProperty(nid) ) {
+                    console.log("FOUND ISECT 2:", nid);
+                    return { node: nodelu[nid], nidx: i };
+                } else {
+                    DrawCircle( nodelu[nid].pos, 5, shapeColor, 1 );
+                    shape.push(nid);
+                }
+            }
+        }
+        return null;
+    }
+
+    function GetDistanceSqr( line1, line2 ) {
+        var t1 = line1.p1.x - line2.p1.x;
+        var t2 = line1.p1.z - line2.p1.z;
+        var distsqr = t1 * t1 + t2 * t2;
+        return distsqr;
+    }
+
+    function CheckShapeLine(startline, nextline, shape, isectnodes) {
+
+        var distsqr = largestFeatureSqr * largestFeatureSqr;
+        var tdata = GetNextIntersectionOnWay( nextline, shape, isectnodes );
+        valid = false;
+
+        if(tdata != null) { 
+
+            nextline = GetCurrentAngle( tdata.node, nextline.wid, tdata.nidx, nextline.dir );
+            if(nextline != null) {
+                nextline = GetNextAngle( tdata.node, nextline );
+                DrawCircle( nextline.p1, 6, shapeColor, 1 );
+                shape.push("" + tdata.node.id);
+                
+                distsqr = GetDistanceSqr( startline, nextline );
+                valid = true;
+            }
+        } 
+
+        return { distsqr: distsqr, valid: valid, next: nextline };   
+    }
+
+    // Try just left hand first 
+    function GetShape( isectnodes, node, wid, nidx ) {
+
+        // first see which line in the edges matched this:
+        //   We will only care about +ve dir and thus node id + 1's with same wayid
+        var shape = [];
+
+        var startline = GetCurrentAngle( node, wid, nidx, 1 );
+        if(startline == null) { return shape; }
+        shape.push("" + node.id);
+    
+        var nextline = GetNextAngle( node, startline );
+        if(nextline == null) { return shape; }
+
+        DrawCircle( startline.p1, 5, 0xff8888, 1 );
+
+        // Ready to loop around
+        var distsqr = GetDistanceSqr( startline, nextline );
+        var data = { valid: true, next: nextline, distsqr: 1 };
+
+        var seccount = 0;
+        while((data.valid == true )&&(data.distsqr > 0.1)&&(seccount < 20)) {
+
+            data = CheckShapeLine(startline, nextline, shape, isectnodes);
+            nextline = data.next;
+            seccount ++; 
+        }
+        console.log("SHAPE EXIT: ", data.valid, data.distsqr, seccount, shape.length);
+        
+        if(data.distsqr < 0.1) { DrawCircle( startline.p1, 6, 0xff0000, 1 ); }
+        return shape;
+    }
+
+    function RandColor() {
+        return '#'+Math.floor(Math.random()*16777215).toString(16);
+    }
+
+    String.prototype.hashCode = function() {
+        var hash = 0, i, chr;
+        if (this.length === 0) return hash;
+        for (i = 0; i < this.length; i++) {
+            chr   = this.charCodeAt(i);
+            hash  = ((hash << 5) - hash) + chr;
+            hash |= 0; // Convert to 32bit integer
+        }
+        return hash;
+    };
+
+    function GetShapeHash( shape ) {
+
+        var skeys = Object.values(shape);
+        skeys.sort();
+
+        var hashstr = "";
+        for(var i=0; i<skeys.length; i++) {
+            hashstr = hashstr + skeys[i];
+        }
+        //console.log(hashstr);
+        return hashstr.hashCode();
+    }
+
+    function GenerateInnerAreas( isectnodes, ways ) {
+    
+        // Now it gets tricky and potentially 'endless'.
+        // Iterate each way. Follow each way node, when it reaches a 
+        // saved intersection (isectnode) then follow edgenodes on the "left"
+        // Follow the nodes until: reach start node, or too much space has 
+        //    been traversed. Could also use too many nodes.
+        // Completed traversals are a "shape". Register the shape with the 
+        //    collated edge or node ids. Sort them in a list, then hash them.
+        // If a shape with the same hash exists, move on. This will resolve 
+        //    duplicate collections of shapes.
+        // Then follow same procedure as above, on right hand nodes.
+        // This should generate all valid shapes that are NON road.
+
+        arrayLength = ways.length;
+        for (var i = 0; i < arrayLength; i++) {
+            var way = ways[i];
+            var tags = getTags(way.tag);
+
+            // If its a road - thats what we care about.
+            if(tags['highway']) {
+                
+                for ( var n = 0; n < way.nd.length; n++) {
+                    
+                    var nid = "" + way.nd[n]._attr.ref._value;
+                    console.log(n, nid);
+
+                    // Found an intersection?
+                    if( isectnodes.hasOwnProperty(nid) ) {
+                        
+                        var node = nodelu[ nid ];
+                        shapeColor = RandColor();
+                        var wayid = way._attr.id._value;
+                        
+                        var shape = GetShape(isectnodes, node, wayid, n);
+                        if(shape.length > 0) {
+                            var shapehash = GetShapeHash( shape );
+                            if( !(shapelu.hasOwnProperty(shapehash)) ) {
+                                shapelu[ shapehash ] = shape;
+                                DrawShrinkShape( shape, shapeColor, 3.0 );
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    $(document).ready(function(){
+
+        console.log("Ready to load:  {{ page.media['map.osm'].url }}" );
+
+        readTextFile( "{{ page.media['map.osm'].url }}", function(contents) {
+            var data = xmlToJSON.parseString(contents);
+            //console.log(data);
+
+            // Get bounds and center to world
+            var bounds = data.osm[0].bounds[0]._attr;
+            var dest = "EPSG:3785";
+
+            // Convert bounds
+            var maxcoords = [ bounds.maxlon._value, bounds.maxlat._value ];
+            var mincoords = [ bounds.minlon._value, bounds.minlat._value ];
+            maxcoords = proj4( dest, maxcoords);
+            mincoords = proj4( dest, mincoords);
+            //console.log( maxcoords, mincoords);
+
+            midcoords = [   (maxcoords[0] - mincoords[0]) * 0.5 + mincoords[0],
+                            (maxcoords[1] - mincoords[1]) * 0.5 + mincoords[1]];
+            
+            // Iterate nodes, and add to scene as simple circles.
+            var nodes = data.osm[0].node;
+
+            var arrayLength = nodes.length;
+            for (var i = 0; i < arrayLength; i++) {
+                var node = nodes[i]._attr;
+                // Convert lat/lon and draw circle.
+                var latlon = [ node.lon._value, node.lat._value ];
+                latlon = proj4( dest, latlon );
+                latlon = [ -(latlon[0] - midcoords[0]), (latlon[1] - midcoords[1]) ];
+
+                var circle = DrawCircle( {x: latlon[0], y: 0.0, z: latlon[1] }, 3, 0xffff00 );
+
+                // Add to node lookup
+                nodelu[ "" + node.id._value ] = { 
+                    id: node.id._value,
+                    pos: circle.position, 
+                    use: [] 
+                };
+
+                //console.log(i, circle.position);
+            }
+
+            // Iterate nodes, and add to scene as simple circles.
+            var ways = data.osm[0].way;
+
+            arrayLength = ways.length;
+            for (var i = 0; i < arrayLength; i++) {
+                var way = ways[i];
+                var tags = getTags(way.tag);
+
+                if(tags['highway']) {
+                //var geometry = new THREE.Geometry();
+                //var material = new THREE.MeshBasicMaterial( { color: new THREE.Color(0x0000ff) } );
+
+                waylu[way._attr.id._value] = way;
+                
+                for ( var n = 0; n < way.nd.length; n++) {
+                    
+                    var node = way.nd[n]._attr.ref._value;
+                    var pos = nodelu["" + node].pos;
+
+                    data = { wid: way._attr.id._value, idx: n };
+                    nodelu[ "" + node ].use.push( data ); 
+                    //geometry.vertices.push( pos );
+                }
+
+                //var line = new THREE.Line( geometry, material );
+                //console.log(i, pos);
+                //scene.add( line );
+                }
+            }
+
+            // For all nodes that have more than one use on a "way" this means
+            //  they are part of an intersection.
+            // This is how we will define road edges. Road edges will be created
+            //  from radii at intersections connecting to radii from other intersections.
+            //  the ways the node intersects all provide the connectivity for each.
+            
+            var edgenodes = [];
+            var isectnodes = [];
+            
+            var nkeys = Object.keys(nodelu);
+            for( var ni = 0; ni < nkeys.length; ni++) {
+                
+                var node = nodelu["" + nkeys[ni]];
+                var p1 = node.pos;
+                var linedegrees = GetLines(node);
+
+                MakeEdgeNodes(node, linedegrees);
+
+                // Intersection?
+                var keys = Object.keys(node.use);
+                if( keys.length > 1 ) {
+                    isectnodes["" + node.id] = node;
+                }
+            }
+
+            GenerateInnerAreas( isectnodes, ways );
+        });
+
+    });			
+
+</script>
+

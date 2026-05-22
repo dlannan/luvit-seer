@@ -1,0 +1,68 @@
+// Movement Handlers ---------------------------------------------------------------------------------------
+
+// Immediate position and rotation setting - updates the ThreeJS model immediately.
+//    
+function immediatePosHeading( ent, targetP, targetR, distance, elapsedTime ) {
+
+    immmediatePosition(ent, targetP);
+    immmediateHeading(ent, targetP, targetR);    
+}
+
+function immmediatePosition( ent, targetP) {
+    ent.node.position.set( targetP.x, targetP.y, targetP.z );
+}
+
+function immmediateHeading( ent, targetP, targetR) {
+    ent.node.lookAt( targetP.x + targetR.x, targetP.y + targetR.y, targetP.z + targetR.z );
+}
+
+// Simple linear tween handler (mainly for pedestrian movement)
+var cRenderDefaultLinear = function ( ent, currentTime, elapsedTime ) {
+
+    // Get OpenSteer position and direction
+    var pos = ent.renderdata.pos;
+    var off = ent.renderdata.offset;
+    var fwd = ent.renderdata.rot;
+
+    // Convert to ThreeJS for rendering
+    var targetP = new THREE.Vector3( pos.x + off.x, pos.y + off.y, pos.z + off.z );
+    var targetR = new THREE.Vector3( fwd.x, fwd.y, fwd.z );
+
+    // If an object has speed, then animate towards target position (smoothly)
+    var distance = targetP.distanceToSquared(ent.node.position);
+    //console.log(targetP, ent.node.position);
+
+    ent.updatetime = currentTime;
+    ent.tweenpos = animateVector4(ent.node, targetP, targetR, {
+            
+        duration: elapsedTime * 1000.0, 
+        easing : TWEEN.Easing.Linear.None,
+        callback : function(){
+            //console.log("Completed");
+        }
+    });
+};
+
+// Simple link render - there is no tweening. Its instant.
+var cRenderDefaultLinked = function ( ent, currentTime, elapsedTime ) {
+
+    // Get OpenSteer position and direction
+    var pos = ent.renderdata.pos;
+    var off = ent.renderdata.offset;
+    var fwd = ent.renderdata.rot;
+
+    // Convert to ThreeJS for rendering
+    var targetP = new THREE.Vector3( pos.x + off.x, pos.y + off.y, pos.z + off.z );
+    var targetR = new THREE.Vector3( fwd.x, fwd.y, fwd.z );
+
+    ent.node.position.copy( targetP );
+    ent.node.quaternion.setFromUnitVectors(new THREE.Vector3( 0, 0, 1 ), targetR) ;
+};
+
+var cRenderDefaultStatic = function( ent, currentTime, elapsedTime) {
+    
+    // Copy the mover position and rotation so that its "kind of" double buffered
+    //    ie: any mover changes after this wont impact the render.            
+    immmediatePosition( ent, ent.renderdata.pos  ); 
+    immmediateHeading( ent, ent.renderdata.pos, ent.renderdata.rot );    
+};

@@ -1,0 +1,91 @@
+{% set scenequery = ("[sql-table json]select * from scenes where projectid = '" ~ projectid ) ~ "' [/sql-table]" %}
+{% set scenedb = ((scenequery|shortcodes) | json_decode) %}
+
+<div class="tab-pane" id="pills-developer" role="tabpanel" aria-labelledby="pills-developer-tab">
+  <div class="col-12">
+    <div class="row">
+      <div class="card-header col-3">
+        <div class="form-group">
+          <label class="form-label">Select Scene</label>
+          <select name="select-developer" id="select-developer" class="form-control custom-select">
+          <option selected="selected">Select Scene...</option>
+  {% for key, scene in scenedb %}
+  {% if scene %}
+              <option value="{{ key }}">{{ scene.name }}</option>
+  {% endif %}
+  {% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="card-header col-3">
+        <div class="form-group">
+
+          <label class="form-label">Select Sensor</label>
+          <select name="select-developer" id="sensor-select-list" class="form-control custom-select">
+          <option selected="selected">Select Sensor...</option>        
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-sm-12">
+        <div class="card">
+
+          <div class="card-header" style="justify-content: space-between;">
+            <div class="leftside col-sm-7">Javascript Development</div>
+
+            <div class="rightside col-sm-5">
+              <div class="row">
+
+                <div class="btn-group col-12">
+                  <select name="select-developer-sample" id="select-developer-sample" class="form-control col-8">
+                  <option selected="selected">Select Sample...</option>
+                  </select>
+                  <div class="clearLink btn btn-danger" role="button" title="Click to clear all" >
+                    Clear
+                  </div>
+                  <div class="runCode btn btn-success" role="button" title="Run the JavaScript">
+                    Run
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="row">
+
+              <div class="col-sm-6 code-css">
+                <textarea id="sensor" class="code-sensor code-textarea" value="" placeholder="HTML" autocapitalize="off" autofocus></textarea>
+              </div>
+
+              <div class="col-sm-6">
+                <div id="html" class="code-html code-textarea"></div>
+              </div>
+            
+              <div class="col-sm-6 code-css">
+                <textarea id="css" class="code-css code-textarea" value="" placeholder="HTML" autocapitalize="off" autofocus></textarea>
+              </div>
+
+              <div class="col-sm-6">
+                <div id="js" class="code-js code-textarea"></div>
+              </div>
+            
+            </div>
+            <div class="row">
+
+              <div class="col-lg-12">
+                  <object id="preview" class="code-output" type="text/html"></object>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="error_output_developer"></div>
+</div>
+

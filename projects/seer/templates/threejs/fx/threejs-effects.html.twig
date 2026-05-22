@@ -1,0 +1,563 @@
+
+var effectMode = "NONE";
+
+function makeThermal( seerCamera ) {
+
+    var w = seerCamera.w;
+    var h = seerCamera.h;
+
+    //custom shader pass
+    thermalEffect  = {
+        uniforms: {
+            "tDiffuse": { value: null },
+            "amount":   { value: 1.0 },
+            "time": { type: 'f', value: 0.1 },
+            "resolution": { type: 'v2', value: new THREE.Vector2( w,h ) }
+        },
+        vertexShader: [
+            "void main() {",
+                "vec4 mvPosition = modelViewMatrix * vec4(position, 1.0 );",
+                "gl_Position = projectionMatrix * mvPosition;",
+            "}"
+        ].join( "\n" ),
+        fragmentShader: [
+            {# "#define C_RED vec4(1.0, 0.0, 0.0, 1.0)",
+            "#define C_YELLOW vec4(1.0, 1.0, 0.0, 1.0)",
+            "#define C_BLUE vec4(0.0, 0.0, 1.0, 1.0)",
+            "uniform float time;",
+            "uniform sampler2D tDiffuse;",
+            "uniform vec2 resolution;",
+            "void main( ) {",
+	        "   vec2 uv = gl_FragCoord.xy / resolution.xy;",
+            "   vec4 c = texture2D(tDiffuse, uv); ",
+            "   float luminance = 0.299 * c.r + 0.587 * c.g + 0.114 * c.b;",
+            "   float THRESHOLD = 0.6;",   // Make it 0.5 -> 0.8
+            "   gl_FragColor = (luminance < THRESHOLD) ? mix(C_BLUE, C_YELLOW, luminance * 2.0 ) : mix(C_YELLOW, C_RED, (luminance - 0.5) * 2.0);",
+            "   gl_FragColor.rgb *= 0.1 + 0.25 + 0.75 * pow( 16.0 * uv.x * uv.y * (1.0 - uv.x) * (1.0 - uv.y), 0.15 );",
+            "}" #}
+            "#define darkIsHot false",
+            "uniform float time;",
+            "uniform sampler2D tDiffuse;",
+            "uniform vec2 resolution;",
+            "void main( ) {",
+	        "   vec2 uv = gl_FragCoord.xy / resolution.xy;",
+            "   vec4 c = texture2D(tDiffuse, uv); ",
+            "   float a = c.r; ",
+            "   if(darkIsHot)",
+            "       a = 1.0 - a;",
+            " ",
+    	    "   //fast shader version",
+            "   gl_FragColor.r = 1.0 - clamp(step(0.166, a)*a, 0.0, 0.333) - 0.667*step(0.333, a) + step(0.666, a)*a + step(0.833, a)*1.0;",
+            "   gl_FragColor.b = clamp(step(0.333, a)*a, 0.0, 0.5) + step(0.5, a)*0.5;",
+            "   gl_FragColor.g = clamp(a, 0.0, 0.166) + 0.834*step(0.166, a) - step(0.5, a)*a - step(0.666, a)*1.0;",
+            "}"
+           ].join( "\n" )
+    };
+
+    var customPass = new THREE.ShaderPass(thermalEffect);
+    seerCamera.composer.addPass(customPass);
+
+    // Effect updater
+    seerCamera.effectUpdate = function( effectpass, dt ) {
+		effectpass.material.uniforms.time.value = dt;
+        effectpass.uniforms.resolution.value.x = this.w;
+        effectpass.uniforms.resolution.value.y = this.h;
+
+    };
+
+    return customPass;
+};
+
+var depthRenderTarget;
+
+function makeDepth( seerCamera ) {
+
+    var w = seerCamera.w;
+    var h = seerCamera.h;
+
+    //custom shader pass
+    depthEffect  = {
+        uniforms: {
+            "tDiffuse": { value: null },
+            "tDepth": { value: null },
+            "cameraNear":   { value: 0.3 },
+            "cameraFar":   { value: 500.0 },
+            "iResolution": { type: 'v2', value: new THREE.Vector2( w,h ) }
+        },
+        vertexShader: [
+			"void main() {",
+			"	gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);",
+			"}"
+        ].join( "\n" ),
+        fragmentShader: [
+            "#include <packing>",
+			"uniform sampler2D tDiffuse;",
+			"uniform sampler2D tDepth;",
+			"uniform float cameraNear;",
+			"uniform float cameraFar;",
+            "uniform vec2 iResolution;",
+			"float readDepth( sampler2D depthSampler, vec2 coord ) {",
+			"	float fragCoordZ = texture2D( depthSampler, coord ).x;",
+			"	float viewZ = perspectiveDepthToViewZ( fragCoordZ, cameraNear, cameraFar );",
+			"	return viewZToOrthographicDepth( viewZ, cameraNear, cameraFar );",
+			"}",
+			"void main() {",
+			"   vec2 uv = gl_FragCoord.xy / iResolution.xy;",
+			"	float depth = readDepth( tDepth, uv );",
+			"	gl_FragColor.rgb = vec3( depth, 0, 0 );",
+			"	gl_FragColor.a = 1.0;",
+			"}"
+        ].join( "\n" )
+    };
+    
+    var postMaterial = new THREE.ShaderMaterial( depthEffect );
+    var customPass = new THREE.RenderPass(scene, seerCamera.camera, postMaterial);
+    customPass.clear = false;
+    seerCamera.composer.addPass(customPass);
+
+    return customPass;
+}
+
+function makeAtmosphereHaze( seerCamera ) {
+
+    var w = seerCamera.w * seerCamera.rtScale;
+    var h = seerCamera.h * seerCamera.rtScale;
+
+    //console.log("RT: ", w + "   "  + h);
+
+    //custom shader pass
+    hazeEffect  = {
+        uniforms: {
+            "tDiffuse": { value: null },
+            "tDepth": { value: seerCamera.renderDepthTexture },
+            "cameraNear":   { value: seerCamera.near },
+            "cameraFar":   { value: seerCamera.far },
+            "iResolution": { type: 'v2', value: new THREE.Vector2( w,h ) }
+        },
+        vertexShader: [
+            "varying vec2 vUv;",
+			"void main() {",
+            "   vUv = uv;",
+            "   vec4 mvPosition = modelViewMatrix * vec4(position, 1.0 );",
+            "   gl_Position = projectionMatrix * mvPosition;",
+			"}"
+        ].join( "\n" ),
+        fragmentShader: [
+            "#include <packing>",
+
+			"uniform sampler2D tDiffuse;",
+			"uniform sampler2D tDepth;",
+			"uniform float cameraNear;",
+			"uniform float cameraFar;",
+            "uniform vec2 iResolution;",
+            "varying vec2 vUv;",
+			"float readDepth( sampler2D depthSampler, vec2 coord ) {",
+			"	float fragCoordZ = texture2D( depthSampler, coord ).x;",
+			"	float viewZ = perspectiveDepthToViewZ( fragCoordZ, cameraNear, cameraFar );",
+			"	return viewZToOrthographicDepth( viewZ, cameraNear, cameraFar );",
+			"}",            
+			"void main() {",
+			"	float depth = smoothstep(readDepth( tDepth, vUv ), 0.4, 1.0);",
+            "	vec3 color = texture2D( tDiffuse, vUv ).rgb;",
+			"	gl_FragColor.rgb = color;",
+			"	gl_FragColor.a = 1.0;",
+			"}"
+        ].join( "\n" )
+    };
+
+    var customPass = new THREE.ShaderPass(hazeEffect);
+    seerCamera.composer.addPass(customPass);
+
+    // Effect updater
+    seerCamera.effectUpdate = function( effectpass, dt ) {
+        effectpass.material.uniforms.tDepth.value = seerCamera.renderDepthTexture;
+    };
+    return customPass;
+}
+
+function makeNightVision( seerCamera ) {
+
+    var w = seerCamera.w;
+    var h = seerCamera.h;
+
+    //custom shader pass
+    var nvEffect  = {
+        uniforms: {
+            "tDiffuse": { value: null },
+            "time": { type: 'f', value: 0.1 },
+            "resolution": { type: 'v2', value: new THREE.Vector2( w,h ) }
+        },
+        vertexShader: [
+			"void main() {",
+                "vec4 mvPosition = modelViewMatrix * vec4(position, 1.0 );",
+                "gl_Position = projectionMatrix * mvPosition;",
+			"}"
+        ].join( "\n" ),
+        fragmentShader: [
+            "#include <packing>",
+			"uniform sampler2D tDiffuse;",
+            "uniform vec2 resolution;",            
+            "uniform float time;",
+            "float hash( float n) { return fract(sin(n)*43758.5453123); }",
+            " ",
+            "void main() {",
+	        "   vec2 p = gl_FragCoord.xy / resolution.xy;",
+            "   ",
+	        "   vec2 u = p * 2. - 1.;",
+	        "   vec2 n = u * vec2(resolution.x / resolution.y, 1.0);",
+            "   vec3 c = texture2D(tDiffuse, p).rgb; ",
+            "   ",    
+	        "   // flicker, grain, vignette, fade in",
+	        "   c += sin(hash(time)) * 0.01;",
+	        "   c += hash((hash(n.x) + n.y) * time) * 0.5;",
+	        "   c *= smoothstep(length(n * n * n * vec2(0.075, 0.4)), 1.0, 0.4);",
+            "   c *= smoothstep(0.001, 3.5, time) * 1.5;",
+            "   ",
+	        "   c = dot(c, vec3(0.2126, 0.7152, 0.0722)) * vec3(0.2, 1.5 - hash(time) * 0.1,0.4); ",
+            "   ",
+	        "   gl_FragColor = vec4(c,1.0);",
+            "}"
+        ].join("\n")
+    };
+
+    nvPass = new THREE.ShaderPass(nvEffect);
+    seerCamera.composer.addPass(nvPass);
+
+    // Effect updater
+    seerCamera.effectUpdate = function( effectpass, dt ) {
+	    effectpass.material.uniforms.time.value += dt;
+
+        effectpass.uniforms.resolution.value.x = this.w;
+        effectpass.uniforms.resolution.value.y = this.h;
+    };
+
+    return nvPass;
+}
+
+function makeRGB360( seerCamera ) {
+
+    var w = seerCamera.w;
+    var h = seerCamera.h;
+
+    var params = {
+        cameraNear: 0.1,
+        cameraFar: 5000
+    };
+
+    var cubeCamPass = new THREE.ThreeSixtySALDO( w, h, params );
+    seerCamera.composer.addPass(cubeCamPass);
+
+    seerCamera.effectUpdate = function( effectpass, dt, seerCam ) {
+
+        effectpass.tsCamera.position.copy( seerCam.camera.position );
+        effectpass.tsCamera.rotation.copy( seerCam.camera.rotation );
+    };
+
+    return cubeCamPass;
+}
+
+
+
+function makeDepthSALDO( seerCamera ) {
+
+    var depthPass = new THREE.DepthPassSALDO( seerCamera.renderDepthTexture );
+    seerCamera.composer.addPass(depthPass);
+    return depthPass;
+}
+
+function makeEchoScopeSALDO( seerCamera ) {
+
+    var composer = seerCamera.composer;
+    var params =     {
+        maximumAzimuth: 15.0,
+        minimumAzimuth: -15.0,
+        angularResV: 0.5,           // Angular vertical resolution
+        angularResH: 0.4,           // Angular horizontal resolution
+        rotationRate: 1.0/20.0,     // Measure in Hz
+        cameraNear: 1.0, 
+        cameraFar: 100.0,
+        vfov: 50.0,
+        vertAzimuth: 30.0,
+        colorMap: null, 
+        warping: 0.125,        
+        lastTime: 0.0, 
+        cameracount: 1
+    };   
+
+    var echoPass = new THREE.EchoSonarSALDO( 256, 256, params );
+
+    echoPass.params.colorMap = new THREE.TextureLoader().load( "{{ theme_url }}/assets/images/echocolormap.png" );
+    echoPass.params.colorMap.magFilter = THREE.LinearFilter;
+    echoPass.params.colorMap.minFilter = THREE.LinearFilter;
+
+    composer.addPass(echoPass);
+
+    seerCamera.effectUpdate = function( effectpass, dt, seerCam ) {
+
+        effectpass.postMaterial.uniforms.timeLast.value += dt;
+        effectpass.postMaterial.uniforms.sunDir.value.copy( dirLight.position );
+        effectpass.lidarCamera.position.copy( seerCam.camera.position );
+        effectpass.lidarCamera.rotation.copy( seerCam.camera.rotation );
+
+    };
+    return echoPass;
+}
+
+function makeTimeBearingSALDO( seerCamera ) {
+
+    var composer = seerCamera.composer;
+    var params =     {
+        cameraNear: 0.5, 
+        cameraFar: 1000.0,
+        colorMap: null, 
+        lastTime: 0.0
+    };   
+
+    var vertlines = 120;
+    var echoPass = new THREE.TimeBearingSALDO( 90, vertlines, params, 1 );
+
+    echoPass.params.colorMap = new THREE.TextureLoader().load( "{{ theme_url }}/assets/images/timebearing.png" );
+    echoPass.params.colorMap.magFilter = THREE.LinearFilter;
+    echoPass.params.colorMap.minFilter = THREE.LinearFilter;
+
+    composer.addPass(echoPass);
+
+    seerCamera.effectUpdate = function( effectpass, dt ) {
+
+        effectpass.postMaterial.uniforms.timeLast.value += dt;
+    };
+
+    return echoPass;
+}
+
+
+function makeLidar16SALDO( seerCamera ) {
+
+    var composer = seerCamera.composer;
+    var params =     {
+        maximumAzimuth: 15.0,
+        minimumAzimuth: -15.0,
+        angularResV: 2.0,       // Angular vertical resolution
+        angularResH: 0.4,       // Angular horizontal resolution
+        rotationRate: 1.0/20.0,     // Measure in Hz
+        cameraNear: 0.5, 
+        cameraFar: 100.0,
+        vfov: 45.0,
+        vertAzimuth: 30.0,
+        colorMap: null, 
+        warping: 0.125,        
+        lastTime: 0.0
+    };   
+
+    var vertlines = params.vertAzimuth / params.angularResV + 1;
+    var lidarPass = new THREE.LidarPassSALDO( 360, vertlines, params, 4);
+
+    lidarPass.params.colorMap = new THREE.TextureLoader().load( "{{ theme_url }}/assets/images/lidarcolormap.png" );
+    lidarPass.params.colorMap.magFilter = THREE.LinearFilter;
+    lidarPass.params.colorMap.minFilter = THREE.LinearFilter;
+
+    composer.addPass(lidarPass);
+    return lidarPass;
+}
+
+function makeLidar64SALDO( seerCamera ) {
+
+    var composer = seerCamera.composer;
+    var params =     {
+        maximumAzimuth: 15.0,
+        minimumAzimuth: -15.0,
+        angularResV: 0.25,       // Angular vertical resolution
+        angularResH: 0.4,       // Angular horizontal resolution
+        rotationRate: 1.0/20.0,     // Measure in Hz
+        cameraNear: 0.5, 
+        cameraFar: 100.0,
+        vfov: 45.0,
+        vertAzimuth: 30.0,
+        colorMap: null, 
+        warping: 0.125,
+        lastTime: 0.0
+    }; 
+
+    var w = seerCamera.w * seerCamera.rtScale;
+    var h = seerCamera.h * seerCamera.rtScale;
+    var lidarPass = new THREE.LidarPassSALDO( 800, 480, params, 4 );
+
+    lidarPass.params.colorMap = new THREE.TextureLoader().load( "{{ theme_url }}/assets/images/lidarcolormap.png" );				
+    lidarPass.params.colorMap.magFilter = THREE.LinearFilter;
+    lidarPass.params.colorMap.minFilter = THREE.LinearFilter;
+
+    composer.addPass(lidarPass);
+    return lidarPass;
+}
+
+function makeLidar128SALDO( seerCamera ) {
+
+    var composer = seerCamera.composer;
+    var params =     {
+        maximumAzimuth: 15.0,
+        minimumAzimuth: -15.0,
+        angularResV: 0.125,       // Angular vertical resolution
+        angularResH: 0.4,       // Angular horizontal resolution
+        rotationRate: 1.0/20.0,     // Measure in Hz
+        cameraNear: 0.5, 
+        cameraFar: 100.0,
+        vfov: 45.0,
+        vertAzimuth: 30.0,
+        colorMap: null, 
+        warping: 0.125,
+        lastTime: 0.0
+    }; 
+
+    var lidarPass = new THREE.LidarPassSALDO( 800, 480, params, 4 );
+
+    lidarPass.params.colorMap = new THREE.TextureLoader().load( "{{ theme_url }}/assets/images/lidarcolormap.png" );				
+    lidarPass.params.colorMap.magFilter = THREE.LinearFilter;
+    lidarPass.params.colorMap.minFilter = THREE.LinearFilter;
+    lidarPass.clear = false;
+
+    composer.addPass(lidarPass);
+    return lidarPass;
+}
+
+function makeEdgeDetect( seerCamera ) {
+
+    var edgePass = new THREE.ShaderPass(THREE.FreiChenShader);
+    seerCamera.composer.addPass(edgePass);
+
+    return edgePass;
+}
+
+function makeSobel( seerCamera ) {
+    var effectGrayScale = new THREE.ShaderPass( THREE.LuminosityShader );
+    seerCamera.composer.addPass( effectGrayScale );
+
+    // you might want to use a gaussian blur filter before
+    // the next pass to improve the result of the Sobel operator
+    // Sobel operator
+    var effectSobel = new THREE.ShaderPass( THREE.SobelOperatorShader );
+    effectSobel.uniforms.resolution.value.x = window.innerWidth;
+    effectSobel.uniforms.resolution.value.y = window.innerHeight;
+
+    seerCamera.composer.addPass( effectSobel );    
+    return effectSobel;
+}
+
+function makeLuminos( seerCamera ) {
+
+    var luminPass = new THREE.ShaderPass(THREE.LuminosityShader);
+    seerCamera.composer.addPass(luminPass);
+
+    return luminPass;
+}
+
+function makeRGB( seerCamera ) {
+    return seerCamera.baseRenderPass;
+}
+
+function makeGlitch( seerCamera ) {
+	
+    var glitchPass = new THREE.GlitchPass();
+	seerCamera.composer.addPass( glitchPass );    
+    return glitchPass;
+}
+
+function makeFilmNoise( seerCamera ) {
+    
+    var effectVignette = new THREE.ShaderPass( THREE.VignetteShader );
+    effectVignette.uniforms[ "offset" ].value = 0.95;
+    effectVignette.uniforms[ "darkness" ].value = 1.6;    
+    seerCamera.composer.addPass( effectVignette );
+    var effectFilm = new THREE.FilmPass( 0.1, 0, 500, false );
+    seerCamera.composer.addPass( effectFilm );
+    return effectFilm;
+}
+
+function makeUnderWater( seerCamera ) {
+    
+var gammaCorrection = new THREE.ShaderPass( THREE.GammaCorrectionShader );
+var effectDotScreen = new THREE.DotScreenPass( new THREE.Vector2( 0, 0 ), 0.5, 0.8 );
+
+var effectColorify1 = new THREE.ShaderPass( THREE.ColorifyShader );
+var effectColorify2 = new THREE.ShaderPass( THREE.ColorifyShader );
+effectColorify1.uniforms[ 'color' ] = new THREE.Uniform( new THREE.Color( 1, 0.8, 0.8 ) );
+effectColorify2.uniforms[ 'color' ] = new THREE.Uniform( new THREE.Color( 1, 0.75, 0.5 ) );
+
+    seerCamera.composer.addPass( gammaCorrection );
+    //seerCamera.composer.addPass( effectDotScreen );
+    //seerCamera.composer.addPass( effectColorify1 );
+    //seerCamera.composer.addPass( effectColorify2 );
+    return effectColorify2;
+}
+
+
+function addCameraEffect( seerCamera, effectName ) {
+    
+    cameraEffectMode = effectName;
+
+    if(effectName == "GLITCH") {
+       return makeGlitch(seerCamera);
+    }
+    if(effectName == "NOISE") {
+       return makeFilmNoise(seerCamera);
+    }
+    if(effectName == "UW") {
+       return makeUnderWater( seerCamera );
+    }
+    if(effectName == "HAZE") {
+        return makeAtmosphereHaze( seerCamera );
+    }
+}
+
+function addEffect( seerCamera, effectName ) {
+
+    effectMode = effectName;
+    // Add effect to the camera - so you can check for it!
+    seerCamera.effects.push(effectName);
+
+    if(effectName == "DEPTH") {
+        return makeDepthSALDO( seerCamera );
+    }
+    if(effectName == "LIDAR16") {
+        return makeLidar16SALDO( seerCamera );
+    }
+    if(effectName == "LIDAR64") {
+        return makeLidar64SALDO( seerCamera );
+    }
+    if(effectName == "LIDAR128") {
+        return makeLidar128SALDO( seerCamera );
+    }
+    if(effectName == "THERMAL") {
+        return makeThermal( seerCamera );
+    }
+    if(effectName == "EDGEFC") {
+        return makeEdgeDetect( seerCamera );
+    }
+    if(effectName == "SOBEL") {
+        return makeSobel( seerCamera );
+    }
+    if(effectName == "LUMINOS") {
+        return makeLuminos( seerCamera );
+    }
+    if(effectName == "RGB") {
+       return makeRGB( seerCamera );
+    }
+    if(effectName == "RGB360" ) {
+        return makeRGB360( seerCamera );
+    }
+    if(effectName == "NV") {
+       return makeNightVision( seerCamera );
+    }
+    if(effectName == "ECHO") {
+       return makeEchoScopeSALDO( seerCamera );
+    }
+    if(effectName == "TimeBearing") {
+        return makeTimeBearingSALDO( seerCamera );
+    }
+}
+
+function applyAntiAliasing( composer ) {
+
+    var smaa = new THREE.SMAAPass( window.innerWidth, window.innerHeight);
+    composer.addPass(smaa);
+    return smaa;
+}

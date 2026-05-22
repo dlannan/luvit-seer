@@ -1,0 +1,26 @@
+{(templates/modules/newsletter.html, {
+  id=0,
+  inputnewsletter=[[
+                    <div class="newsletter text-center">
+                        <div class="row">
+                            <form role="form" id="userlogin_info" method="POST" style="width:80%;">
+                                <div class="col-md-5">
+                                    <h4>Sign up for updates</h4>
+                                </div>
+                                <div class="input-group">
+                                    <div class="col-md-6 col-sm-6 col-xs-6 nopadding">
+                                        <input id="newsletter_name" name="newsletter_name" type="text" class="form-control" required>
+                                         <label for="newsletter_name" class="form-control-label">Name</label>
+                                    </div>
+                                    <div class="col-md-6 col-sm-6 col-xs-6 nopadding">
+                                        <input id="newsletter_email" name="newsletter_email" type="email" class="form-control showpassword" required>
+                                        <label for="newsletter_email" class="form-control-label">E-mail</label>                        </div>
+                                    <div class="input-group-btn">
+                                        <button id="wizard_login_submit" type="submit" class="btn"><span class="icon-checkmark"></span></button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+  ]]
+})}

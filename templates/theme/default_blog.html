@@ -1,0 +1,30 @@
+<!DOCTYPE HTML>
+<html lang="en">
+
+    <head>
+        {% local userassets = _G.USERASSETS %}
+        {(templates/common/head.html)}
+    </head>
+
+    <body class="page">
+
+        {(templates/common/redis.html)}
+        {(templates/tools/admintop.html)}
+
+        {(templates/common/navstyle.html)}
+        {(templates/common/navsite.html)}
+
+        <main class="page__main">
+            
+            {(templates/wizards/module-add.html)}
+            {(templates/modules/banner.resty)}
+            {(templates/wizards/module-add.html)}
+        
+            {(templates/modules/fullscreenmedia.resty)}
+        </main>
+
+        {(templates/common/basejs.html)}
+        
+        {(templates/tools/adminbottom.html)}
+    </body>
+</html>

@@ -1,0 +1,42 @@
+{% set query = "[sql-table json]select name,uid,desc from projects where users like '%{{ grav.user.username }}%'[/sql-table]" %}
+{% set results = (query|shortcodes)| json_decode %}
+
+
+{% for pp in results %}  
+{% if pp %}
+
+    {% set query = ("[sql-table json]select * from scenes where projectid = '" ~ pp.uid ) ~ "' [/sql-table]" %}
+    {% set scenedb = ((query|shortcodes) | json_decode) %}
+    {% if scenedb %}
+        {% set randomscene = random(scenedb) %}
+
+        {% set iconquery = ("[sql-table json]select * from icons where uid = '" ~ randomscene.icon ) ~ "' [/sql-table]" %}
+        {% if iconquery %}
+        {% set icondb = ((iconquery|shortcodes)| json_decode)[0] %}
+        {% endif %}
+    {% endif %}
+
+
+                <div class="col-sm-6">
+                <div class="card">
+                    <div class="card-header" style="justify-content: space-between;">
+                    <div class="leftside col-sm-9"><h3>{{ pp.name }}</h3></div>
+                    <div class="rightside col-sm-3">
+                    <a href="/project?projectid={{pp.uid}}">                        
+<i class="fe fe-edit" style="font-size: 1.5rem;"></i>  
+                    </a>
+                    </div>
+                    </div>
+                    <div class="card-body">
+                    <h6>{{ pp.modified }}</h6>
+                    <div class="row">
+                        <div class="col-sm-6">{{ pp.desc }}</div>
+                        <div class="col-sm-6 scene-card" onclick="location.href='/project?projectid={{pp.uid}}'" id="{{ pp.uid|md5 }}">
+                        <img src="data:image/png;base64,{{ icondb.data }}" />                        
+                        </div>                    
+                    </div>
+                    </div>
+                </div>
+                </div>
+{% endif %}
+{% endfor %}

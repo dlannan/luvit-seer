@@ -1,0 +1,352 @@
+{% embed 'partials/base-dashboard.html.twig' %}
+
+{% if config.plugins.login.enabled and grav.user.username %}
+{% set uservalid = true %}
+{% endif %}
+
+{% block content %}
+
+{% include "forms/form.html.twig" with { form: forms('project-issue') } %}
+{% include "forms/form.html.twig" with { form: forms('update-issue') } %}
+
+<div id="archiveModal" class="modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Archive Issue</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Archiving an issue is permanent.</p>
+        <p>Do you wish to continue?</p>
+      </div>
+      <div class="modal-footer">
+        <button id="archiveIssue" type="button" class="btn btn-danger">Continue</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% include 'dashboard/header-edit.html.twig' %}
+
+<div class="my-3 my-md-5">
+  <div class="container">           
+
+            <div id="gallery-controls" class="page-header">
+              <h1 class="page-title">
+                Project Issues
+              </h1>
+              <div id="issues-pages" class="page-subtitle">1 - 20 of X issues</div>
+              <div class="page-options d-flex">
+
+                <div class="btn-group">              
+                  <label id="issue-prev-page" class="btn btn-secondary issue-controls-align">
+                    <i class="fe fe-chevron-left"></i>
+                  </label>
+                  <label id="issue-next-page" class="btn btn-secondary mr-2 issue-controls-align">
+                    <i class="fe fe-chevron-right"></i>
+                  </label>                
+                </div>  
+
+                <select id="issue-sorting" class="form-control custom-select w-auto">
+                  <option value="asc">Newest</option>
+                  <option value="desc">Oldest</option>
+                  <option value="status">Status</option>
+                  <option value="priority">Priority</option>
+                  <option value="project">Project</option>
+                </select>
+                <div class="input-icon ml-2">
+                  <span class="input-icon-addon">
+                    <i class="fe fe-search"></i>
+                  </span>
+                  <input id="issue-search" type="text" class="form-control w-10" placeholder="Search issues">
+                </div>
+              </div>
+            </div>
+
+          <div class="row">
+
+            <div class="col-sm-12">
+            
+<form id="project-data-two" name="fakeData">
+
+              <div class="card">
+                <div class="card-header" style="justify-content: space-between;">
+                  <div class="leftside"><h6>Create or Edit Issue</h6></div>
+
+{% set grouplist = grav.user.groups %}
+{% if 'admin' in grouplist %}   
+
+                  <div class="form-group rightside col-sm-3" style="margin-bottom: 0px;">
+                    <label class="custom-switch">
+                      <input id="projectedit" type="checkbox" name="custom-switch-checkbox" class="custom-switch-input">
+                      <span class="custom-switch-indicator"></span>
+                      <span class="custom-switch-description">Edit Issues</span>
+                    </label>
+                  </div>  
+{% endif %}
+                  <div class="rightside col-sm-1">
+                    <div id="issue-toggle">    
+                      <a>                
+                        <i class="fe fe-plus-square" style="font-size: 1.5rem;"></i>  
+                      </a>
+                    </div>
+                  </div>
+                </div>
+<!--                  <div id="chart-development-activity" style="height: 10rem"></div>  -->
+
+                <div id="issues-create" class="card-body issue-form-area">
+                  <h3 class="card-title">New Issue</h3>
+                  <div class="row">
+                    <div class="col-sm-6 col-md-6">
+                      <div class="form-group">
+                        <label class="form-label">Issue Title</label>
+                        <input id="issue-name" name="name" type="text" class="form-control" placeholder="Issue Title" value="">
+                      </div>
+                    </div>
+                    <div class="col-sm-6 col-md-3">
+                      <div class="form-group">
+                        <label class="form-label">Project</label>
+                        <select id="issue-projectid" name="projectid" class="form-control custom-select">
+                          <option value="0">SEER</option>
+
+{% set query = "[sql-table json]select name,uid,desc from projects where users like '%{{ grav.user.username }}%'[/sql-table]" %}
+{% set results = (query|shortcodes)| json_decode %}
+
+{% for pp in results %}  
+{% if pp %}
+                          <option value="{{ pp.uid }}">{{ pp.name }}</option>
+{% endif %}
+{% endfor %}
+                        </select>
+                      </div>                    
+                    </div>                    
+                    <div class="col-sm-6 col-md-3">
+                      <div class="form-group">
+                        <label class="form-label">Subsystem</label>
+                        <input id="issue-subsystem" name="subsystem" type="text" class="form-control" placeholder="Scene name or System" value="">
+                        <input id="issue-userid" name="userid" type="hidden" class="form-control" placeholder="" value="{{ grav.user.username }}">
+                      </div>                    
+                    </div>                    
+                    <div class="col-md-12">
+                      <div class="form-group mb-0">
+                        <label class="form-label">Issue Description</label>
+                        <textarea id="issue-issue" name="issue" rows="5" class="form-control" placeholder="Describe issue in detail." value=""> </textarea>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-12">
+                    <div class="card-header">
+                      <div class="rightside">
+                        <button id="raise-issue-button" type="submit" class="btn btn-primary">Raise Issue</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+  </form>
+
+          <div class="row">
+            <div class="col-sm-12">
+              <div id="issues-list" class="card">
+              {% include 'dashboard/issue-list.html.twig' with { 'limit': '15', 'page': 1, 'hidedetails': 'none' } %}
+              </div>
+            </div>
+          </div>
+        
+          </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="row align-items-center flex-row-reverse">
+        <div class="col-auto ml-lg-auto">
+          <div class="row align-items-center">
+            <div class="col-auto">
+            </div>
+            <div class="col-auto">
+            </div>
+          </div>
+        </div>
+        <div class="col-12 col-lg-auto mt-3 mt-lg-0 text-center">
+        </div>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<script>
+var page = 1;
+var limit = 15;
+
+function getDateString() {
+    var d = new Date().toUTCString();
+    return d;
+}
+
+function dateFromMilliseconds( val ) {
+    var dobj = new Date(val);
+    var d = dobj.toDateString() + " " + dobj.toLocaleTimeString();
+    return d;
+}
+
+function UpdateIssueData(iid, status, priority, severity) {
+
+  /* console.log(name + "      " + desc); */
+  if( $(":checkbox").prop("checked") == false ) return;
+  
+  $('#update-issue input[name="data[priority]"]').val(priority);
+  $('#update-issue input[name="data[status]"]').val(status);
+  $('#update-issue input[name="data[severity]"]').val(severity);
+  $('#update-issue input[name="data[where]"]').val(' uid = "' + iid + '"');
+  {# $("#update-issue").attr("action", "/issues?psef=1"); #}
+  {# $("#update-issue").submit();   #}
+
+  var form = $("#update-issue");
+  // submit the form via Ajax
+  $.ajax({
+      url: form.attr('action'),
+      type: form.attr('method'),
+      dataType: 'html',
+      data: form.serialize(),
+      success: function(result) {
+      }
+  });
+}
+
+function UpdateStatusInfo() {
+
+  if ($(":checkbox").is(':checked')) {
+
+    $(".project-issue-status").each( function() {
+
+      $(this).click( function() {
+
+        if( $(":checkbox").prop("checked") == false ) return;
+        var iid = parseInt($(this).parent().attr("id-data"));
+        var status =  parseInt($(this).attr("id-data-status"));
+        var priority =  parseInt($(this).parent().find(".project-issue-priority").attr("id-data-priority"));
+        var severity =  0;
+        status = (status + 1) % 5;
+        $(this).attr("id-data-status", status);
+
+        ProjectIssuesCheckStatus();
+        UpdateIssueData(iid, status, priority, severity);
+      });
+    });
+
+    $(".project-issue-priority").each( function() {
+
+      $(this).click( function() {
+
+        if( $(":checkbox").prop("checked") == false ) return;
+        var iid = parseInt($(this).parent().attr("id-data"));
+        var priority =  parseInt($(this).attr("id-data-priority"));
+        var status =  parseInt($(this).parent().find(".project-issue-status").attr("id-data-status"));
+        var severity =  0;
+        priority = (priority + 1) % 5;
+        $(this).attr("id-data-priority", priority);
+
+        ProjectIssuesCheckPriority();
+        UpdateIssueData(iid, status, priority, severity);
+      });
+    });
+
+    $(".deleteIssueRow").click( function(e) {
+
+      if( $(":checkbox").prop("checked") == false ) return;
+      e.preventDefault();
+      // TODO: SAFE DELETE METHOD NOT IN ADMIN MODE!!
+      var iid = parseInt($(this).parent().attr("id-data"));
+      var priority =  parseInt($(this).parent().find(".project-issue-priority").attr("id-data-priority"));
+      var status =  parseInt($(this).parent().find(".project-issue-status").attr("id-data-status"));
+
+      $('#archiveIssue').on('click', function(e) {
+        e.preventDefault();
+        
+        ProjectIssuesCheckStatus();        
+        UpdateIssueData(iid, status, priority, 1);
+        $('#archiveModal').modal('hide');
+      });
+      $('#archiveModal').modal('show');
+    });
+
+  } else {
+    $(".project-issue-status").each( function() { 
+      $(this).unbind();
+    });
+  }
+}
+
+$( function() {
+  $( document ).on( "change", ":checkbox", function () {
+
+    UpdateStatusInfo();
+    if( $(":checkbox").prop("checked") == false ) {
+      window.location="/issues";
+    }
+  });
+});
+
+$(document).ready(function() {
+
+  // Convert time to something more human readable.
+  $(".issue-time").each( function( index ) {
+    var val = $(this).text();
+    $( this ).text( dateFromMilliseconds( val ));
+  });
+
+  // Show / Hide issue creation form
+  $(".issue-form-area").hide();
+  $("#issue-toggle").click( function() {
+    $(".issue-form-area").toggle();
+  });
+
+  // Handle the highlighting and toggling of issue details
+  $(".project-issue-detail").hide();
+  $(".project-issue-summary").hover( 
+    function() {
+        $(this).css("background", "lightgrey");
+    }, 
+    function () {
+        $(this).css("background","");
+    });
+
+  $("#issue-prev-page").click( function() {
+    page = UpdateIssues(page-1, limit);
+  });
+
+  $("#issue-next-page").click( function() {
+    page = UpdateIssues(page+1, limit);
+  });
+
+  // Raise a new issue
+  $("#raise-issue-button").click( function (e) {
+
+    if($(":checkbox").prop("checked") == true) return;
+      var textissue = $("#issue-issue").val().replace(/\n/g, "<br />");
+      e.preventDefault();
+      $('#project-issue input[name="data[name]"]').val( $("#issue-name").val() );
+      $('#project-issue input[name="data[projectid]"]').val( $("#issue-projectid").val() );
+      $('#project-issue input[name="data[issue]"]').val( textissue );
+      $('#project-issue input[name="data[updated]"]').val( getDateString() );
+      $('#project-issue input[name="data[userid]"]').val( $("#issue-userid").val() );
+      $('#project-issue input[name="data[subsystem]"]').val( $("#issue-subsystem").val() );
+      $("#project-issue").attr("action", "/issues");
+      
+      $("#project-issue").submit();
+  });
+
+  page = UpdateIssues(page-1, limit);
+
+});
+</script>
+
+{% include 'dashboard/footer.html.twig' %}
+
+{% endblock %}
+{% endembed %}

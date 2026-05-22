@@ -1,0 +1,34 @@
+{% if pagination|length > 1 %}
+
+{% if base_url == '' %}
+    {% set base_url = '/' %}
+{% endif %}
+
+<div class="pagination">
+    {% if pagination.hasPrev %}
+        {% set url = (base_url ~ pagination.params ~ pagination.prevUrl)|replace({'//':'/'}) %}
+        <a href="{{ url }}" class="btn">Previous</a>
+    {% else %}
+        Previous
+    {% endif %}
+    <ul class="inline-list">
+    {% for paginate in pagination %}
+        {% if paginate.isCurrent %}
+            <li><span class="current-page">{{ paginate.number }}</span></li>
+        {% elseif paginate.isInDelta %}
+            {% set url = (base_url ~ pagination.params ~ paginate.url)|replace({'//':'/'}) %}
+            <li><a href="{{ url }}">{{ paginate.number }}</a></li>
+        {% elseif paginate.isDeltaBorder %}
+            <li class="gap"><span>&hellip;</span></li>
+        {% endif %}
+    {% endfor %}
+    </ul>
+    {% if pagination.hasNext %}
+        {% set url = (base_url ~ pagination.params ~ pagination.nextUrl)|replace({'//':'/'}) %}
+        <a href="{{ url }}" class="btn">Next</a>
+    {% else %}
+        Next
+    {% endif %}
+</div>
+
+{% endif %}

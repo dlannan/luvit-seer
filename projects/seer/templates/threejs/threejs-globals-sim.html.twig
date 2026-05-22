@@ -1,0 +1,69 @@
+<script>
+var renderBasePass;
+var renderEffectPass;
+var saoPass;
+var renderBloomPass;
+
+
+var SimulationMode = Object.freeze({
+	"NONE":0,  "PAUSED":1, "PLAY":2, "RESET":3
+});
+
+var simstate = {
+    
+    simt: 0.0,
+    realt: 0.0,
+
+    deltat: 0.0,
+    steps: 0,
+
+    mode: SimulationMode.NONE,
+
+    funcinit: function() {},
+    funcupdate: function(dt) {},
+    funcreset: function() {},
+    funckill: function() {}
+};
+
+// Watch for sim state changes (when buttons or network commands occur)
+simstate.watch("mode", function (id, oldval, newval) {
+    
+    // This is a check to see if its the first "run". If so, apply init!
+    if((newval === SimulationMode.PLAY) && (oldval === SimulationMode.NONE)) {
+        simstate.simt = 0.0;
+        simstate.steps = 0;
+        simstate.funcinit();
+        stateManager.AddCoState("defaultSim");
+    }
+
+    if( newval === SimulationMode.RESET ) {
+        simstate.simt = 0.0;
+        simstate.steps = 0;
+        simstate.funcreset();
+        newval = SimulationMode.PLAY;
+    }
+
+    if( newval === SimulationMode.NONE ) {
+        simstate.funckill();
+    }
+
+    return newval;
+});
+
+{# simstate.watch("deltat", function (id, oldval, newval) {
+    return newval;        
+});   #}
+
+function simRunner() {
+
+    // As part of the state manager - update external updates/functions
+    if( simstate.mode === SimulationMode.PLAY ) {
+        simstate.funcupdate(simstate.deltat);
+        simstate.simt = simstate.simt + simstate.deltat;
+        simstate.steps ++;
+    }
+
+    simstate.realt = simstate.realt + simstate.deltat;
+};
+
+</script>

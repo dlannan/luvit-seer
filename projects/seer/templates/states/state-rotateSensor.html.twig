@@ -1,0 +1,66 @@
+
+function checkSensorRotation() {
+
+    var ok = (mode.state === EditorMode.SENSORROTATE);
+    if(!ok) return;
+
+    var d = camera.position.distanceTo( mode.object.position );
+    
+    selectCursor.scale.set( d, d, d );
+    var rotation = mouse.x * config.rotateSpeed;
+    if(shiftPressed) {
+        var rmod = rotation % ( 10.0 * Math.PI / 180.0 );
+        rotation = rotation - rmod;
+    } 
+    selectCursor.rotation.set( -Math.PI/2, rotation, 0.0 );
+
+    if(mode.object) {
+
+        selectCursor.position.copy( mode.object.position);
+        // mode.object.rotation.set( 0.0, rotation, 0.0 );
+
+        var vec = Vec3Set(Math.sin(rotation), 0.0, Math.cos(rotation));
+        SceneGraph.updateEntityForward( mode.object.userData.uid, vec.x, vec.y, vec.z );        
+        renewLinks(mode.object.userData.uid);        
+        SceneGraph.forceUpdate( mode.object.userData.uid );        
+        SceneGraph.forceRender( mode.object.userData.uid );        
+    }
+}
+
+var rotateSensorState = {
+
+    name: "rotatesensor",
+    value: 0,              // Set this value to react to external state control
+    parent: undefined,      // If this is set, exit ensures the parent state is reactivated
+
+    onenter: function(init) {
+
+        selectCursor.material.color.setHex(0x00ff00);
+        selectCursor.visible = true;
+        disableControls();
+        hidePopups();
+    },
+
+    onupdate: function(dt) {
+        // Dont do much - its an init state, nothing to see here.
+        checkSensorRotation();
+    },
+
+    onmouse: function( event ) {
+
+        if(event.type === "mouseup") {
+
+            var check = (mode.state == EditorMode.SENSORROTATE);
+            if(check) {
+                
+                FinishSensorPlacement();
+            } 
+
+            mode.state = EditorMode.NONE;
+        }
+    },
+
+    onexit: function() {
+
+    }
+};

@@ -1,0 +1,11 @@
+
+<html>
+<body>
+<ul>
+{% for _, user in ipairs(users) do %}
+    {(templates/page.html, user)}
+{% end %}
+</ul>
+</body>
+</html>
+

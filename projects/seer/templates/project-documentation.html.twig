@@ -1,0 +1,210 @@
+{% embed 'partials/base-dashboard.html.twig' %}
+
+{% if config.plugins.login.enabled and grav.user.authorize('site.login') %}
+{% set uservalid = true %}
+{% endif %}
+
+{% block content %}
+{% include 'dashboard/header.html.twig' %}
+
+<style>
+.video_url p{
+    margin: 0px;
+}
+</style>
+
+        <div class="my-3 my-md-5">
+          <div class="container">           
+
+            <div id="gallery-controls" class="page-header">
+              <h1 class="page-title">
+                Documentation
+              </h1>
+            </div>
+
+             <div id="dashboard-docs-documentation" class="row row-cards row-deck">
+              <div class="col-lg-12">
+                <div class="card">
+<!--                  <div id="chart-development-activity" style="height: 10rem"></div>  -->
+
+<div class="table-responsive">
+<table class="table card-table table-striped table-vcenter">
+    <thead>
+    <tr>
+        <th>Author</th>
+        <th>Title</th>
+        <th>URL</th>
+        <th>Bookmark</th>
+    </tr>
+    </thead>
+    <tbody>
+{% for p in page.children if p != page %}
+      <tr>
+        <td class="w-1" data-toggle="tooltip" title="{{ p.header.author }}"><span class="avatar avatar-blue">{{ p.header.author|first|upper }}</span></td>
+        <td>{{ p.title }}</td>
+        <td><a href="{{ p.url }}">{{ p.url }}</a></td>
+        <td><div class="bookmark-document"><i class="fe fe-bookmark"></i></div></td>
+      </tr>
+{% endfor %}
+    </tbody>
+</table>
+</div>
+                </div>
+              </div>
+            </div>
+
+             <div id="dashboard-docs-tours" class="row row-cards row-deck">
+              <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-header" style="justify-content: space-between;">
+                        <div class="leftside"><h3>Tours</h3></div>
+                    </div>
+<!--                  <div id="chart-development-activity" style="height: 10rem"></div>  -->
+
+<div class="table-responsive">
+<table class="table card-table table-striped table-vcenter">
+    <thead>
+    <tr>
+        <th>Tour</th>
+        <th>Description</th>
+        <th>Complete</th>
+    </tr>
+    </thead>
+    <tbody>
+{% for t in page.header.tours %}
+      <tr class="tour_click" data-url="{{ t.url }}" data-name="{{ t.tourname }}" data-id="{{loop.index}}">
+        <td width="20%">{{ t.tourname }}</td>
+        <td>{{ t.description }}</td>
+        <td width="10%"><div class="tours-complete"><i class="fe fe-circle"></i></div></td>
+      </tr>
+{% endfor %}
+    </tbody>
+</table>
+</div>
+                </div>
+              </div>
+            </div>
+
+             <div id="dashboard-docs-videos" class="row row-cards row-deck">
+              <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-header" style="justify-content: space-between;">
+                        <div class="leftside"><h3>Videos</h3></div>
+                    </div>
+<!--                  <div id="chart-development-activity" style="height: 10rem"></div>  -->
+
+<div class="table-responsive">
+<table class="table card-table table-striped table-vcenter">
+    <thead>
+    <tr>
+        <th>Video</th>
+        <th>Description</th>
+        <th>Link</th>
+        <th>Share</th>
+    </tr>
+    </thead>
+    <tbody>
+
+{% for p in page.find('/dashboard/videos').children.order('date', 'desc') %}
+
+      <tr class="video_click" data-url="{{ t.url }}" data-name="{{ t.tourname }}" data-id="{{loop.index}}">
+
+        <td width="20%">{{ p.title }}</td>
+        <td class="video_url">{{ p.content }}</td>
+        <td><a href="{{ p.metadata.videolink.content}}">{{ p.metadata.videolink.content }}</a></td>
+        <td width="10%"><div class="video-share"><i class="fe fe-facebook"></i><i class="fe fe-twitter"></i><i class="fe fe-instagram"></i></div></td>
+      </tr>
+{% endfor %}
+
+    </tbody>
+</table>
+</div>
+                </div>
+              </div>
+            </div>
+
+
+        </div>
+      </div>
+
+      <footer class="footer">
+        <div class="container">
+          <div class="row align-items-center flex-row-reverse">
+            <div class="col-auto ml-lg-auto">
+              <div class="row align-items-center">
+                <div class="col-auto">
+                </div>
+                <div class="col-auto">
+                </div>
+              </div>
+            </div>
+            <div class="col-12 col-lg-auto mt-3 mt-lg-0 text-center">
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+<script>
+
+function getDateString() {
+    var d = new Date().toUTCString();
+    return d;
+}
+
+function dateFromMilliseconds( val ) {
+    var dobj = new Date(val);
+    var d = dobj.toDateString() + " " + dobj.toLocaleTimeString();
+    return d;
+}
+
+$(document).ready(function() {
+
+  $(".tour_click").on("click", function(e) {
+    e.stopPropagation();
+    var url = $(this).attr('data-url');
+    if( url.startsWith("/project?") ) url += '&tour=1';
+    else if( url.startsWith("/scenarist?") ) url += '&tour=1';
+    else url += "?tour=1";
+    document.location.href = url;
+  });
+
+  $(".issue-time").each( function( index ) {
+    var val = $(this).text();
+    console.log(val);
+    $( this ).text( dateFromMilliseconds( val ));
+  });
+
+  $("#issue-form").hide();
+  $("#issue-toggle").click( function() {
+    $("#issue-form").toggle();
+  });
+
+  $("#raise-issue-button").click( function (e) {
+
+      var textissue = $("#issue-issue").val().replace(/\n/g, "<br />");
+      e.preventDefault();
+      $('#project-issue input[name="data[name]"]').val( $("#issue-name").val() );
+      $('#project-issue input[name="data[projectid]"]').val( $("#issue-projectid").val() );
+      $('#project-issue input[name="data[issue]"]').val( textissue );
+      $('#project-issue input[name="data[updated]"]').val( getDateString() );
+      $('#project-issue input[name="data[userid]"]').val( $("#issue-userid").val() );
+      $('#project-issue input[name="data[subsystem]"]').val( $("#issue-subsystem").val() );
+      $("#project-issue").attr("action", "/issues");
+      $("#project-issue").submit();
+  });
+
+  $(".deleteIssueRow").click( function(e) {
+
+    console.log(e);
+    e.preventDefault();
+    // TODO: SAFE DELETE METHOD NOT IN ADMIN MODE!!
+  });
+});
+
+</script>
+
+{% include 'dashboard/footer.html.twig' %}
+
+{% endblock %}
+{% endembed %}

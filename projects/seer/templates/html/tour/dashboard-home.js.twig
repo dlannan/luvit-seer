@@ -1,0 +1,43 @@
+    // Define the steps for introduction
+    tourSteps.defineSteps([
+    {
+        element: '#dashboard-title',
+        popover: {
+            title: 'Welcome to SEER',
+            description: 'SEER is currently in prototyping stages and many features may not yet be fully functional.',
+            position: 'bottom-center'
+        }
+    },
+    {
+        element: '#dashboard-menu',
+        popover: {
+        title: 'SEER Project Main Menu',
+        description: 'The SEER Project Main menu allows you to see and interact with projects, scenes and people within the same project space as you.',
+        position: 'bottom-center'
+        }
+    },
+    {
+        element: '#dashboard-summary',
+        popover: {
+        title: 'Projects Summary',
+        description: 'A summary of project statistics. Further detail can be examined by clicking on them (in development)',
+        position: 'top'
+        }
+    },
+    {
+        element: '#dashboard-latest',
+        popover: {
+        title: 'Latest Modified Projects',
+        description: 'The four most recently modified projects. Clicking on their icon will take you to the project page.',
+        position: 'top'
+        }
+    },
+    {
+        element: '#dashboard-issues',
+        popover: {
+        title: 'Latest Issues',
+        description: '<p>The latest eight issues effecting projects you are involved with.</p><p>Clicking on the Issues menu item will take you to a full list of <a href="/issues">current issues.</a></p>',
+        position: 'top'
+        }
+    }
+    ]);

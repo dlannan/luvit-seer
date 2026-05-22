@@ -1,0 +1,187 @@
+
+// Controllers functions and objects. 
+// All controllers must implement:
+//   - Init method
+//   - Start method
+//   - Update method
+//   - Finish method 
+// A render method can be provided as well if accurate rendering is needed
+
+
+controllers.vehicles['TrafficSimple'] = {
+    
+    vehicles: {},
+    dirty: {},
+    routes: {},         // List of ways for a start to end destination
+    maxvehicles: 20,    // This prepares a pool of vehicles for cloning at runtime.
+    
+    // Spawn the maxvehicles and have them ready for cloning at runtime.
+    init: function() {
+    },
+
+    // Start spawning vehicles and controlling them
+    start: function() {
+    },
+
+    update: function( dt ) {
+
+    },
+
+    finish: function() {
+
+    },
+
+    // Add a vehicle into the network randomly selecting a route - pass in the asset name to use for this spawn (if not set, a preset one will load)
+    spawnVehicle( asset ) {
+
+    },
+
+    // Remove a vehicle - happens at end of routes and 
+    removeVehicle( id ) {
+
+    },
+
+    // Update an individual vehicle for position and any state 
+    updateVehicle( id, dt ) {
+
+    }
+}
+
+controllers.vehicles['DriverManual'] = {
+    
+    vehicles: {},
+    dirty: {},
+    inputcontrol: undefined,         // List of ways for a start to end destination
+    
+    init: function() {
+        // instaniate the driver vehicle (random select?)
+    },
+
+    start: function() {
+        // Start spawning vehicles and controlling them
+    },
+
+    update: function( dt ) {
+
+    },
+
+    finish: function() {
+
+    },
+
+    // Update the manual driver vehicle - there should only be one (for the time being)
+    updateVehicle( dt ) {
+
+    }
+}
+
+
+// Transfer a vehicle from one controller to another (Simple to Manual Driver for example)
+function TransferVehicle( c1, c2, id ) {
+    
+}
+
+
+// Init controllers...
+function InitControllers() {
+    for(var key in controllers.pedestrians) {  
+        var pedctrl = controllers.pedestrians[key];
+        if(pedctrl && pedctrl.init) { pedctrl.init() };
+    }
+    for(var key in controllers.vehicles) {  
+        var vehctrl = controllers.vehicles[key];
+        if(vehctrl && vehctrl.init) { vehctrl.init() };
+    }
+    for(var key in controllers.vessels) {  
+        var vesctrl = controllers.vessels[key];
+        if(vesctrl && vesctrl.init) { vesctrl.init() };
+    }
+    for(var key in controllers.aircraft) {  
+        var airctrl = controllers.aircraft[key];
+        if(airctrl && airctrl.init) { airctrl.init() };
+    }
+}
+
+// Start controllers...
+function StartControllers() {
+
+    for(var key in controllers.pedestrians) {  
+        var pedctrl = controllers.pedestrians[key];
+        if(pedctrl && pedctrl.start) { pedctrl.start() };
+    }
+    for(var key in controllers.vehicles) {  
+        var vehctrl = controllers.vehicles[key];
+        if(vehctrl && vehctrl.start) { vehctrl.start() };
+    }
+    for(var key in controllers.vessels) {  
+        var vesctrl = controllers.vessels[key];
+        if(vesctrl && vesctrl.start) { vesctrl.start() };
+    }
+    for(var key in controllers.aircraft) {  
+        var airctrl = controllers.aircraft[key];
+        if(airctrl && airctrl.start) { airctrl.start() };
+    }
+}
+
+// Update controllers...
+function UpdateControllers( dt ) {
+
+    for(var key in controllers.pedestrians) {  
+        var pedctrl = controllers.pedestrians[key];
+        if(pedctrl && pedctrl.update) { pedctrl.update( dt ) };
+    }
+    for(var key in controllers.vehicles) {  
+        var vehctrl = controllers.vehicles[key];
+        if(vehctrl && vehctrl.update) { vehctrl.update( dt ) };
+    }
+    for(var key in controllers.vessels) {  
+        var vesctrl = controllers.vessels[key];
+        if(vesctrl && vesctrl.update) { vesctrl.update( dt ) };
+    }
+    for(var key in controllers.aircraft) {  
+        var airctrl = controllers.aircraft[key];
+        if(airctrl && airctrl.update) { airctrl.update( dt ) };
+    }
+}
+
+// Render Controllers... if available
+function RenderControllers() {
+
+    for(var key in controllers.pedestrians) {  
+        var pedctrl = controllers.pedestrians[key];
+        if(pedctrl && pedctrl.render) { pedctrl.render() };
+    }
+    for(var key in controllers.vehicles) {  
+        var vehctrl = controllers.vehicles[key];
+        if(vehctrl && vehctrl.render) { vehctrl.render() };
+    }
+    for(var key in controllers.vessels) {  
+        var vesctrl = controllers.vessels[key];
+        if(vesctrl && vesctrl.render) { vesctrl.render() };
+    }
+    for(var key in controllers.aircraft) {  
+        var airctrl = controllers.aircraft[key];
+        if(airctrl && airctrl.render) { airctrl.render() };
+    }
+}
+
+// Finish Controllers...
+function FinishControllers() {
+
+    for(var key in controllers.pedestrians) {  
+        var pedctrl = controllers.pedestrians[key];
+        if(pedctrl && pedctrl.finish) { pedctrl.finish() };
+    }
+    for(var key in controllers.vehicles) {  
+        var vehctrl = controllers.vehicles[key];
+        if(vehctrl && vehctrl.finish) { vehctrl.finish() };
+    }
+    for(var key in controllers.vessels) {  
+        var vesctrl = controllers.vessels[key];
+        if(vesctrl && vesctrl.finish) { vesctrl.finish() };
+    }
+    for(var key in controllers.aircraft) {  
+        var airctrl = controllers.aircraft[key];
+        if(airctrl && airctrl.finish) { airctrl.finish() };
+    }
+}

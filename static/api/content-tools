@@ -1,0 +1,2058 @@
+<!DOCTYPE HTML>
+<html lang="en" prefix="og: http://ogp.me/ns#">
+
+    <head>
+        <title>ContentTools API documentation · ContentTools</title>
+
+        <!-- Meta data -->
+        <meta http-equiv="x-ua-compatible" content="IE=edge">
+        <meta
+            name="description"
+            content="A JavaScript library aimed at building WYSIWYG editors for HTML content."
+            >
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta name="author" content="Anthony Blackshaw">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+        <meta name="HandheldFriendly" content="true">
+        <meta name="MobileOptimized" content="320">
+        <meta name="csrf-token" content="1471948623##67205ddd656f1de0e8189b8075fb6c819b70670f">
+        
+        
+
+        <!-- Favicon -->
+        <link rel="icon" type="image/x-icon" href="/favicon.ico">
+        <link rel="apple-touch-icon-precomposed" href="/favicon-152.png">
+        <meta name="msapplication-TileColor" content="#2980b9">
+        <meta name="msapplication-TileImage" content="/favicon-144.png">
+
+        
+            <!-- Twitter card -->
+            <meta name="twitter:card" content="summary">
+            <meta name="twitter:url" content="http://getcontenttools.com/api/content-tools">
+            <meta name="twitter:title" content="ContentTools API documentation · ContentTools">
+            <meta name="twitter:description" content="A JavaScript library aimed at building WYSIWYG editors for HTML content.">
+            <meta name="twitter:image" content="http://getcontenttools.com//images/twitter-card-logo.png">
+        
+
+        
+            <!-- Facebook Open Graph -->
+            <meta property="og:type" content="website">
+            <meta property="og:site_name" content="ContentTools">
+            <meta property="og:title" content="ContentTools API documentation">
+            <meta property="og:description" content="A JavaScript library aimed at building WYSIWYG editors for HTML content.">
+            <meta property="og:url" content="http://getcontenttools.com/api/content-tools">
+            <meta property="og:image" content="http://getcontenttools.com/images/facebook-share-logo.png">
+            <meta property="og:image:type" content="image/png">
+            <meta property="og:image:width" content="470">
+            <meta property="og:image:height" content="250">
+        
+
+        <!-- CSS -->
+        <link rel="stylesheet" type="text/css" href="/styles/site.css">
+        
+        
+
+        <!-- Google Analytics -->
+        
+            <script>
+              (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+              (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+              m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+              })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+              ga('create', 'UA-66406639-1', 'auto');
+              ga('send', 'pageview');
+            </script>
+        
+    </head>
+
+    <body class="page">
+        
+            <header class="page__header">
+                <nav class="site-nav">
+                    <a href="/" class="site-nav__logo">
+                        <img
+                            src="/images/logo@2x.png"
+                            alt="ContentTools logo"
+                            width="168"
+                            height="36"
+                            >
+                    </a>
+                    <div class="site-nav__toggle">
+                        <span class="sr-only">Toggle navigation</span>
+                    </div>
+                    <ul class="site-nav__items">
+                        <li class="site-nav__item">
+        
+        <a
+            href="/demo"
+            class="
+                site-nav__link
+                
+                "
+            >
+            Demo
+        </a>
+    </li>
+                        <li class="site-nav__item">
+        
+        <a
+            href="/getting-started"
+            class="
+                site-nav__link
+                
+                "
+            >
+            Getting&nbsp;started
+        </a>
+    </li>
+                        <li class="site-nav__item">
+        
+        <a
+            href="/tutorials"
+            class="
+                site-nav__link
+                
+                "
+            >
+            Tutorials
+        </a>
+    </li>
+                        <li class="site-nav__item">
+        
+        <a
+            href="/api"
+            class="
+                site-nav__link
+                site-nav__link--you-are-here
+                "
+            >
+            API
+        </a>
+    </li>
+                        <li class="site-nav__item">
+        
+        <a
+            href="https://github.com/GetmeUK"
+            class="
+                site-nav__link
+                
+                "
+            >
+            GitHub
+        </a>
+    </li>
+                    </ul>
+                </nav>
+                <div class="page__container">
+                    
+    <div data-editable data-name="page__heading">
+
+<h1 class="page__heading">
+    ContentTools
+</h1>
+
+    </div>
+
+                    
+    <div data-editable data-name="page__opening">
+
+<p class="page__opening">
+    A JavaScript library aimed at building WYSIWYG editors for HTML content.
+</p>
+
+</div>
+
+                </div>
+            </header>
+        
+
+        
+            <main class="page__main">
+                <div class="page__container">
+                    
+    <section
+        class="[ page__content ]  [ formatted ]"
+        data-editable
+        data-name="page__content"
+        >
+
+<p>
+    <b>ContentTools</b> aims to provide both a fully-functional content editor that can be used out of the box and a tool kit of classes and functions that can be used to build your own editor. The tool kit includes a lightweight set of user interface classes, a set of tools for performing common editing tasks, and a history stack for managing undo/redo. Whilst the components provided by the tool kit work well together, they can also be used or replaced as required.
+</p>
+<p>
+    The rest of this page is purely reference documentation for the <b>ContentTools</b> library, for usage guides and examples I recommend you read the <a href="/getting-started">Getting Started</a> guide and other <a href="/tutorials">Tutorials</a>.
+</p>
+<h2 id="reference">
+    Reference
+</h2>
+<p>
+    The library consists of a collection of classes namespaced under <b>ContentTools</b>:
+</p>
+<ul>
+    <li>
+        <b><a href="#settings">Settings</a></b>
+    </li>
+    <li>
+        <b><a href="#functions">Functions</a></b>
+    </li>
+    <li>
+        <b><a href="#editor-app">ContentTools.EditorApp</a></b>
+    </li>
+    <li>
+        <b><a href="#history">ContentTools.History</a></b>
+    </li>
+    <li>
+        <b><a href="#style-palette">ContentTools.StylePalette</a></b>
+    </li>
+    <li>
+        <b><a href="#style">ContentTools.Style</a></b>
+    </li>
+    <li>
+        <b><a href="#tools">Tools</a></b>
+    </li>
+    <li>
+        <b><a href="#tool-shelf">ContentTools.ToolShelf</a></b>
+    </li>
+    <li>
+        <b><a href="#tool">ContentTools.Tool</a></b>
+    </li>
+    <li>
+        <b><a href="#event" target>ContentTools.Event</a></b>
+    </li>
+    <li>
+        <b><a href="#component-ui">ContentTools.ComponentUI</a></b>
+    </li>
+    <li>
+        <b><a href="#widget-ui">ContentTools.WidgetUI</a></b>
+    </li>
+    <li>
+        <b><a href="#anchored-component-ui">ContentTools.AnchoredComponentUI</a></b>
+    </li>
+    <li>
+        <b><a href="#flash-ui">ContentTools.FlashUI</a></b>
+    </li>
+    <li>
+        <b><a href="#ignition-ui">ContentTools.IgnitionUI</a></b>
+    </li>
+    <li>
+        <b><a href="#inspector-ui">ContentTools.InspectorUI</a></b>
+    </li>
+    <li>
+        <b><a href="#tag-ui">ContentTools.TagUI</a></b>
+    </li>
+    <li>
+        <b><a href="#modal-ui">ContentTools.ModalUI</a></b>
+    </li>
+    <li>
+        <b><a href="#toolbox-ui">ContentTools.ToolboxUI</a></b>
+    </li>
+    <li>
+        <b><a href="#tool-ui">ContentTools.ToolUI</a></b>
+    </li>
+    <li>
+        <b><a href="#base-dialog-ui">ContentTools.BaseDialogUI</a></b>
+    </li>
+    <li>
+        <b><a href="#anchored-dialog-ui">ContentTools.AnchoredDialogUI</a></b>
+    </li>
+    <li>
+        <b><a href="#dialog-ui">ContentTools.DialogUI</a></b>
+    </li>
+    <li>
+        <b><a href="#image-dialog">ContentTools.ImageDialog</a></b>
+    </li>
+    <li>
+        <b><a href="#link-dialog">ContentTools.LinkDialog</a></b>
+    </li>
+    <li>
+        <b><a href="#properties-dialog">ContentTools.PropertiesDialog</a></b>
+    </li>
+    <li>
+        <b><a href="#table-dialog">ContentTools.TableDialog</a></b>
+    </li>
+    <li>
+        <b><a href="#video-dialog">ContentTools.VideoDialog</a></b>
+    </li>
+</ul>
+<h3 id="settings">
+    Settings
+</h3>
+<p>
+    A number of settings are provided against the <b>ContentTools</b> namespace. These can be set directly.
+</p>
+<p class="definition">
+    DEFAULT_TOOLS
+</p>
+<p>
+    The default tool configuration for the editor's toolbox. The format is an array of arrays, where each top level array is a grouping and each group array holds a list of tools specified by their registered name as a string.
+</p>
+<pre><code class="language-javascript">// Defaults to
+DEFAULT_TOOLS: [
+    [
+        'bold',
+        'italic',
+        'link',
+        'align-left',
+        'align-center',
+        'align-right'
+    ], [
+        'heading',
+        'subheading',
+        'paragraph',
+        'unordered-list',
+        'ordered-list',
+        'table',
+        'indent',
+        'unindent',
+        'line-break'
+    ], [
+        'image',
+        'video',
+        'preformatted'
+    ], [
+        'undo',
+        'redo',
+        'remove'
+    ]
+]</code></pre>
+<p class="definition">
+    DEFAULT_VIDEO_WIDTH,&nbsp;DEFAULT_VIDEO_HEIGHT
+</p>
+<p>
+    Default sizes for new videos when inserted.
+</p>
+<p>
+    <i>Defaults to <b>400</b> by <b>300</b></i>
+</p>
+<p class="definition">
+    HIGHLIGHT_HOLD_DURATION
+</p>
+<p>
+    If the user holds down the shift key for an extended period of time the editor will highlight the editable regions on the page. This setting determines how long the user must hold down the shift key to activate this feature.
+</p>
+<p>
+    <i>Defaults to <b>2000</b></i>
+</p>
+<p class="definition">
+    INSPECTOR_IGNORED_ELEMENTS
+</p>
+<p>
+    A list of element class names ignored by the inspector, typically because attributes cannot be safely set against them.
+</p>
+<p>
+    <i>Defaults to <b>[ListItemText, Region, TableCellText]</b></i>
+</p>
+<p class="definition">
+    IMAGE_UPLOADER
+</p>
+<p>
+    A function that accepts an <b>ImageDialog</b>, the function then binds handlers to various events for the <b>ImageDialog</b> to implement support for&nbsp;uploading and manipulating images asynchronously <i>(see the <a href="/tutorials/handling-image-uploads">Handling image uploads</a> tutorial)</i>.
+</p>
+<p>
+    <i>There is no default image uploader.</i>
+</p>
+<p class="definition">
+    MIN_CROP
+</p>
+<p>
+    The minimum region that can be selected when cropping an image (in pixels).
+</p>
+<p>
+    <i>Defaults to&nbsp;<b>10</b></i>
+</p>
+<p class="definition">
+    RESTRICTED_ATTRIBUTES
+</p>
+<p>
+    A map of restricted attributes; attributes which can't be viewed or modified in the properties dialog. The map is defined as an object with a list of restricted attributes against each tag name. Attribute and tag names must be specified in lower case.
+</p>
+<p class="note">
+    Attribute and tag names must be specified in lower case.
+</p>
+<pre><code class="language-javascript">// Defaults to
+RESTRICTED_ATTRIBUTES: {
+    '*': [],
+    'img': ['height', 'src', 'width', 'data-ce-max-width', 'data-ce-min-width'],
+    'iframe': ['height', 'width']
+    }</code>
+</pre>
+<p class="note">
+    '*' is a special case tag name any attributes defined against it will be restricted for all tags.
+</p>
+<h3 id="functions">
+    Functions
+</h3>
+<p class="definition">
+    ContentTools.getEmbedVideoURL(url)
+</p>
+<p>
+    Validate/parse a video <b>url</b> and return a valid embed URL. Supports <i>YouTube</i> and <i>Vimeo</i> URLs.
+</p>
+<p class="definition">
+    ContentTools.getRestrictedAtributes(tagName)
+</p>
+<p>
+    Return a list of restricted attributes for the given <b>tagName</b>. This will include restricted attributes defined against all tags using <b>'*'</b> as the tag name.
+</p>
+<h3 id="editor-app">
+    EditorApp (inherits from <a href="#component-ui">ComponentUI</a>)
+</h3>
+<p>
+    The <b>EditorApp</b> class is actually a wrapper class that provides singleton access to, by default, the out of the box content editor. Access is provided via the <b>get</b>&nbsp;class method like so:
+</p>
+<pre><code class="language-javascript">var editor = EditorApp.get();</code></pre>
+<p>
+    Whilst the reference below provides details of the methods for the default editor, if you're thinking of extending or rolling your own editor you will either want to use the <b>getCls</b> method to monkey patch or inherit from the default editor, and if you're inheriting or rolling your own you'll need to modify the EditorApp wrapper class so that it returns your new class, for example:
+</p>
+<pre><code class="language-javascript">// Monkey patching default editor class
+var editorClass = EditorApp.getCls();
+editorClass.prototype.someMethod = function () { ...monkey, monkey... };
+
+// Rolling your own
+var MyEditor = function () {
+    ... optionally extended using the `editorClass`...
+};
+
+// Patch the EditorApp wrapper class to support our new class
+EditorApp.getCls = function () { return MyEditor; }</code></pre>
+<p>
+    Writing your own editor from scratch requires you to have a good knowledge of the <b>ContentTools</b> code base. If it's a small change you want to make then monkey patching or extending and overwriting is the way to go.
+</p>
+<table class="v-head">
+    <thead>
+        <tr>
+            <th>
+                Event name
+            </th>
+            <th>
+                Description
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+                revert
+            </td>
+            <td>
+                Triggered when the editor reverts the page to it's previous state.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                save
+            </td>
+            <td>
+                Triggered when the editor saves the page. The event includes the&nbsp;<b>passive</b>&nbsp;key/value.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                saved
+            </td>
+            <td>
+                Triggered after the editor has saved the page. The event includes the <b>passive</b> and <b>regions</b> key/value pairs. Regions is an object containing a map (name/content) of regions that have changed.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                start
+            </td>
+            <td>
+                Triggered when the editor is started.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                stop
+            </td>
+            <td>
+                Triggered when the editor is stopped. The event includes the <b>save</b> key/value.
+            </td>
+        </tr>
+    </tbody>
+</table>
+<p class="definition">
+    editor = ContentTools.EditorApp.get()
+</p>
+<p>
+    Returns the single&nbsp;instance of the <b>editor</b>.
+</p>
+<p class="definition">
+    cls = ContentTools.EditorApp.getCls()
+</p>
+<p>
+    Return the class used to generate an editor instance.
+</p>
+<p class="definition">
+    editor.init(<br>&nbsp; &nbsp; queryOrDOMElements,<br>&nbsp; &nbsp; namingProp='id', <br>&nbsp; &nbsp; fixtureTest=null,<br>&nbsp; &nbsp; withIgnition=true<br>&nbsp; &nbsp; )
+</p>
+<p>
+    Initialize the <b>editor</b>. The <b>queryOrDOMElements</b> parameter can either be a CSS query selecting that selects the editable regions on the page or a list of DOM elements, and the <b>namingProp</b> is used to determine which attribute against each of the region DOM elements will be used to uniquely identify each region. The <b>query</b> should be a string containing one or more CSS selectors, for example:
+</p>
+<pre><code class="language-markup">&lt;!-- HMTL --&gt;
+&lt;div data-editable data-name="article-body"&gt;...&lt;/div&gt;</code>
+
+<code class="language-javascript">// JavaScript
+var editor = ContentTools.EditorApp.get();
+editor.init('[data-editable]', 'data-name');​​​​​​​​​​</code></pre>
+<p>
+    Optionally a fixture test function can be provided which will receive a DOM element representing a region/fixture and should return true if it is a <a href="/api/content-edit#fixture" target>Fixture</a>, for example:
+</p>
+<pre><code class="language-javascript">editor.init(
+    '[data-editable], [data-fixture]', 
+    'data-name',
+    function (domElement) { 
+        return domElement.hasAttribute('data-fixture');
+    }
+);​</code></pre>
+<p>
+    If no fixture test is provided then the editor will provide a default test function identical to the one in the example given above.
+</p>
+<p>
+    The last argument, <b>withIgnition</b>, allows you to control if an ignition component will be created for the editor, this is useful when you want to use a different mechanism/UI to start/stop the editor.
+</p>
+<p class="definition">
+    editor.crtlDown()
+</p>
+<p>
+    Returns true if the Ctrl key (or Command key on Apple) is currently being held down.
+</p>
+<p class="definition">
+    editor.destroy()
+</p>
+<p>
+    Destroy/tear down the editor application.
+</p>
+<p class="definition">
+    editor.domRegions()
+</p>
+<p>
+    Return a list of all the DOM elements that are known to the editor as regions.
+</p>
+<p class="definition">
+    editor.getState()
+</p>
+<p>
+    Returns the current state of the editor. The possible editor states are:
+</p>
+<table class="v-head">
+    <tbody>
+        <tr>
+            <td>
+                DORMANT
+            </td>
+            <td>
+                An instance of the `_EditorApp` class exists but the `init` method has not yet been called (the primary distinction here is that the editor has not been mounted to the DOM).
+            </td>
+        </tr>
+        <tr>
+            <td>
+                READY
+            </td>
+            <td>
+                The editor has been mounted to the DOM and is ready (e.g the `start` method can be called to begin editing the document).
+            </td>
+        </tr>
+        <tr>
+            <td>
+                EDITING
+            </td>
+            <td>
+                The editor is in the editing state allowing changes to be made to the document.
+            </td>
+        </tr>
+    </tbody>
+    <thead>
+        <tr>
+            <th>
+                Editor state
+            </th>
+            <th>
+                Description
+            </th>
+        </tr>
+    </thead>
+</table>
+<p class="note">
+    Editor states are held against the&nbsp;<b>ContentTools.EditorApp</b> class.
+</p>
+<p class="definition">
+    editor.history
+</p>
+<p>
+    The <b>editor</b> tracks changes to the page using the <b><a href="#history">History</a></b> class. The <b>history</b> property holds an instance of the <b>History</b> class used to store the state of the current editing session.
+</p>
+<p class="definition">
+    editor.ignition()
+</p>
+<p>
+    Return the <a href="#ignition-ui" target>ignition</a> UI component for the editor.
+</p>
+<p class="definition">
+    editor.inspector()
+</p>
+<p>
+    Return the <a href="#inspector-ui" target>inspector</a> UI component for the editor.
+</p>
+<p class="definition">
+    editor.isDormant()
+</p>
+<p>
+    Return true if the editor is currently in the dormant state.
+</p>
+<p class="definition">
+    editor.isReady()
+</p>
+<p>
+    Return true if the editor is currently in the ready state.
+</p>
+<p class="definition">
+    editor.isEditing()
+</p>
+<p>
+    Return true if the editor is currently in the editing state.
+</p>
+<p class="definition">
+    editor.orderedRegions()
+</p>
+<p>
+    Return a list of regions in their navigation order. By default this is based on their position in the page, but it can be modified using the <b>setRegionOrder</b> method.
+</p>
+<p class="definition">
+    editor.regions()
+</p>
+<p>
+    Return a list of <b><a href="/api/content-edit#region">ContentEdit.Region</a></b>s that the editor is managing.
+</p>
+<p class="definition">
+    editor.shiftDown()
+</p>
+<p>
+    Returns true if the Shift key is currently being held down.
+</p>
+<p class="definition">
+    editor.toolbox()
+</p>
+<p>
+    Return the <a href="#toolbox-ui" target>toolbox</a> UI component for the editor.
+</p>
+<p class="definition">
+    editor.busy(busyState)
+</p>
+<p>
+    Get/set the busy state of the editor; if no <b>busyState</b>&nbsp;is provided then the current state is returned (as <b>true</b> or <b>false</b>). If a <b>busyState</b> is provided then the <b>editor</b> will either be set or taken out of the busy state.
+</p>
+<p class="definition">
+    editor.createPlaceholderElement(region)
+</p>
+<p>
+    Return a placeholder element for the region (used to populate an empty region).
+</p>
+<p class="note">
+    If you want to customize the default placeholder element used to populate a region when it becomes empty then override this method. By default it will return an empty paragraph.
+</p>
+<p class="definition">
+    editor.highlightRegions(highlight)
+</p>
+<p>
+    <b>Highlight</b> (or stop <b>highlight</b>ing) editable regions within the page.
+</p>
+<p class="definition">
+    editor.paste(element, clipboardData)
+</p>
+<p>
+    Paste content from the&nbsp;<b><a href="https://developer.mozilla.org/en-US/docs/Web/API/ClipboardEvent/clipboardData">clipboardData</a></b>&nbsp;into the given <b>element</b>. The <b>editor</b> monitors for paste events from the user and uses this method to handle them.
+</p>
+<p class="definition">
+    editor.revert()
+</p>
+<p>
+    Revert the page to its previous state (before we started editing it).
+</p>
+<p class="definition">
+    editor.revertToSnapshot(snapshot, restoreEditable=true)
+</p>
+<p>
+    Revert the page to a&nbsp;<b>snapshot</b>. See <b><a href="#history">History</a></b>.
+</p>
+<p class="definition">
+    editor.save(passive)
+</p>
+<p>
+    Save the page in its current state. This triggers &nbsp;<b>save</b>&nbsp;and <b>saved</b> events against the <b>editor</b>.
+</p>
+<p>
+    The <b>saved</b> event allows changes to the page to be saved somewhere, for example a database or file (<i>see <a href="/getting-started#save-changes">Saving changes</a></i>).
+</p>
+<p>
+    If the&nbsp;<b>passive</b>&nbsp;argument is given and <b>true</b> then the <b>saved</b>&nbsp;event will trigger, but the page will remain editable. This allows a save to be called by external code that doesn't want to change the state of the editor (e.g to support auto-saving).
+</p>
+<p class="definition">
+    editor.setRegionOrder(regionNames)
+</p>
+<p>
+    Similar to the tab index of fields in a form, this method allows the navigation order of regions to be set. The new order is defined by a list of <b>regionNames</b>.
+</p>
+<p class="definition">
+    editor.start()
+</p>
+<p>
+    Start editing the page. Calling this method makes the regions the <b>editor</b> was initialized with editable.
+</p>
+<p class="definition">
+    editor.stop(save)
+</p>
+<p>
+    Stop editing the page. The <b>save</b> argument if determines whether <b>stop</b> will call the editors <b>save</b> method (if true) or <b>revert</b> method (if false).
+</p>
+<p class="definition">
+    editor.syncRegions(regionQuery)
+</p>
+<p>
+    Sync the editor with the page. <b>SyncRegions</b>&nbsp;can be called in any editor state making it easy to add or remove editable regions while live editing. If a <b>regionQuery</b> is provided then the existing region query will be replaced.
+</p>
+<p class="note">
+    <b>syncRegions</b> looks for new or removed editable regions since <b>syncRegions</b> was last called. (potentially indirectly from <b>init</b> and <b>start</b>). If you want to replace the content within the existing region then consider using the <b><a href="/api/content-edit#region">Region.setContent</a></b> method.
+</p>
+<h3 id="history">
+    History
+</h3>
+<p>
+    The <b>History</b>&nbsp;class provides a mechanism for storing, navigating and&nbsp;reverting the changes made to an editable document.
+</p>
+<p class="note">
+    <b>Snaphots</b> are referenced throughout the following section. The term refers to an object which contains a map of region names and their HTML content as well as the selection state at the point the snapshot was taken.
+</p>
+<pre><code class="language-javascript">// The structure of a snapshot
+var snapshot = {
+    regions: {
+        'article-body': '...', // (a string of HTML)
+        ...
+        },
+    selected: {
+        element: element,      // a ContentEdit.Element instance
+        selection: selection   // a ContentSelect.Range instance
+        }
+};</code></pre>
+<p class="definition">
+    stack = new ContentTools.History(regions)
+</p>
+<p>
+    Create a new <b>History</b> stack monitoring the given <b>regions</b>. The <b>regions</b> should be specified as an object where region names map to their&nbsp;<b><a href="/api/content-edit#region">ContentEdit.Region</a></b> instance.
+</p>
+<p class="definition">
+    stack.canRedo()
+</p>
+<p>
+    Returns <b>true</b> if there is one or more snapshots ahead of the current snapshot and therefore the <b>redo</b> method can be called.
+</p>
+<p class="definition">
+    stack.canUndo()
+</p>
+<p>
+    Returns <b>true</b> if there is one or more snapshots behind the current snapshot and therefore the <b>undo</b> method can be called.
+</p>
+<p class="definition">
+    stack.length()
+</p>
+<p>
+    Return the number of snaphots stored in the&nbsp;<b>stack</b>.
+</p>
+<p class="definition">
+    stack.snapshot()
+</p>
+<p>
+    Return the current snapshot.
+</p>
+<p class="definition">
+    stack.goTo(index)
+</p>
+<p>
+    Move the <b>stack</b>'s head to the given <b>index</b> and return the snapshot at that position.
+</p>
+<p class="definition">
+    stack.redo()
+</p>
+<p>
+    Move the <b>stack</b>'s head forward one position and return the snapshot at that position.
+</p>
+<p class="definition">
+    stack.replaceRegions(regions)
+</p>
+<p>
+    Replace the regions the <b>stack</b>&nbsp;is monitoring with a new set.&nbsp;The <b>regions</b> should be specified as an object where region names map to their <b><a href="/api/content-edit#region">ContentEdit.Region</a></b> instance.
+</p>
+<p class="definition">
+    stack.restoreSelection(snapshot)
+</p>
+<p>
+    Restore the content selection and caret position for the given&nbsp;<b>snapshot</b>.
+</p>
+<p class="definition">
+    stack.stopWatching()
+</p>
+<p>
+    Stop watching the page for changes.
+</p>
+<p class="definition">
+    stack.undo()
+</p>
+<p>
+    Move the <b>stack</b>'s head backwards one position and return the snapshot at that position.
+</p>
+<p class="definition">
+    stack.watch()
+</p>
+<p>
+    Watch the document for changes. The watch process monitors the root <i>(see <b><a href="/api/content-edit#root">ContentEdit.Root</a></b>)</i> for changes by comparing its modified date with the date a snapshot was last taken; if the two are not the same then it triggers the creation of snapshot.
+</p>
+<p>
+    To ensure we don't take snapshots whilst the user is still actively making changes we wait for a short period of inactivity before taking the snapshot.
+</p>
+<h3 id="style-palette">
+    StylePalette
+</h3>
+<p>
+    The <b>StylesPalette</b>&nbsp;class stores a list of styles available to users via the editor. A list of styles is usually defined and added to the palette as part of initializing the application <i>(see <a href="/getting-started#configure-styles">Configure styles</a>)</i>.
+</p>
+<p>
+    <b>StylePalette</b> is a static class and should not be initialized, all its methods are class methods.
+</p>
+<p class="definition">
+    ContentTools.StylePalette.add(styles)
+</p>
+<p>
+    Add a list of <b>Style</b>s to the <b>palette</b>.
+</p>
+<p class="definition">
+    ContentTools.StylePalette.styles(tagName)
+</p>
+<p>
+    Return a list of styles in the palette. If a&nbsp;<b>tagName</b> is specified then only styles applicable to that tag will be returned.
+</p>
+<h3 id="style">
+    Style
+</h3>
+<p>
+    The <b>Style</b> class is used to define styles (CSS classes) for use in the editor. <b>Styles</b> must be registered with <b>StylePalette</b> before they can be accessed in the editor.
+</p>
+<p class="definition">
+    style = new ContentTools.Style(name, cssClass, applicableTo)
+</p>
+<p>
+    Create a new <b>Style.</b>&nbsp;The <b>name</b> is displayed to users in the editor, the <b>cssClass</b> is added to the <b>class</b> attribute of an element the style is applied to, and the <b>applicableTo</b> can be used to limit the <b>style</b> to a list of applicable tag names. If <b>applicableTo</b> is not given, the <b>style</b> will be applicable to all tags.
+</p>
+<p class="definition">
+    style.applicableTo()
+</p>
+<p>
+    Return the tag names this style is applicable to, no value (<b>null</b>) means the style is applicable to all tags.
+</p>
+<p class="definition">
+    style.cssClass()
+</p>
+<p>
+    Return the CSS class name for the style.
+</p>
+<p class="definition">
+    style.name()
+</p>
+<p>
+    Return the name of the style.
+</p>
+<h3 id="tools">
+    Tools
+</h3>
+<p>
+    <b>ContentTools</b> provides a set of tools for common editing tasks. Whilst these tools provide a good base for creating a content editor, it is possible to create new tools as required (<i>see the <a href="/tutorials/adding-new-tools">Adding new tools</a>&nbsp;tutorial</i>).
+</p>
+<p>
+    The following tools are available in the standard code base.
+</p>
+<table class="v-head">
+    <thead>
+        <tr>
+            <th>
+                Tool name
+            </th>
+            <th>
+                Tool description
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+                bold
+            </td>
+            <td>
+                Make the current selection of text bold (e.g <code>&lt;b&gt;foo&lt;/b&gt;</code>). Applying the tool to bold text will remove the format.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                italic
+            </td>
+            <td>
+                Make the current selection of text italic (e.g <code>&lt;i&gt;foo&lt;/i&gt;</code>).&nbsp;Applying the tool to italic text will remove the format.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                link
+            </td>
+            <td>
+                Insert a link.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                heading
+            </td>
+            <td>
+                Convert the current text block to a heading (e.g <code>&lt;h1&gt;foo&lt;/h1&gt;</code>).
+            </td>
+        </tr>
+        <tr>
+            <td>
+                subheading
+            </td>
+            <td>
+                Convert the current text block to a subheading (e.g <code>&lt;h2&gt;foo&lt;/h2&gt;</code>).
+            </td>
+        </tr>
+        <tr>
+            <td>
+                paragraph
+            </td>
+            <td>
+                Convert the current text block to a paragraph (e.g <code>&lt;p&gt;foo&lt;/p&gt;</code>).
+            </td>
+        </tr>
+        <tr>
+            <td>
+                preformatted
+            </td>
+            <td>
+                Convert the current text block to a preformatted block (e.g <code>&lt;pre&gt;foo&lt;/pre&gt;</code>).
+            </td>
+        </tr>
+        <tr>
+            <td>
+                align-left
+            </td>
+            <td>
+                Apply a class to left-align the contents of the current text block. The class applied is <b>text-left</b>.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                align-center
+            </td>
+            <td>
+                Apply a class to center-align the contents of the current text block.&nbsp;The class applied is <b>text-center</b>.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                align-right
+            </td>
+            <td>
+                Apply a class to right-align the contents of the current text block. The class applied is <b>text-right</b>.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                unordered-list
+            </td>
+            <td>
+                Set an element as an unordered list.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                ordered-lists
+            </td>
+            <td>
+                Set an element as an ordered list.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                table
+            </td>
+            <td>
+                Insert/update a Table.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                indent
+            </td>
+            <td>
+                Indent a list item.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                unindent
+            </td>
+            <td>
+                Un-indent a list item.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                line-break
+            </td>
+            <td>
+                Insert a line break into the current element at the specified selection.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                image
+            </td>
+            <td>
+                Insert an image.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                video
+            </td>
+            <td>
+                Insert a video.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                undo
+            </td>
+            <td>
+                Undo the last change.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                redo
+            </td>
+            <td>
+                Redo the last undo.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                remove
+            </td>
+            <td>
+                Remove the current element.
+            </td>
+        </tr>
+    </tbody>
+</table>
+<h3 id="tool-shelf">
+    ToolShelf
+</h3>
+<p>
+    The <b>ToolShelf</b>&nbsp;class allows tools to be stored and retrieved using a name. Tool names are used to define the tools that will populate the editor <b>ToolboxUI</b> widget <i>(see <b>DEFAULT_TOOLS</b> in <a href="#settings">settings</a>)</i>.
+</p>
+<p>
+    <b>ToolShelf</b> is a static class and should not be initialized, all its methods are class methods.
+</p>
+<p class="definition">
+    ContentTools.ToolShelf.stow(cls, name)
+</p>
+<p>
+    Add a tool class to the shelf so we can retrieve it later by <b>name</b>.
+</p>
+<p class="definition">
+    ContentTools.ToolShelf.fetch(name)
+</p>
+<p>
+    Return a tool from the shelf associated with the given&nbsp;<b>name</b>.
+</p>
+<h3 id="tool">
+    Tool
+</h3>
+<p>
+    The <b>Tool</b> class defines a common API for editor tools, for this reason any tool class you write should inherit from the <b>Tool</b> class (<i>see the <a href="/tutorials/adding-new-tools">Adding new tools</a> tutorial</i>).
+</p>
+<p>
+    Classed derived from the <b>Tool</b> class are static classes; every property and method is held against the class and the class should not be initialized.
+</p>
+<p class="definition">
+    ContentTools.Tool.label
+</p>
+<p>
+    The tools <b>label</b>, this will be displayed as a tool tip when the user hovers over the tools icon in the tool box.
+</p>
+<p class="definition">
+    ContentTools.Tool.icon
+</p>
+<p>
+    The tools <b>icon</b> class, this will be added as a modifier of the <b>ct-tool</b> CSS class, for example if the <b>icon</b> was defined as <i>bold</i> the modifier CSS class would be <b>ct-tool--bold</b>.
+</p>
+<p class="definition">
+    ContentTools.Tool.canApply(element, selection)
+</p>
+<p>
+    Return <b>true</b> if the tool can be applied to the given <b>element</b> and <b>selection</b>.
+</p>
+<p class="definition">
+    ContentTools.Tool.isApplied(element, selection)
+</p>
+<p>
+    Return <b>true</b> if the tool is currently applied to the the given <b>element</b> and <b>selection</b>.
+</p>
+<p class="definition">
+    ContentTools.Tool.apply(element, selection, callback)
+</p>
+<p>
+    Apply the tool to the given <b>element</b> and <b>selection</b>. Optionally a <b>callback</b> function can be provided which will be called once the tool has been applied.
+</p>
+<h3 id="event">
+    Event
+</h3>
+<p>
+    The <b>Event</b> class provides information about events dispatched by <a href="#component-ui" target>ComponentUI</a> instances.
+</p>
+<p class="note">
+    The event model changed in release 1.2 and is no longer compatible with the <a href="/api/content-edit" target>ContentEdit</a> event model. The change was necessary to allow UI events in ContentTools to modify the default behaviour and halt other registered callbacks.
+</p>
+<p class="definition">
+    event = ContentTools.Event(eventName, detail)
+</p>
+<p>
+    Create a new Event with the given name and detail. The <b>eventName</b> is used so that event listeners can be added which will trigger bound callbacks when an event of the same name is dispatched. The <b>detail</b> for an event can be any value but will always be either an <b>object</b> or <b>undefined</b> if dispatched by the core library (and we recommend that you follow this approach).
+</p>
+<p class="definition">
+    event.defaultPrevented()
+</p>
+<p>
+    Return <b>true</b> of the event has been cancelled.
+</p>
+<p class="definition">
+    event.detail()
+</p>
+<p>
+    Return the detail of the event.
+</p>
+<p class="definition">
+    event.name()
+</p>
+<p>
+    Return the name of the event.
+</p>
+<p class="definition">
+    event.propagationStopped()
+</p>
+<p>
+    Return <b>true</b> if the event has been halted.
+</p>
+<p class="definition">
+    event.timeStamp()
+</p>
+<p>
+    Return a time stamp of when the event was created.
+</p>
+<p class="definition">
+    event.preventDefault()
+</p>
+<p>
+    Cancel the event preventing the default event action.
+</p>
+<p class="definition">
+    event.stopImmediatePropagation()
+</p>
+<p>
+    Halt the event preventing any bound listener functions that have not&nbsp;yet been called for the event being called.
+</p>
+<h3 id="component-ui">
+    ComponentUI
+</h3>
+<p>
+    ContentTools provides a small set of user interface classes to support the included editor. The UI is not designed to be a complete UI library and is deliberately designed to be concise. If you're writing your own editor you may well choose to use a more complete UI library, however if you're just looking to extend the functionality of the existing editor the UI library is quite capable.
+</p>
+<p>
+    All UI component classes inherit from the <b>ComponentUI</b> class which provides base functionality and a common API.
+</p>
+<p class="definition">
+    component = ContentTools.ComponentUI()
+</p>
+<p>
+    Create a new <b>ComponentUI</b>.
+</p>
+<p class="definition">
+    component.children()
+</p>
+<p>
+    Return a list of children for the <b>component</b> (this list is a copy but the child components are not).
+</p>
+<p class="definition">
+    component.domElement()
+</p>
+<p>
+    Return the mounted DOM element for the <b>component</b>.
+</p>
+<p class="definition">
+    component.parent()
+</p>
+<p>
+    Return the parent component for the <b>component</b>.
+</p>
+<p class="definition">
+    component.isMounted()
+</p>
+<p>
+    Return <b>true</b> if the <b>component</b> is mounted to the DOM.
+</p>
+<p class="definition">
+    component.attach(child, index)
+</p>
+<p>
+    Attach a component as a <b>child</b> of this <b>component</b>.
+</p>
+<p class="definition">
+    component.addCSSClass(className)
+</p>
+<p>
+    Add a CSS class to the <b>component</b>'s DOM element. The CSS class is not retained if the <b>component</b> is remounted.
+</p>
+<p class="definition">
+    component.detach(component)
+</p>
+<p>
+    Detach a child from this <b>component</b>.
+</p>
+<p class="definition">
+    component.mount()
+</p>
+<p>
+    Mount the component to the DOM.
+</p>
+<p class="definition">
+    component.removeCSSClass(className)
+</p>
+<p>
+    Remove a CSS class to the <b>component</b>'s DOM element.
+</p>
+<p class="definition">
+    component.unmount()
+</p>
+<p>
+    Unmount the <b>component</b> from the DOM.
+</p>
+<p class="definition">
+    component.addEventListener(eventName, callback)
+</p>
+<p>
+    Add an event listener for the named event against <b>component</b>.
+</p>
+<p class="definition">
+    component.createEvent(eventName, detail)
+</p>
+<p>
+    Create an <a href="#event" target>event</a>. This provides a useful short-cut allowing you to call <code>@createEvent(...)</code> instead of <code>new ContentTools.Event(...)</code>.
+</p>
+<p class="definition">
+    component.dispatchEvent(ev)
+</p>
+<p>
+    Dispatch an event against the&nbsp;<b>compontent</b>.
+</p>
+<p class="definition">
+    component.removeEventListener(eventName, callback)
+</p>
+<p>
+    Remove a previously registered event listener for the <b>component</b>. If;
+</p>
+<ul>
+    <li>
+        no <b>eventName</b> is given all listeners are unbound from the <b>component</b>,
+    </li>
+    <li>
+        an <b>eventName</b> is given but no <b>callback</b> is, then all listeners for the named event are unbound,
+    </li>
+    <li>
+        an <b>eventName</b> and <b>callback</b> are given then the listener for the given <b>calback</b>&nbsp;is unbound for the named event.
+    </li>
+</ul>
+<p class="definition">
+    component._addDOMEventListeners()
+</p>
+<p>
+    Added DOM event bindings for the <b>component</b>.
+</p>
+<p class="definition">
+    component._removeDOMEventListeners()
+</p>
+<p>
+    Remove DOM event bindings for the <b>component</b>.
+</p>
+<p class="note">
+    I typically don't document private methods (indicated by the prefixed _ character) but these two methods (<b>_addDOMEventListeners</b>/<b>_removeDOMEventListeners</b>) are worth documenting as when you're writing your own components you should override these and add any DOM event binding/unbinding code to them.
+</p>
+<p class="definition">
+    ContentTools.ComponentUI.createDiv(classNames, attributes, content)
+</p>
+<p>
+    All UI components are constructed entirely from one or more nested <b>&lt;div&gt;</b>s. This <b>createDiv</b>&nbsp;class method provides a short-cut for creating a <b>&lt;div&gt;</b> including the initial CSS class names, <b>attributes</b> and <b>content</b>. A DOM element is returned.
+</p>
+<h3 id="widget-ui">
+    WidgetUI (inherits from <a href="#component-ui">ComponentUI</a>)
+</h3>
+<p>
+    The <b>WidgetUI</b> class is the base class for components that are mounted at the root of the application such as the toolbox, tag inspector, ignition and dialogs (e.g within the <code>&lt;div class="ct-app"&gt;..&lt;/div&gt;</code> element added by the editor).
+</p>
+<p class="definition">
+    widget = new ContentTools.WidgetUI()
+</p>
+<p>
+    Create a new <b>WidgetUI</b>.
+</p>
+<p class="definition">
+    widget.show()
+</p>
+<p>
+    Show the <b>widget</b>. By default widgets are not visible when they are mounted to the DOM.
+</p>
+<p class="definition">
+    widget.hide()
+</p>
+<p>
+    Hide the <b>widget</b>.
+</p>
+<h3 id="anchored-component-ui">
+    AnchoredComponentUI
+</h3>
+<p>
+    Anchored components are mounted against DOM elements at a specified point. Remounting an anchored component requires that the parent perform the re-mount.
+</p>
+<p>
+    The benefit of anchored components is they are lightweight and can be rendered into a specific DOM element by the parent, for example tools within the toolbox are anchored components.
+</p>
+<p class="definition">
+    component = new ContentTools.AnchoredComponentUI()
+</p>
+<p>
+    Create a new <b>AnchoredComponentUI</b>.
+</p>
+<p class="definition">
+    component.mount(domParent, before)
+</p>
+<p>
+    Mount the <b>component</b> in the DOM within the <b>domParent</b>, if a DOM element is given as&nbsp;<b>before</b>&nbsp;then the <b>component</b> will be mounted before that element, provided it is a child of <b>domParent</b>. If before is not given then the <b>component</b> will be mounted as the last child of the <b>domParent</b>.
+</p>
+<h3 id="flash-ui">
+    FlashUI (inherits from&nbsp;<a href="#anchored-component-ui">AnchoredComponentUI</a>)
+</h3>
+<p>
+    A flash is a visual indicator displayed typically once a task has been completed, for example it might show that a save has been successful or that it failed.
+</p>
+<p>
+    Instances of the <b>FlashUI</b> class are short lived, they display as soon as mounted and are unmounted as soon as their animation has finished. As such, references to flash instances should not be stored, for example:
+</p>
+<pre><code class="language-javascript">// Let the user know everything went OK
+new ContentTools.FlashUI('ok');</code></pre>
+<p class="definition">
+    flash = new ContentTools.FlashUI(modifier)
+</p>
+<p>
+    Create a new FlashUI with the given modifier (<i>see the <b><a href="#flash-ui-mount">mount</a></b> method</i>).
+</p>
+<p class="definition" id="flash-ui-mount">
+    flash.mount(modifier)
+</p>
+<p>
+    Mount the <b>flash</b>&nbsp;on the DOM, the <b>modifier</b> will be applied as a CSS modifier of the <b>ct-flash</b>&nbsp;class for example if the <b>modifier</b> is <i>ok</i> then the modifier class would be <b>ct-flash--ok</b>.
+</p>
+<p>
+    The modifiers currently included in the code base are:
+</p>
+<ul>
+    <li>
+        <b>ok</b> which displays a tick.
+    </li>
+    <li>
+        <b>no</b> which displays a cross.
+    </li>
+</ul>
+<p class="note">
+    There is no need to call mount directly as it is called when the FlashUI instance is initialized.
+</p>
+<h3 id="ignition-ui">
+    IgnitionUI (inherits from <a href="#widget-ui">WidgetUI</a>)
+</h3>
+<p>
+    To control editing of content (e.g. start/stop/busy) an&nbsp;<b>IgnitionUI</b> class is provided. The ignition switch is typically created and used by the <b><a href="#editor-app">EditorApp</a></b> class to control its state and would not usually be accessed outside of the <b>EditorApp</b> class.
+</p>
+<table class="v-head">
+    <thead>
+        <tr>
+            <th>
+                Event name
+            </th>
+            <th>
+                Description
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+                busy
+            </td>
+            <td>
+                Triggered when the iginition is set to or reverted from the busy state. The event includes the <b>busy</b> key/value.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                cancel
+            </td>
+            <td>
+                Triggered when the ignition's cancel action is selected.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                confirm
+            </td>
+            <td>
+                Triggered when the ignition's confirm action is selected.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                edit
+            </td>
+            <td>
+                Triggered when the ignition's edit action is selected.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                statechange
+            </td>
+            <td>
+                Triggered when the ignition's state is changed. The event includes the <b>state</b> key/value.
+            </td>
+        </tr>
+    </tbody>
+</table>
+<p class="definition">
+    ignition = new ContentTools.IgnitionUI()
+</p>
+<p>
+    Create a new <b>IgnitionUI</b>.
+</p>
+<p class="definition">
+    ignition.busy(busy)
+</p>
+<p>
+    Set the <b>ignition</b> to busy (or revert if from a busy state to its previous&nbsp;state.
+</p>
+<p class="definition">
+    ignition.cancel()
+</p>
+<p>
+    Dispatch the cancel event against the <b>ignition</b> and set its state to&nbsp;ready.
+</p>
+<p class="definition">
+    ignition.confirm()
+</p>
+<p>
+    Dispatch the confirm event against the <b>ignition</b> set its state to&nbsp;ready.
+</p>
+<p class="definition">
+    ignition.edit()
+</p>
+<p>
+    Dispatch the edit event against the <b>ignition</b> and set its state to&nbsp;editing.
+</p>
+<p class="definition">
+    ignition.state(state)
+</p>
+<p>
+    Get/Set the state of the <b>ignition</b>. State must be one of the following values:
+</p>
+<ul>
+    <li>
+        busy
+    </li>
+    <li>
+        editing
+    </li>
+    <li>
+        ready
+    </li>
+</ul>
+<h3 id="inspector-ui">
+    InspectorUI (inherits from <a href="#widget-ui">WidgetUI</a>)
+</h3>
+<p>
+    The <b>InspectorUI</b> class provides a breadcrumb style navigation tool for the selected editable element within the document and its chain of parent elements.
+</p>
+<p class="definition">
+    inspector = new ContentTools.InspectorUI()
+</p>
+<p>
+    Create a new <b>InspectorUI</b>.
+</p>
+<p class="definition">
+    inspector.updateTags()
+</p>
+<p>
+    Update the tags displayed in the <b>inspector</b>'s tag trail based on the editable element that currently has focus.
+</p>
+<h3 id="tag-ui">
+    TagUI (inherits from <a href="#anchored-component-ui">AnchoredComponentUI</a>)
+</h3>
+<p>
+    The <b>TagUI</b> class is used to populate the <b>InspectorUI</b>'s tag trail. Each tag represents an editable element. Selecting a tag from the inspector bar allows the user to modify its properties.
+</p>
+<p class="definition">
+    tag = new ContentTools.TagUI(element)
+</p>
+<p>
+    Create a <b>TagUI</b>&nbsp;for the given <b>element</b>&nbsp;which must be a <b><a href="/api/content-edit#element">ContentEdit.Element</a></b> instance.
+</p>
+<h3 id="modal-ui">
+    ModalUI (inherits from <a href="#widget-ui">WidgetUI</a>)
+</h3>
+<p>
+    The ModalUI class provides a blocking layer which prevents the user from interacting with the page whilst allowing them to interact with UI components above the layer such as a dialog.
+</p>
+<p class="definition">
+    modal = new ContentTools.ModalUI(transparent, allowScrolling)
+</p>
+<p>
+    Create a new <b>ModalUI</b>. The <b>transparent</b> flag determines if the <b>modal</b>'s layer should in some way hide the page content (e.g to reduce distraction) or if the layer shouldn't be invisible to the user. The <b>allowScrolling</b> flag determines if the page can be scrolled while the <b>modal</b> is open - when a dialog is opened you typically don't want the page to scroll as that behaviour may interfere with the scrolling of content within the dialog.
+</p>
+<p>
+    The <b>transparent</b> flag determines if the <b>modal</b>'s layer should in some way hide the page content (e.g to reduce distraction) or if the layer shouldn't be invisible to the user.
+</p>
+<p>
+    The <b>allowScrolling</b> flag determines if the page can be scrolled while the <b>modal</b> is open. When a dialog is opened you typically don't want the page to scroll as that behaviour may interfere with the scrolling of content within the dialog.
+</p>
+<table class="v-head">
+    <thead>
+        <tr>
+            <th>
+                Event name
+            </th>
+            <th>
+                Description
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+                click
+            </td>
+            <td>
+                Triggered when the user clicks on the modal.
+            </td>
+        </tr>
+    </tbody>
+</table>
+<h3 id="toolbox-ui">
+    ToolboxUI (inherits from <a href="#widget-ui">WidgetUI</a>)
+</h3>
+<p>
+    The ToolboxUI class provides a floating window of content-editing tools. The toolbox is draggable so that the user can position it as required whilst editing. The position is stored in local storage so it persists between editing sessions.
+</p>
+<p class="definition">
+    toolbox = ContentTools.ToolboxUI(tools)
+</p>
+<p>
+    Create a new <b>ToolboxUI</b> containing the given <b>tools</b>. The <b>tools</b> should be provided as an array of tool groups where each tool group is an array of tool names (<i>see the DEFAULT_TOOLS in <a href="#settings">settings</a>.</i>).
+</p>
+<p class="definition">
+    toolbox.isDragging()
+</p>
+<p>
+    Return true if the <b>toolbox</b> is currently being dragged.
+</p>
+<p class="definition">
+    toolbox.tools(tools)
+</p>
+<p>
+    Get/set the <b>tools</b> that populate the <b>toolbox</b>. If a new set of&nbsp;<b>tools</b> is given then the the tools populating the <b>toolbox</b> will be updated, otherwise those that currently populate it will be returned.
+</p>
+<p class="definition">
+    toolbox.updateTools()
+</p>
+<p>
+    Refresh all tools in the <b>toolbox</b>, this must be called whenever the currently selected element is changed so that the tools can be updated (e.g applied, can be applied states) to reflect those changes.
+</p>
+<h3 id="tool-ui">
+    ToolUI (inherits from&nbsp;<a href="#anchored-dialog-ui">AnchoredComponentUI</a>)
+</h3>
+<p>
+    A tool that can be selected in the toolbox.
+</p>
+<table class="v-head">
+    <thead>
+        <tr>
+            <th>
+                Event name
+            </th>
+            <th>
+                Description
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+                apply
+            </td>
+            <td>
+                Triggered when the tool is selected. The event includes <b>element</b> and <b>selection</b> key/values.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                applied
+            </td>
+            <td>
+                Triggered after a tool has been applied. The event includes <b>element</b> and <b>selection</b> key/values.
+            </td>
+        </tr>
+    </tbody>
+</table>
+<p class="definition">
+    tool = new ContentTools.ToolUI(tool)
+</p>
+<p>
+    Create a new <b>ToolUI</b> that when selected will apply the specified <b>tool</b> (<a href="#tool">Tool</a>).
+</p>
+<p class="definition">
+    tool.apply(element, selection)
+</p>
+<p>
+    Apply the tool (<a href="#tool">Tool</a>) associated with the <b>tool</b> (ToolUI) to the given <b>element</b> and optionally <b>selection</b>.
+</p>
+<p class="definition">
+    tool.disabled(disabledState)
+</p>
+<p>
+    Get/Set the disabled state of the <b>tool</b>. If <b>disabledState</b> is given then the tool's state will be set otherwise the tool's current state will be returned.
+</p>
+<p class="definition">
+    tool.update(element, selection)
+</p>
+<p>
+    Update the tool's active state and applied appearance based on a given <b>element</b> and optionally&nbsp;<b>selection</b>.
+</p>
+<h3 id="anchored-dialog-ui">
+    AnchoredDialogUI (inherits from <a href="#widget-ui">WidgetUI</a>)
+</h3>
+<p>
+    The <b>AnchoredDialogUI</b> class is the base class for creating anchored dialogs. An anchored dialog appears above the page but is anchored to a set position within it, they are useful for in-page edits such as setting a link within the page.
+</p>
+<p class="definition">
+    dialog = new ContentTools.AnchoredDialogUI()
+</p>
+<p>
+    Create a new <b>AnchoredDialogUI</b>.
+</p>
+<p class="definition">
+    dialog.position(newPosition)
+</p>
+<p>
+    Get/set the position of the dialog. If a <b>newPosition</b> is given then the dialog will be anchored there, if not then the <b>dialog</b>'s current position will be returned.
+</p>
+<p>
+    The <b>newPosition</b> must be a 2 item array in the form <b>[x, y]</b>&nbsp;(in pixels).
+</p>
+<h3 id="dialog-ui">
+    DialogUI (inherits from <a href="#widget-ui">WidgetUI</a>)
+</h3>
+<p>
+    The <b>DialogUI</b> class is the base class for creating dialogs.
+</p>
+<table class="v-head">
+    <thead>
+        <tr>
+            <th>
+                Event name
+            </th>
+            <th>
+                Description
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+                cancel
+            </td>
+            <td>
+                Triggered when the dialog is cancelled (closed without saving).
+            </td>
+        </tr>
+        <tr>
+            <td>
+                save
+            </td>
+            <td>
+                Triggered when the dialog is saved. Typical the save event will provide one or more key/value pairs containing details of the dialog's content when the user saved.
+            </td>
+        </tr>
+    </tbody>
+</table>
+<p class="definition">
+    dialog = new ContentTools.DialogUI(caption='')
+</p>
+<p>
+    Create a new <b>DialogUI</b> with the given <b>caption</b>.
+</p>
+<p class="definition">
+    dialog.busy(busyState)
+</p>
+<p>
+    Get/set the busy state of the <b>dialog</b>, if no <b>busyState</b> is provided then the current state is returned (as <b>true</b> or <b>false</b>). If a <b>busyState</b> is provided then the <b>dialog</b> will either be set or taken out of the busy state.
+</p>
+<p class="definition">
+    dialog.caption(newCaption)
+</p>
+<p>
+    Get/set the <b>dialog</b>'s caption. If no <b>newCaption</b> is provided then the current caption is returned. If a <b>newCaption</b> is provided then the <b>dialog</b>'s caption will be updated.
+</p>
+<h3 id="image-dialog">
+    ImageDialog
+</h3>
+<p>
+    The <b>ImageDialog</b> class provides a dialog for uploading, rotating and cropping images.
+</p>
+<p>
+    The dialog doesn't handle the uploading of images. A function should be set against the&nbsp;<b>IMAGE_UPLOADER</b> setting like so:
+</p>
+<pre><code class="language-javascript">ContentTools.IMAGE_UPLOADER = myImageUploader;</code>
+</pre>
+<p>
+    This function receives the dialog when the dialog is initialized, at which point it can set up all the required event bindings to support image uploads (<i>see the <a href="/tutorials/handling-image-uploads">Handling image uploads</a> tutorial</i>).
+</p>
+<table class="v-head">
+    <thead>
+        <tr>
+            <th>
+                Event name
+            </th>
+            <th>
+                Description
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+                .cancelupload
+            </td>
+            <td>
+                Triggered when a user cancels the upload of an image file.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                .clear
+            </td>
+            <td>
+                Triggered when a user clears the image from the dialog.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                .fileready
+            </td>
+            <td>
+                Triggered when a user selects an image to upload. The event provides the <b>file</b> key/value.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                .mount
+            </td>
+            <td>
+                Triggered when the image dialog is mounted.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                .rotatecw
+            </td>
+            <td>
+                Triggered when the user rotates the image clockwise.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                .rotateccw
+            </td>
+            <td>
+                Triggered when the user rotates the image counter-clockwise.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                .save
+            </td>
+            <td>
+                Triggered when the user selects to save the image.
+            </td>
+        </tr>
+        <tr>
+            <td>
+                .unmount
+            </td>
+            <td>
+                Triggered when the image dialog is unmounted.
+            </td>
+        </tr>
+    </tbody>
+</table>
+<p class="note">
+    The prefixed full-stop&nbsp;<b>.</b>&nbsp;against each event above means the event is namespaced under <b>imageuploader</b>, for example <b>.cancelupload</b> would be <b>imageuploader.cancelupload</b>.
+</p>
+<p class="definition">
+    dialog = new ContentTools.ImageDialog()
+</p>
+<p>
+    Create a new <b>ImageDialog</b>.
+</p>
+<p class="definition">
+    dialog.cropRegion()
+</p>
+<p>
+    Return the defined crop-region (<i>top, left, bottom, right</i>). The values are normalized to the range <b>0.0 - 1.0</b>. If no crop region is defined then the maximum region will be returned (e.g <b>[0, 0, 1, 1]</b>).
+</p>
+<p class="definition">
+    dialog.addCropMarks()
+</p>
+<p>
+    Add crop marks to the current image so the user can define a crop region.
+</p>
+<p class="definition">
+    dialog.clear()
+</p>
+<p>
+    Clear the image that currently populates the <b>dialog</b>.
+</p>
+<p class="definition">
+    dialog.populate(imageURL, imageSize)
+</p>
+<p>
+    Populate the <b>dialog</b> with an image. The <b>imageURL</b> should point to the image to display in the <b>dialog.</b>&nbsp;There's little point in this being larger than the <b>dialog</b>'s viewport (570x320 pixels) - the <b>imageSize</b> should be the actual image size as a 2 item of the form <b>[width, height]</b> in pixels.
+</p>
+<p>
+    The <b>populate</b> method is typically called when a new image is uploaded or after the current image has been rotated.
+</p>
+<p class="definition">
+    dialog.progress(uploadProgress)
+</p>
+<p>
+    When an image is being uploaded the dialog displays a progress bar. The <b>progress</b> method will get/set the <b>uploadProgress</b> percentage for the <b>dialog</b>. If <b>uploadProgress</b> is given (as a percentage, e.g 0-100) then the progress bar will be updated to reflect the new value, if not then the current progress value will be returned.
+</p>
+<p class="definition">
+    dialog.removeCropMarks()
+</p>
+<p>
+    Remove crop marks from the current image.
+</p>
+<p class="definition">
+    dialog.save(imageURL, imageSize, imageAttrs)
+</p>
+<p>
+    Save and insert the current image. This method triggers the <b>save</b> event against the <b>dialog.</b>&nbsp;The event is triggered with the following arguments:
+</p>
+<ul>
+    <li>
+        <b>imageURL</b> The URL of the image to insert.
+    </li>
+    <li>
+        <b>imageSize</b> The size of the image (the size at which it will be inserted into the page) given as a 2 item of the form [width, height] in pixels.
+    </li>
+    <li>
+        <b>imageAttrs</b> The attributes for the image given as an object. Common attributes to include are <b>alt</b> and <b>data-ce-max-width</b> (<i>see <a href="/api/content-edit#resizable-element">ContentEdit.ResizeableElement</a></i>).
+    </li>
+</ul>
+<p class="definition">
+    dialog.state(newState)
+</p>
+<p>
+    Set/get the state of the <b>dialog</b>. The dialog can be set to any of the following states - <b>empty</b>, <b>uploading</b>, <b>populated</b>. If a&nbsp;<b>newState</b> is given then the dialog's state will be set, otherwise its current state will be returned.
+</p>
+<h3 id="link-dialog">
+    LinkDialog (inherits from <a href="#anchored-dialog-ui">AnchoredDialogUI</a>)
+</h3>
+<p>
+    The <b>LinkDialog</b> class provides a dialog that floats above a selection of text or image and allows a link to be entered.&nbsp;The dialog is associated with the <b><a href="#tools">link</a></b> tool.
+</p>
+<p class="definition">
+    dialog = new ContentTools.LinkDialog(initialValue='')
+</p>
+<p>
+    Create a <b>LinkDialog</b>. The <b>initialValue</b> is used to pre-populate the <b>dialog's</b> input field, for example with the current URL for the link.
+</p>
+<p class="definition">
+    dialog.save()
+</p>
+<p>
+    Save the link. This method triggers the save event against the <b>dialog.</b>&nbsp;The event is triggered with the value of the <b>dialog's</b> input field.
+</p>
+<h3 id="properties-dialog">
+    PropertiesDialog (inherits from <a href="#dialog-ui">DialogUI</a>)
+</h3>
+<p>
+    The <b>PropertiesDialog</b> class provides a dialog that allows an element's styles, attributes and inner HTML to be viewed and updated. The properties dialog is opened by selecting a tag in tag inspector.
+</p>
+<p class="definition">
+    dialog = new ContentTools.PropertiesDialog(element)
+</p>
+<p>
+    Create a new <b>PropertiesDialog</b> populated by the given <b>element</b>.
+</p>
+<p class="definition">
+    dialog.changedAttributes()
+</p>
+<p>
+    Return an object of attributes set in the <b>dialog</b>&nbsp;that have been changed by the user (e.g were added, modified or removed). Attributes that have been removed are assigned a <b>null</b> value, for example:
+</p>
+<pre><code class="language-javascript">{
+    'alt': 'My dragon Burt', // + This attribute was added or updated
+    'id': null               // - This attribute was removed
+}</code></pre>
+<p class="definition">
+    dialog.changedStyles()
+</p>
+<p>
+    Return an object of styles that have been changed by the user (e.g applied or removed). The styles CSS class is mapped to <b>true</b> if the style has been applied and <b>false</b> if it's been removed, for example:
+</p>
+<pre><code class="language-javascript">{
+    'note': true,       // + This style was applied
+    'definition': false // - This style was removed
+}</code></pre>
+<p class="definition">
+    dialog.getElementInnerHTML()
+</p>
+<p>
+    Return the inner HTML for the element, taking into account that the element might be a <b><a href="/api/content-edit#list-item">ListItem</a></b> or <b><a href="/api/content-edit#table-cell">TableCell</a></b> and in which case the content is stored in a child <b><a href="/api/content-edit#list-item-text">ListItemText</a></b> or <b><a href="/api/content-edit#table-cell-text">TableCellText</a></b> element respectively.
+</p>
+<p class="definition">
+    dialog.save()
+</p>
+<p>
+    Save any changes to the properties. This method triggers the <b>save</b> event against the <b>dialog</b>, the event is triggered with the following arguments:
+</p>
+<ul>
+    <li>
+        <b>attributes</b> the attributes that have been changed and their values. Attributes with <b>null</b> values have been removed (see the <b>changedAttributes</b> method).
+    </li>
+    <li>
+        <b>styles</b> the styles that have changed (see the <b>changedStyles</b> method).
+    </li>
+    <li>
+        <b>innerHTML</b> The inner HTML for the element. If the element doesn't support content the value will be <b>null</b>.
+    </li>
+</ul>
+<h3 id="table-dialog">
+    TableDialog (inherits from <a href="#dialog-ui">DialogUI</a>)
+</h3>
+<p>
+    The <b>TableDialog</b> class provides a dialog that allows a table to be inserted or modified.&nbsp;The dialog is associated with the <b><a href="#table">table</a></b> tool.
+</p>
+<p class="definition">
+    dialog = new ContentTools.TableDialog(table)
+</p>
+<p>
+    Create a new <b>TableDialog</b>, if a <b>table</b>&nbsp;element is provided, the dialog allows the user to update the table, if not the dialog allows the user to insert a new table.
+</p>
+<p class="definition">
+    dialog.save()
+</p>
+<p>
+    Save the table. This method triggers the <b>save</b> event against the <b>dialog.</b>&nbsp;The event is triggered with the following arguments:
+</p>
+<ul>
+    <li>
+        <b>body</b> the number of columns in the body of the table.
+    </li>
+    <li>
+        <b>foot</b> whether the table has a footer <b>&lt;tfoot&gt;</b>.
+    </li>
+    <li>
+        <b>head</b> whether the table has a head <b>&lt;thead&gt;</b>.
+    </li>
+</ul>
+<h3 id="video-dialog">
+    VideoDialog (inherits from <a href="#dialog-ui">DialogUI</a>)
+</h3>
+<p>
+    The <b>VideoDialog</b> class provides a <b>dialog</b> that allows a <i>YouTube</i> or <i>Vimeo</i> video to be inserted, alternatively a user can enter any URL and an <b>&lt;iframe&gt;</b> will be inserted with the specified URL as its source. The <b>dialog</b> is associated with the <b><a href="#tools">video</a></b> tool.
+</p>
+<p class="definition">
+    dialog = new ContentTools.VideoDialog()
+</p>
+<p>
+    Create a new <b>VideoDialog</b>.
+</p>
+<p class="definition">
+    dialog.clearPreview()
+</p>
+<p>
+    Clear the preview video from the <b>dialog</b>.
+</p>
+<p class="definition">
+    dialog.preview(url)
+</p>
+<p>
+    Show a preview video in the <b>dialog</b> for the given <b>url</b>.
+</p>
+<p class="definition">
+    dialog.save()
+</p>
+<p>
+    Save the video. This method triggers the <b>save</b> event against the <b>dialog.</b>&nbsp;The event is triggered with the URL for the video.
+</p>
+<p>
+    The URL may differ from that entered by the user if it is a&nbsp;<i>YouTube</i> or <i>Vimeo</i> URL, in which case it may be altered to match the required format to embed such videos <i>(see the the&nbsp;<b><a href="#functions">getEmbedVideoURL</a></b> function)</i>.
+</p>
+
+    </section>
+
+                </div>
+            </main>
+        
+
+        
+            <footer class="page__footer">
+                <div class="page__container">
+                    <p class="sign-off">
+                        ContentTools was created by Anthony Blackshaw - a founder of and
+                        developer at <a href="http://getme.co.uk">getme</a>.
+                        The project is maintained by the crew at <a href="https://github.com/orgs/GetmeUK/people">getme</a>
+                        along with <a href="https://github.com/GetmeUK/ContentTools/graphs/contributors">our contributors</a>.
+                        The code is licensed under <a href="https://github.com/GetmeUK/ContentTools/blob/master/LICENSE">MIT</a>.
+                    </p>
+                    <p class="social-handles">
+                        <a href="https://twitter.com/contenttoolsjs" class="[ twitter-follow-button ]  [ social-handles__handle ]" data-show-count="true" data-dnt="true">Follow @contenttoolsjs</a>
+                        <a href="https://github.com/getmeuk/ContentTools" class="[ github-button ]  [ social-handles__handle ]" data-count-href="/getmeuk/ContentTools/stargazers" data-count-api="/repos/getmeuk/ContentTools#stargazers_count" data-count-aria-label="# stargazers on GitHub" aria-label="Star getmeuk/ContentTools on GitHub">Star</a>
+                        <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+                        <script async defer id="github-bjs" src="https://buttons.github.io/buttons.js"></script>
+                    </p>
+                </div>
+            </footer>
+        
+
+        <script src="/scripts/site.js"></script>
+        
+            <script src="/scripts/prism.js"></script>
+        
+        
+    </body>
+</html>

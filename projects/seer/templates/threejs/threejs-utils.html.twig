@@ -1,0 +1,302 @@
+<script>
+
+function clamp( num, min, max) {
+  return Math.min(Math.max(num, min), max);
+};
+
+function getPixel( imagedata, x, y ) {
+
+    var position = ( x + imagedata.width * y ) * 4, data = imagedata.data;
+    return { r: data[ position ], g: data[ position + 1 ], b: data[ position + 2 ], a: data[ position + 3 ] };
+}
+
+function lerp( a,  b,  f) {
+    return a + f * (b - a);
+}
+
+function serialize(obj) {
+  var str = [];
+  for (var p in obj)
+    if (obj.hasOwnProperty(p)) {
+      str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
+    }
+  return str.join("&");
+}
+
+function clampValue( val, minval, maxval ) {
+    return Math.min(Math.max(minval, val), maxval);
+}
+
+/* Animates a Vector3 to the target */
+function animateVector3(object3DToAnimate, targetP, targetR, options){
+    options = options || {};
+
+    // get targets from options or set to defaults
+    var to = targetP || THREE.Vector3(),
+        easing = options.easing || TWEEN.Easing.Quadratic.In,
+        duration = options.duration || 100;
+    var rQ = new THREE.Quaternion().setFromEuler(new THREE.Euler( 0.0, targetR, 0.0));
+    var sQ = object3DToAnimate.quaternion.clone();
+
+    // create the tween
+    var tweenVector3 = new TWEEN.Tween(object3DToAnimate.position)
+        .to({ x: to.x, y: to.y, z: to.z, }, duration)
+        .easing(easing)
+        .onUpdate(function(d) {
+
+            THREE.Quaternion.slerp(sQ, rQ, object3DToAnimate.quaternion, d);
+            if(options.update){ 
+                options.update(d);
+            }
+         })
+        .onComplete(function(){
+          if(options.callback) options.callback();
+        });
+        
+    // start the tween
+    tweenVector3.start();
+    // return the tween in case we want to manipulate it later on
+    return tweenVector3;
+}
+
+/* Animates a Vector3 to the target */
+function animateVector4(object3DToAnimate, targetP, targetR, options){
+    options = options || {};
+
+    // get targets from options or set to defaults
+    var to = targetP || THREE.Vector3(),
+        easing = options.easing || TWEEN.Easing.Quadratic.In,
+        duration = options.duration || 100;
+    var rQ = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3( 0, 0, 1 ), targetR);
+    var sQ = object3DToAnimate.quaternion.clone();
+
+    // create the tween
+    var tweenVector3 = new TWEEN.Tween(object3DToAnimate.position)
+        .to({ x: to.x, y: to.y, z: to.z, }, duration)
+        .easing(easing)
+        .onUpdate(function(d) {
+
+            THREE.Quaternion.slerp(sQ, rQ, object3DToAnimate.quaternion, d);
+            if(options.update){ 
+                options.update(d);
+            }
+         })
+        .onComplete(function(){
+          if(options.callback) options.callback();
+        });
+        
+    // start the tween
+    tweenVector3.start();
+    // return the tween in case we want to manipulate it later on
+    return tweenVector3;
+}
+
+
+function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function colorTexture(width, height, color ) {
+
+    // create a buffer with color data
+    var size = width * height;
+    var data = new Uint8Array( 3 * size );
+
+    var r = Math.floor( color.r * 255 );
+    var g = Math.floor( color.g * 255 );
+    var b = Math.floor( color.b * 255 );
+
+    for ( var i = 0; i < size; i ++ ) {
+
+        var stride = i * 3;
+        data[ stride ] = r;
+        data[ stride + 1 ] = g;
+        data[ stride + 2 ] = b;
+    }
+
+    // used the buffer to create a DataTexture
+    var texture = new THREE.DataTexture( data, width, height, THREE.RGBFormat );
+    texture.needsUpdate = true;
+    return texture;    
+}
+
+// This allows for up to 10000 uids to be generated within a millisecond.
+var ms2uid = {
+    uidtimes: []
+};
+
+function UID() {
+    var ms = Date.now().toString();
+    // This checks in case its called many times within 1 millisecond
+    while(ms2uid.uidtimes.includes(ms)) { ms = ms - 1; }
+    ms2uid.uidtimes.push(ms);
+    return ms;
+}
+
+function UIDFromNode( node ) {
+    var xvalue = Math.round( node.position.x );
+    var zvalue = Math.round( node.position.z ) * 10000;
+    return xvalue + zvalue;
+}
+
+function msToTime(secs) {
+    var duration = secs * 1000.0;
+    var milliseconds = parseInt((duration % 1000) / 100),
+    
+    seconds = parseInt((duration / 1000) % 60),
+    minutes = parseInt((duration / (1000 * 60)) % 60),
+    hours = parseInt((duration / (1000 * 60 * 60)) % 24);
+
+  hours = (hours < 10) ? "0" + hours : hours;
+  minutes = (minutes < 10) ? "0" + minutes : minutes;
+  seconds = (seconds < 10) ? "0" + seconds : seconds;
+
+  return hours + ":" + minutes + ":" + seconds + "." + milliseconds;
+}
+
+function loadScript( scriptfile, okfunc, failfunc ) {
+
+    jQuery.ajax({
+        type: "GET",
+        url: scriptfile,
+        dataType: "script",
+        error: function (httprequest, textStatus, errorThrown) {
+            failfunc(httprequest, status, errorThrown);
+        },
+        success: function() {
+            okfunc(scriptfile);
+        }
+    });    
+}
+
+function loadRunScript(url, callback) {
+
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+
+    if (script.readyState) { //IE
+        script.onreadystatechange = function () {
+            if (script.readyState == "loaded" || script.readyState == "complete") {
+                script.onreadystatechange = null;
+                callback();
+            }
+        };
+    } else { //Others
+        script.onload = function () {
+            callback();
+        };
+    }
+
+    script.src = url;
+    document.getElementById("script-injection").appendChild(script);
+}
+
+// Converts from degrees to radians.
+Math.radians = function(degrees) {
+  return degrees * Math.PI / 180;
+};
+ 
+// Converts from radians to degrees.
+Math.degrees = function(radians) {
+  return radians * 180 / Math.PI;
+};
+
+function isParentType( obj, str ) {
+    //console.log("isParentType:", obj, str);
+    if(obj && obj.userData && obj.userData.parentType) {
+        if(obj.userData.parentType.indexOf(str) > -1)
+            return true;
+    }
+    return false;
+}
+
+function sleep(ms, f) {
+    return(
+        setTimeout(f, ms)
+    )
+}
+
+function flipMeshFaces( mesh ) {
+    if ((mesh instanceof THREE.Mesh) && (mesh.geometry.faces)) {  
+        for ( var i = 0; i < mesh.geometry.faces.length; i ++ ) {
+
+            var face = mesh.geometry.faces[ i ];
+            var temp = face.a;
+            face.a = face.c;
+            face.c = temp;
+
+        }
+
+        mesh.geometry.computeFaceNormals();
+        mesh.geometry.computeVertexNormals();
+
+        var faceVertexUvs = mesh.geometry.faceVertexUvs[ 0 ];
+        for ( var i = 0; i < faceVertexUvs.length; i ++ ) {
+
+            var temp = faceVertexUvs[ i ][ 0 ];
+            faceVertexUvs[ i ][ 0 ] = faceVertexUvs[ i ][ 2 ];
+            faceVertexUvs[ i ][ 2 ] = temp;
+
+        }
+    }    
+}
+
+
+// -------------------------------------------------------
+
+function movePivot(sceneTrav, v) {
+
+    sceneTrav.traverse( function( node ) {
+
+        if (node instanceof THREE.Mesh) {
+            node.geometry.translate(0, v, 0);
+        }
+    });
+}
+
+var utils = {
+    
+    // Get the mesh node, extract it from parent and add as new object to scene
+    getObjectMesh: function ( obj, meshName ) {
+        var mesh = obj.getObjectByName(meshName);
+        if(mesh) {
+            THREE.SceneUtils.detach( mesh, models, scene );
+        }
+        return mesh;
+    },
+
+    getAllMeshesWithName: function ( obj, name ) {
+
+        var allobjs = [];
+        for(var i=0; i< obj.children.length; i++) {
+            if(obj.children[i].name.indexOf(name) != -1) {
+                //console.log("Child name: ", obj.children[i]);
+                allobjs.push(obj.children[i]);
+            }
+        }
+        return allobjs;
+    },
+
+    hideAllMeshesWithName: function ( obj, name, vis=false ) {
+
+        var allobjs = [];
+        for(var i=0; i< obj.children.length; i++) {
+            if(obj.children[i].name.indexOf(name) != -1) {
+                obj.children[i].visible = vis;
+            }
+        }
+    },
+
+    getParentObject: function ( pid, ptype ) {
+
+        if(!threeMapping.hasOwnProperty(ptype)) return;
+        var collection = threeMapping[ptype];
+        for(var i=0; i<collection.children.length; i++) {
+            if(collection.children[i].userData.uid == pid)
+                return collection.children[i];
+        }
+        return null;
+    }
+};
+
+</script>

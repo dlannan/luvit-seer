@@ -1,0 +1,20 @@
+
+{% if uri.query('getlist') or GETLIST %}
+
+{% if not TOFFSET %}
+{% set TOFFSET = uri.query('TOFFSET') %}
+{% endif %}
+{% if not TLIMIT %}
+{% set TLIMIT = uri.query('TLIMIT') %}
+{% endif %}
+
+<div id="gallery-list" class="row row-cards">
+{% set query = ((("[sql-table json]select uid,name,data,editname,edittime from icons limit " ~ TLIMIT) ~ " offset ") ~ TOFFSET) ~ "[/sql-table]" %}
+{% set results = (query|shortcodes)| json_decode %}
+
+{% for icon in results %}
+{% include "html/project/gallery-card.html.twig" with {icon: icon} %}
+{% endfor %}
+</div>
+
+{% endif %}

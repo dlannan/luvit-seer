@@ -1,0 +1,624 @@
+<!DOCTYPE HTML>
+<html lang="en" prefix="og: http://ogp.me/ns#">
+
+    <head>
+        <title>Adding new tools tutorial · ContentTools</title>
+
+        <!-- Meta data -->
+        <meta http-equiv="x-ua-compatible" content="IE=edge">
+        <meta
+            name="description"
+            content="Tools, the toolbox and the tool shelf. A short how-to guide to adding and
+managing tools."
+            >
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta name="author" content="Anthony Blackshaw">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+        <meta name="HandheldFriendly" content="true">
+        <meta name="MobileOptimized" content="320">
+        <meta name="csrf-token" content="1471948612##dd70e21129f2e27dee30b9ab2b7072ae4d712a0f">
+        
+        
+
+        <!-- Favicon -->
+        <link rel="icon" type="image/x-icon" href="/favicon.ico">
+        <link rel="apple-touch-icon-precomposed" href="/favicon-152.png">
+        <meta name="msapplication-TileColor" content="#2980b9">
+        <meta name="msapplication-TileImage" content="/favicon-144.png">
+
+        
+            <!-- Twitter card -->
+            <meta name="twitter:card" content="summary">
+            <meta name="twitter:url" content="http://getcontenttools.com/tutorials/adding-new-tools">
+            <meta name="twitter:title" content="Adding new tools tutorial · ContentTools">
+            <meta name="twitter:description" content="Tools, the toolbox and the tool shelf. A short how-to guide to adding and
+managing tools.">
+            <meta name="twitter:image" content="http://getcontenttools.com//images/twitter-card-logo.png">
+        
+
+        
+            <!-- Facebook Open Graph -->
+            <meta property="og:type" content="website">
+            <meta property="og:site_name" content="ContentTools">
+            <meta property="og:title" content="Adding new tools tutorial">
+            <meta property="og:description" content="Tools, the toolbox and the tool shelf. A short how-to guide to adding and
+managing tools.">
+            <meta property="og:url" content="http://getcontenttools.com/tutorials/adding-new-tools">
+            <meta property="og:image" content="http://getcontenttools.com/images/facebook-share-logo.png">
+            <meta property="og:image:type" content="image/png">
+            <meta property="og:image:width" content="470">
+            <meta property="og:image:height" content="250">
+        
+
+        <!-- CSS -->
+        <link rel="stylesheet" type="text/css" href="/styles/site.css">
+        
+        
+
+        <!-- Google Analytics -->
+        
+            <script>
+              (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+              (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+              m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+              })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+              ga('create', 'UA-66406639-1', 'auto');
+              ga('send', 'pageview');
+            </script>
+        
+    </head>
+
+    <body class="page">
+        
+            <header class="page__header">
+                <nav class="site-nav">
+                    <a href="/" class="site-nav__logo">
+                        <img
+                            src="/images/logo@2x.png"
+                            alt="ContentTools logo"
+                            width="168"
+                            height="36"
+                            >
+                    </a>
+                    <div class="site-nav__toggle">
+                        <span class="sr-only">Toggle navigation</span>
+                    </div>
+                    <ul class="site-nav__items">
+                        <li class="site-nav__item">
+        
+        <a
+            href="/demo"
+            class="
+                site-nav__link
+                
+                "
+            >
+            Demo
+        </a>
+    </li>
+                        <li class="site-nav__item">
+        
+        <a
+            href="/getting-started"
+            class="
+                site-nav__link
+                
+                "
+            >
+            Getting&nbsp;started
+        </a>
+    </li>
+                        <li class="site-nav__item">
+        
+        <a
+            href="/tutorials"
+            class="
+                site-nav__link
+                site-nav__link--you-are-here
+                "
+            >
+            Tutorials
+        </a>
+    </li>
+                        <li class="site-nav__item">
+        
+        <a
+            href="/api"
+            class="
+                site-nav__link
+                
+                "
+            >
+            API
+        </a>
+    </li>
+                        <li class="site-nav__item">
+        
+        <a
+            href="https://github.com/GetmeUK"
+            class="
+                site-nav__link
+                
+                "
+            >
+            GitHub
+        </a>
+    </li>
+                    </ul>
+                </nav>
+                <div class="page__container">
+                    
+    <div data-editable data-name="page__heading">
+
+<h1 class="page__heading">
+    Adding new tools
+</h1>
+
+    </div>
+
+                    
+    <div data-editable data-name="page__opening">
+
+<p class="page__opening">
+    Tools, the toolbox and the tool shelf. A short how-to guide to adding and managing tools.
+</p>
+
+</div>
+
+                </div>
+            </header>
+        
+
+        
+            <main class="page__main">
+                <div class="page__container">
+                    
+    <section
+        class="[ page__content ]  [ formatted ]"
+        data-editable
+        data-name="page__content"
+        >
+
+<h2 class="ce-element ce-element--type-text" id="tools-the-toolbox-and-the-tool-shelf">
+    Tools, the toolbox and the tool shelf
+</h2>
+<p class="ce-element ce-element--type-text">
+    We can all agree I went too far with the metaphors (so let's not dwell) - basically a <b>tool</b> is a class that provides some editing function (for example making the currently-selected text bold). The <b>toolbox</b>&nbsp;is a draggable box that contains a set of icons, each representing a tool, and the <b>tool shelf</b> is a registry of tools that allows a tool to be referenced and retrieved using its name.
+</p>
+<p class="note ce-element ce-element--type-text">
+    The code examples in this tutorial use CoffeeScript as this is the recommended language to use to extend the editor, but it is possible to use JavaScript if you prefer. I'd also recommend you familiarize yourself with the project's build process now if you're not already familiar (see the repo).
+</p>
+<h2 class="ce-element ce-element--type-text" id="adding-a-time-tool">
+    Adding a &lt;time&gt; tool
+</h2>
+<p class="ce-element ce-element--type-text">
+    For the purpose of the tutorial we're going to create a tool that wraps selected content using the HTML5 <b>&lt;time&gt;</b>&nbsp;tag. When a user chooses our time tool from the toolbox they'll be asked to enter a <a href="http://www.w3.org/TR/html-markup/datatypes.html#common.data.datetime"><i>datetime</i> value</a> in a floating dialog (in the same way the link tool asks the user for a URL).
+</p>
+<h3 class="ce-element ce-element--type-text" id="creating-a-time-tool-class">
+    Creating the Time tool class
+</h3>
+<p class="ce-element ce-element--type-text">
+    All tools are static classes that inherit from the <b><a href="/api/content-tools#tool">ContentTools.Tool</a></b> class. Those included in the ContentTools library are namespaced under <b>ContentTools.Tools</b>&nbsp;(this isn't necessary for tools you create unless they become part of the library).
+</p>
+<p class="ce-element ce-element--type-text">
+    Create a file named <b>time-tool.coffee</b> and add the following outline code for our <b>TimeTool</b>&nbsp;class:
+</p>
+<pre class="ce-element ce-element--type-pre-text"><code class="language-coffeescript">class TimeTool extends ContentTools.Tools.Bold
+
+    # Insert/Remove a &lt;time&gt; tag.
+
+    # Register the tool with the toolshelf
+    ContentTools.ToolShelf.stow(@, 'time')
+
+    # The tooltip and icon modifier CSS class for the tool
+    @label = 'Time'
+    @icon = 'time'
+
+    # The Bold provides a tagName attribute we can override to make inheriting
+    # from the class cleaner.
+    @tagName = 'time'
+
+    @apply: (element, selection, callback) -&gt;
+        # Apply a &lt;time&gt; element to the specified element and selection
+
+    @getDatetime: (element, selection) -&gt;
+        # Return any existing `datetime` attribute for the element and selection</code>
+</pre>
+<p class="ce-element ce-element--type-text">
+    Notice that we're inheriting from the <b>Bold</b> tool here, this is a useful starting point as the <b>canApply</b> and <b>isApplied</b>&nbsp;class methods are already defined for us.&nbsp;<b>canApply</b>&nbsp;will return&nbsp;<b>true</b> if there is text selected,&nbsp;<b>isApplied</b>&nbsp;will return&nbsp;<b>true</b> if a <b>&lt;time&gt;</b> tag is already wrapped around all or some of the selected text. If&nbsp;<b>canApply</b>&nbsp;returns <b>false</b> then it holds that <b>isApplied</b> must also return&nbsp;<b>false</b>.
+</p>
+<p class="note ce-element ce-element--type-text">
+    I recommend reviewing the code for these class methods against the <b>Bold</b> tool class to familiarize yourself with their workings.
+</p>
+<h3 class="ce-element ce-element--type-text" id="asking-the-time">
+    Asking the time
+</h3>
+<p class="ce-element ce-element--type-text">
+    To be able to add a <b>&lt;time&gt;</b> tag we'll need to ask the user for a <i>datetime</i> value and for this we'll use an anchored dialog similar to the one used by the link tool. Anchored dialogs are positioned /anchored above &nbsp;the content they are related to.
+</p>
+<p class="ce-element ce-element--type-text">
+    Add the following code under the&nbsp;<b>Time</b> tool class:
+</p>
+<pre class="ce-element ce-element--type-pre-text"><code class="language-coffeescript">class TimeDialog extends ContentTools.LinkDialog
+
+    # An anchored dialog to support inserting/modifying a &lt;time&gt; tag
+
+    mount: () -&gt;
+        super()
+
+        # Update the name and placeholder for the input field provided by the
+        # link dialog.
+        @_domInput.setAttribute('name', 'time')
+        @_domInput.setAttribute('placeholder', 'Enter a date/time/duration...')
+
+        # Remove the new window target DOM element
+        @_domElement.removeChild(@_domTargetButton);
+
+    save: () -&gt;
+        # Save the datetime.
+        detail = {
+            datetime: @_domInput.value.trim()
+        }
+        @dispatchEvent(@createEvent('save', detail))</code>
+</pre>
+<p class="ce-element ce-element--type-text">
+    We're inheriting from the&nbsp;<b>LinkDialog</b> class which&nbsp;accepts an <b>initialValue</b> argument that pre-populates its input field. Since our tool also allows users to <i>update</i> the&nbsp;<i>datetime</i> value of an existing <b>&lt;time&gt;</b> element, we need to be able to read the the <i>datetime</i> value from any existing element. Change the&nbsp;<b>getDateTime</b> class method against the <b>TimeTool</b> class to:
+</p>
+<pre class="ce-element ce-element--type-pre-text"><code class="language-coffeescript">@getDatetime(element, selection) -&gt;
+    # Return any existing `datetime` attribute for the element and selection
+
+    # Find the first character in the selected text that has a `time` tag and
+    # return its `datetime` value.
+    [from, to] = selection.get()
+    selectedContent = element.content.slice(from, to)
+    for c in selectedContent.characters
+
+        # Does this character have a time tag applied?
+        if not c.hasTags('time')
+            continue
+
+        # Find the time tag and return the datetime attribute value
+        for tag in c.tags()
+            if tag.name() == 'a'
+                return tag.attr('href')
+
+        return ''</code>
+</pre>
+<h3 class="ce-element ce-element--type-text" id="applying-time">
+    Applying &lt;time&gt;
+</h3>
+<p class="ce-element ce-element--type-text">
+    Back to our <b>TimeTool</b> class now and the <b>apply</b> class method.
+</p>
+<pre class="ce-element ce-element--type-pre-text"><code class="language-coffeescript">@apply: (element, selection, callback) -&gt;
+    # Apply the tool to the specified element and selection
+
+    # Store the selection state of the element so we can restore it once done
+    element.storeState()
+
+    # Add a fake selection wrapper to the selected text so that it appears to be
+    # selected when the focus is lost by the element.
+    selectTag = new HTMLString.Tag('span', {'class': 'ct--puesdo-select'})
+    [from, to] = selection.get()
+    element.content = element.content.format(from, to, selectTag)
+    element.updateInnerHTML()
+
+    # Set-up the dialog
+    app = ContentTools.EditorApp.get()
+
+    # Add an invisible modal that we'll use to detect if the user clicks away
+    # from the dialog to close it.
+    modal = new ContentTools.ModalUI(transparent=true, allowScrolling=true)
+
+    modal.addEventListener 'click', () -&gt;
+        # Close the dialog
+        @unmount()
+        dialog.hide()
+
+        # Remove the fake selection from the element
+        element.content = element.content.unformat(from, to, selectTag)
+        element.updateInnerHTML()
+
+        # Restore the real selection
+        element.restoreState()
+
+        # Trigger the callback
+        callback(false)
+
+    # Measure a rectangle of the content selected so we can position the
+    # dialog centrally to it.
+    domElement = element.domElement()
+    measureSpan = domElement.getElementsByClassName('ct--puesdo-select')
+    rect = measureSpan[0].getBoundingClientRect()
+
+    # Create the dialog
+    dialog = new TimeDialog(@getDatetime(element, selection))
+    dialog.position([
+        rect.left + (rect.width / 2) + window.scrollX,
+        rect.top + (rect.height / 2) + window.scrollY
+        ])
+
+    # Listen for save events against the dialog
+    dialog.addEventListener 'save', (ev) -&gt;
+        # Add/Update/Remove the &lt;time&gt;
+        datetime = ev.detail().datetime
+
+        # Clear any existing link
+        element.content = element.content.unformat(from, to, 'time')
+
+        # If specified add the new time
+        if datetime
+            time = new HTMLString.Tag('time', {datetime: datetime})
+            element.content = element.content.format(from, to, time)
+
+        element.updateInnerHTML()
+        element.taint()
+
+        # Close the modal and dialog
+        modal.unmount()
+        dialog.hide()
+
+        # Remove the fake selection from the element
+        element.content = element.content.unformat(from, to, selectTag)
+        element.updateInnerHTML()
+
+        # Restore the real selection
+        element.restoreState()
+
+        # Trigger the callback
+        callback(true)
+
+    app.attach(modal)
+    app.attach(dialog)
+    modal.show()
+    dialog.show()</code>
+
+
+</pre>
+<p class="ce-element ce-element--type-text">
+    That's quite a bit of code to take in, let's pull out the interesting parts and look at them in a bit more detail.
+</p>
+<p class="ce-element ce-element--type-text">
+    When the user selects the time tool we want them to be able to continue to see the selection of text they are applying the tool&nbsp;to. However when the user selects the dialog's <i>datetime</i> input field the existing selection will be lost because the focus will transfer to the input. To solve this we wrap the selected text in a <b>&lt;span&gt;</b> tag with the CSS modifier class&nbsp;<b>ct--puesdo-select</b> to ensure&nbsp;it remains highlighted.
+</p>
+<pre class="ce-element ce-element--type-pre-text"><code class="language-coffeescript">    ...
+
+    # Add a fake selection wrapper to the selected text so that it appears to be
+    # selected when the focus is lost by the element.
+    selectTag = new HTMLString.Tag('span', {'class': 'ct--puesdo-select'})
+    [from, to] = selection.get()
+    element.content = element.content.format(from, to, selectTag)
+    element.updateInnerHTML()
+
+    ...</code>
+</pre>
+<p class="ce-element ce-element--type-text">
+    We also want our <b>TimeDialog</b> to appear above our selected content, to achieve this we query the bounding rectangle for the selected text and take the center as the position to anchor our dialog.
+</p>
+<pre class="ce-element ce-element--type-pre-text"><code class="language-coffeescript">    ...
+
+    # Measure a rectangle of the content selected so we can position the
+    # dialog centrally to it.
+    domElement = element.domElement()
+    measureSpan = domElement.getElementsByClassName('ct--puesdo-select')
+    rect = measureSpan[0].getBoundingClientRect()
+
+    # Create the dialog
+    dialog = new TimeDialog(@getDatetime(element, selection))
+    dialog.position([
+        rect.left + (rect.width / 2) + window.scrollX,
+        rect.top + (rect.height / 2) + window.scrollY
+        ])
+
+    ...</code>
+</pre>
+<p class="ce-element ce-element--type-text">
+    Finally we need to wrap our text in a new&nbsp;<b>&lt;time&gt;</b> tag -&nbsp;<i>or update/remove an existing <b>&lt;time&gt;</b> tag</i>. We start by removing any existing <b>&lt;time&gt;</b> tag from the selection, then providing a <i>datetime</i> value has been set we add a new <b>&lt;time&gt;</b> tag. Using this approach, if no <i>datetime</i> value is set, the <b>&lt;time&gt;</b> tag is removed.
+</p>
+<pre class="ce-element ce-element--type-pre-text"><code class="language-coffeescript">    ...
+
+    # Listen for save events against the dialog
+    dialog.addEventListner 'save', (ev) -&gt;
+        # Add/Update/Remove the &lt;time&gt;
+        datetime = ev.detail().datetime
+
+        # Clear any existing link
+        element.content = element.content.unformat(from, to, 'time')
+
+        # If specified add the new time
+        if datetime
+            time = new HTMLString.Tag('time', {datetime: datetime})
+            element.content = element.content.format(from, to, time)
+
+        element.updateInnerHTML()
+        element.taint()
+
+    ...</code>
+
+</pre>
+<h2 class="ce-element ce-element--type-text" id="adding-a-tool-to-the-toolbox">
+    Adding a tool to the toolbox
+</h2>
+<p class="ce-element ce-element--type-text">
+    Right now, users can't access our brand spanking new time tool because it isn't in their toolbox. This is both a very simple task and a slightly fiddly one.
+</p>
+<p class="ce-element ce-element--type-text">
+    Let's start with the easy bit. The simplest way to add a new tool to the toolbox is to update the <a href="/api/content-tools#settings"><b>DEFAULT_TOOLS</b> settings</a>.&nbsp;For the moment we'll add our time tool to the end of the first group of tools. Add the following code as the last line in the <b>time-tool.coffee</b>:
+</p>
+<pre class="ce-element ce-element--type-pre-text"><code class="language-coffeescript">ContentTools.DEFAULT_TOOLS[0].push('time')</code>
+</pre>
+<p class="ce-element ce-element--type-text">
+    This adds the tool to the toolbox but visually we won't be able to see much because we haven't added a CSS class modifier for the tool. The tool's&nbsp;<b>@icon</b> attribute is used to build a modifier CSS class name for setting the tools icon. The modifier class in this case will be&nbsp;<b>ce-tool--time</b>. To define a style for the icon we need to update the <b>src/styles/ui/_toolbox.scss</b> file (or if you really wanted to you could create a new file, e.g <i>_custom-toolbox.scss</i>). In the <b>_toolbox</b>.scss file find the ce-tools section (it's at the end of the file) and add a definition for time:
+</p>
+<pre class="ce-element ce-element--type-pre-text"><code class="language-css">.ct-tool {
+
+    ...
+
+    &amp;--time:before { content: "\e94e"; }
+}</code>
+</pre>
+<p class="ce-element ce-element--type-text">
+    The <b>content</b> attribute determines the character that will be displayed by the tool which maps to an icon in our&nbsp;<b>icons.woff</b> font file. You'll have to take my word for it that <b>\e94e</b> is the correct one.
+</p>
+<h3 class="ce-element ce-element--type-text" id="now-the-fiddly-bit">
+    Now the fiddly bit
+</h3>
+<p class="ce-element ce-element--type-text">
+    The editor uses a font that has icons for characters - the font was created using the <a href="https://icomoon.io/">icomoon</a> font app. To recreate the font and add the additional time icon you'll need to open the <a href="https://icomoon.io/app/#/select">icomoon app</a> then select the following icons (the order is not important):
+</p>
+<ul class="ce-element ce-element--type-list">
+    <li class="ce-element ce-element--type-list-item">
+        <div class="ce-element ce-element--type-list-item-text">pencil</div>
+    </li>
+    <li class="ce-element ce-element--type-list-item">
+        <div class="ce-element ce-element--type-list-item-text">droplet</div>
+    </li>
+    <li class="ce-element ce-element--type-list-item">
+        <div class="ce-element ce-element--type-list-item-text">image</div>
+    </li>
+    <li class="ce-element ce-element--type-list-item">
+        <div class="ce-element ce-element--type-list-item-text">clock</div>
+    </li>
+    <li class="ce-element ce-element--type-list-item">
+        <div class="ce-element ce-element--type-list-item-text">undo</div>
+    </li>
+    <li class="ce-element ce-element--type-list-item">
+        <div class="ce-element ce-element--type-list-item-text">redo</div>
+    </li>
+    <li class="ce-element ce-element--type-list-item">
+        <div class="ce-element ce-element--type-list-item-text">cog</div>
+    </li>
+    <li class="ce-element ce-element--type-list-item">
+        <div class="ce-element ce-element--type-list-item-text">bin</div>
+    </li>
+    <li class="ce-element ce-element--type-list-item">
+        <div class="ce-element ce-element--type-list-item-text">list-numbered</div>
+    </li>
+    <li class="ce-element ce-element--type-list-item">
+        <div class="ce-element ce-element--type-list-item-text">list</div>
+    </li>
+    <li class="ce-element ce-element--type-list-item">
+        <div class="ce-element ce-element--type-list-item-text">list2</div>
+    </li>
+    <li class="ce-element ce-element--type-list-item">
+        <div class="ce-element ce-element--type-list-item-text">link</div>
+    </li>
+    <li class="ce-element ce-element--type-list-item">
+        <div class="ce-element ce-element--type-list-item-text">cross</div>
+    </li>
+    <li class="ce-element ce-element--type-list-item">
+        <div class="ce-element ce-element--type-list-item-text">checkmark</div>
+    </li>
+    <li class="ce-element ce-element--type-list-item">
+        <div class="ce-element ce-element--type-list-item-text">crop</div>
+    </li>
+    <li class="ce-element ce-element--type-list-item">
+        <div class="ce-element ce-element--type-list-item-text">bold</div>
+    </li>
+    <li class="ce-element ce-element--type-list-item">
+        <div class="ce-element ce-element--type-list-item-text">italic</div>
+    </li>
+    <li class="ce-element ce-element--type-list-item">
+        <div class="ce-element ce-element--type-list-item-text">pagebreak</div>
+    </li>
+    <li class="ce-element ce-element--type-list-item">
+        <div class="ce-element ce-element--type-list-item-text">table2</div>
+    </li>
+    <li class="ce-element ce-element--type-list-item">
+        <div class="ce-element ce-element--type-list-item-text">paragraph-left</div>
+    </li>
+    <li class="ce-element ce-element--type-list-item">
+        <div class="ce-element ce-element--type-list-item-text">paragraph-center</div>
+    </li>
+    <li class="ce-element ce-element--type-list-item">
+        <div class="ce-element ce-element--type-list-item-text">paragraph-right</div>
+    </li>
+    <li class="ce-element ce-element--type-list-item">
+        <div class="ce-element ce-element--type-list-item-text">indent-increase</div>
+    </li>
+    <li class="ce-element ce-element--type-list-item">
+        <div class="ce-element ce-element--type-list-item-text">indent-decrease</div>
+    </li>
+    <li class="ce-element ce-element--type-list-item">
+        <div class="ce-element ce-element--type-list-item-text">embed2</div>
+    </li>
+    <li class="ce-element ce-element--type-list-item">
+        <div class="ce-element ce-element--type-list-item-text">youtube2</div>
+    </li>
+    <li class="ce-element ce-element--type-list-item">
+        <div class="ce-element ce-element--type-list-item-text">clock</div>
+    </li>
+</ul>
+<p class="ce-element ce-element--type-text">
+    Once you've select these icons you then need to choose the <b>Generate font</b> button followed by the <b>Download</b> button. Extract the zip file you downloaded and in the <b>/fonts</b> folder there will be a file named <b>icomoon.woff.</b>&nbsp;Change the name of the file to <b>icon.woff</b> and replace the existing&nbsp;<b>icon.woff</b> in your project.
+</p>
+<h2 class="ce-element ce-element--type-text" id="putting-it-all-together">
+    Putting it all together
+</h2>
+<p class="ce-element ce-element--type-text">
+    If you've been following along at home then it's time to&nbsp;build the new improved version of the editor with our super-duper time tool. Open the&nbsp;<b>Gruntfile.coffee</b>&nbsp;file in the project root and add the following line to the <b>coffee &gt; build</b>&nbsp;task's <b>files</b>&nbsp;option <i>'path/to/file/time-tools.coffee'</i>&nbsp;as below:
+</p>
+<pre class="ce-element ce-element--type-pre-text"><code class="language-coffeescript">...
+
+coffee:
+    options:
+        join: true
+
+    build:
+        files:
+            'src/tmp/content-tools.js': [
+                'src/scripts/namespace.coffee'
+
+                ...
+
+                # Custom tools
+                'path/to/file/time-tools.coffee'
+
+...</code>
+</pre>
+<p class="ce-element ce-element--type-text">
+    Save your changes, and then at the command prompt enter:&nbsp;<code>grunt build</code>. All being well,&nbsp;<i>Grunt</i> will compile our CoffeeScript and SASS changes.
+</p>
+<p class="ce-element ce-element--type-text">
+    With your new <b>icons.woff</b> font,&nbsp;<b>content-tools.min.js</b> and and <b>content-tools.min.css</b> in place (either uploaded to your site or just overwritten locally), open an editable page in a new browser window, select some text and click the new time tool (which should appears as a clock face).
+</p>
+<p class="note ce-element ce-element--type-text">
+    By default the <b>&lt;time&gt;</b> element will probably not be styled, so if you want it to be visibly different from the surrounding content you'll need to add some CSS for that.
+</p>
+<p class="ce-element ce-element--type-text">
+    Here's one I made <time datetime="2015-08-24">earlier</time>.
+</p>
+
+    </section>
+
+                </div>
+            </main>
+        
+
+        
+            <footer class="page__footer">
+                <div class="page__container">
+                    <p class="sign-off">
+                        ContentTools was created by Anthony Blackshaw - a founder of and
+                        developer at <a href="http://getme.co.uk">getme</a>.
+                        The project is maintained by the crew at <a href="https://github.com/orgs/GetmeUK/people">getme</a>
+                        along with <a href="https://github.com/GetmeUK/ContentTools/graphs/contributors">our contributors</a>.
+                        The code is licensed under <a href="https://github.com/GetmeUK/ContentTools/blob/master/LICENSE">MIT</a>.
+                    </p>
+                    <p class="social-handles">
+                        <a href="https://twitter.com/contenttoolsjs" class="[ twitter-follow-button ]  [ social-handles__handle ]" data-show-count="true" data-dnt="true">Follow @contenttoolsjs</a>
+                        <a href="https://github.com/getmeuk/ContentTools" class="[ github-button ]  [ social-handles__handle ]" data-count-href="/getmeuk/ContentTools/stargazers" data-count-api="/repos/getmeuk/ContentTools#stargazers_count" data-count-aria-label="# stargazers on GitHub" aria-label="Star getmeuk/ContentTools on GitHub">Star</a>
+                        <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+                        <script async defer id="github-bjs" src="https://buttons.github.io/buttons.js"></script>
+                    </p>
+                </div>
+            </footer>
+        
+
+        <script src="/scripts/site.js"></script>
+        
+            <script src="/scripts/prism.js"></script>
+        
+        
+    </body>
+</html>

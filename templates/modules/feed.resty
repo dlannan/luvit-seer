@@ -1,0 +1,28 @@
+{(templates/modules/feed.html, {
+  id=0,
+  mediafeeds=[[
+<div class="container medium-insert-images paintarea">
+    <div class="image-container col-md-4">
+    <div class="feed-instagram" data-src="https://api.instagram.com/oembed?url=https://instagr.am/p/BKyGRRgAYk2/"></div>
+    </div>
+    <div class="image-container col-md-4">
+    <div class="feed-instagram" data-src="https://api.instagram.com/oembed?url=https://instagr.am/p/BKx6Z3bgdRy/"></div>
+    </div>
+    <div class="image-container col-md-4">
+    <div class="feed-instagram" data-src="https://api.instagram.com/oembed?url=https://instagr.am/p/BKTJeQYAMA4/"></div>
+    </div>
+    <div class="image-container col-md-4">
+    <div class="feed-instagram" data-src="https://api.instagram.com/oembed?url=https://instagr.am/p/BK5vsvLAqCi/"></div>
+    </div>
+    <div class="image-container col-md-4">
+    <div class="feed-instagram" data-src="https://api.instagram.com/oembed?url=https://instagr.am/p/BLtnrE0AK9D/"></div>
+    </div>
+    <div class="image-container col-md-4">
+    <div class="feed-instagram" data-src="https://api.instagram.com/oembed?url=https://instagr.am/p/BLtI9OQg2e2/"></div>
+    </div>
+    <button class="feed-like-button"> Add Like </button>
+    <div class="feed-like-data">Likes: 0 </div>
+</div>
+  ]]
+})}
+

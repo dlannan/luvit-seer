@@ -1,0 +1,42 @@
+<div id="wizard_assets" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="col-md-2 col-sm-12 col-xs-12 nopadding">
+                    <h1>Assets</h1>
+                </div>
+                <div class="col-md-5 col-sm-12 col-xs-12 nopadding" id="pasteTarget">
+                Click and paste here.
+                </div>
+                <div class="col-md-5 col-sm-12 col-xs-12 nopadding">
+                    <form id="website_info" method="POST" class="pull-right" role="form">
+                        <div class="input-group">
+                            <input type="text" class="assets-search form-control" placeholder="Search assets" >
+                            <select class="selectpicker" title="Asset size" data-style="btn" name="wizard_assets_size">
+                                <option data-content="Small<span class='label label-info'>511x511</span>" value="Small">Small</option>
+                                <option data-content="Medium<span class='label label-info'>768x768</span>" value="Medium">Medium</option>
+                                <option data-content="Large<span class='label label-info'>1024x1024</span>" value="Large">Large</option>
+                                <option data-content="XLarge<span class='label label-info'>2048x2048</span>" value="XLarge">XLarge</option>
+                            </select>             
+                            <div class="input-group-btn">
+                                <div class="btn btn-icon btn-sm btn-rounded btn-fill">
+                                    <label for="uploadFile"><span class="icon-file_upload"></span></label>
+                                    <input type="file" id="uploadFile"/>
+                                </div>
+                                <button id="wizard_assets_submit" class="btn btn-icon btn-sm btn-rounded btn-fill" type="submit" data-dismiss="modal">
+                                    <span class="icon-checkmark"></span>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div id="assets_view">
+                    {(templates/wizards/wizard_assets_view.html)}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

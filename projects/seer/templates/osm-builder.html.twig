@@ -1,0 +1,185 @@
+{% embed 'partials/base-builder.html.twig' %}
+
+	{% set collection = page.collection() %}
+	{% set base_url = page.url %}
+    {% set feed_url = base_url %}
+
+    {% if base_url == '/' %}
+        {% set base_url = '' %}
+    {% endif %}
+
+    {% if base_url == base_url_relative %}
+        {% set feed_url = base_url~'/'~page.slug %}
+    {% endif  %}
+
+	{% block content %}
+
+		{% include 'threejs/threejs-style-main.html.twig' %}
+
+		<div class="main-panel">
+			<div id="container">
+			</div>
+			<div id="select-wrap">
+				<div class="selection-slider">
+				</div>
+			</div>
+		</div>
+
+		{% include 'threejs/threejs-globals.html.twig' %}
+
+		{% include 'threejs/threejs-scripts-builder.html.twig' %}
+		{% include 'threejs/scene/scene-loader.html.twig' %}
+        
+		{% include 'threejs/threejs-osm.html.twig' %}
+		{% include 'threejs/threejs-tools.html.twig' %}
+
+		{% include 'threejs/fx/threejs-sky.html.twig' %}
+		{% include 'threejs/fx/threejs-ground.html.twig' %}		
+		{% include 'threejs/fx/threejs-materials.html.twig' %}
+        
+		<script>
+
+			if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+
+			{% include 'threejs/threejs-mode.html.twig' %}
+
+			{% include 'threejs/threejs-nodes.html.twig' %}
+			{% include 'threejs/threejs-ways.html.twig' %}
+			{% include 'threejs/threejs-select-objects.html.twig' %}
+
+			var parameters = {
+				inclination: 0.5,
+				azimuth: 0.0,
+				coverage: 0.5,
+				cloudHeight: 300.0
+			};
+
+			init();
+			animate();
+
+
+			function init() {
+
+				camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.3, 5500 );
+				camera.position.set( 0, 100, 0 );
+
+				//camera.setLens(20);
+				scene = new THREE.Scene();
+
+				container = document.getElementById( 'container' );
+				var w = container.offsetWidth;
+				var h = container.offsetHeight;
+
+				renderer = new THREE.WebGLRenderer();
+				renderer.shadowMapEnabled = true;
+    			renderer.shadowMapSoft = true;
+
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( w, h );
+				container.appendChild( renderer.domElement );
+
+				// Should enable/disable this when mode changes
+				renderer.domElement.addEventListener( 'mousemove', onMouseMove, false );
+				renderer.domElement.addEventListener( 'mousedown', onMouseClick, false );
+
+				clearScene();
+
+				var gui = new dat.GUI();
+
+				gui.add( parameters, 'inclination', -1, 1, .001 );
+				gui.add( parameters, 'azimuth', -0.5, 0.5, .001 );
+				gui.add( parameters, 'coverage', 0.0, 1, .001 );
+				gui.add( parameters, 'cloudHeight', 0.0, 500.0, .1 );
+
+				window.addEventListener( 'resize', onWindowResize, false );
+			}
+
+			// Completely clear out the scene
+			function clearScene() {
+
+				clearLookups();
+				clearAllObjects();
+
+				initSky();
+				initGround();
+
+				initTools();
+				finalizeTools();
+
+				mode.state = EditorMode.NONE;
+			}
+
+			function onWindowResize() {
+
+				var w = container.offsetWidth;
+				var h = container.offsetHeight;
+
+				camera.aspect = w / h;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( w, h );
+				render();
+			}
+
+			function animate() {
+
+				requestAnimationFrame( animate );
+
+				if(water) {
+				water.material.uniforms.time.value += 1.0 / 60.0;
+				water.material.uniforms.size.value = parameters.size;
+				water.material.uniforms.distortionScale.value = parameters.distortionScale;
+				water.material.uniforms.alpha.value = parameters.alpha;
+				}
+				
+				render();
+			}
+
+			function render() {
+				var delta = clock.getDelta();
+				if(sky) {
+					sky.material.uniforms.time.value = clock.elapsedTime * 0.2;
+					sky.material.uniforms.cloudHeight.value = parameters.cloudHeight;
+					sky.material.uniforms.coverage.value = parameters.coverage;
+					skyUpdate(parameters);
+				}
+
+				if(controls) {
+					mode.camera.lon = controls.lon;
+					mode.camera.lat = controls.lat;
+					controls.update(delta);
+				}
+
+				camera.getWorldDirection( cameraDir );
+				renderer.render( scene, camera );
+				
+				// update octree post render
+				// this ensures any objects being added
+				// have already had their matrices updated
+				octree.update();
+			}
+
+			function onMouseMove( event ) {
+
+				event.preventDefault();
+
+				mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+				mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+			}
+
+			function onMouseClick( event ) {
+
+				// Check mode, to see what the click 'means'
+				if(mode.state == EditorMode.ROTATE) {
+					mode.state = EditorMode.NONE;
+				}
+
+				if(mode.state == EditorMode.PLACE) {
+					mode.state = EditorMode.ROTATE;
+				}
+			}
+		</script>
+
+	{% endblock %}
+
+{% endembed %}

@@ -1,0 +1,9 @@
+         {% if loginrequired == true then %}
+         {(templates/wizards/wizard_login.js)}
+         {% end %}
+         {% if editing == true then %}
+         {(templates/tools/editorjs.html)}
+         {(templates/wizards/wizard_assets.js)}
+
+         {(templates/common/init.js)}
+         {% end %}

@@ -1,0 +1,10 @@
+{(templates/modules/image.html, {
+    id=0,
+    inputimage=[[
+<div class="container">
+    <div class="image-container col-md-12">
+        <img data-src="holder.js/700x450?auto=yes" />
+    </div>
+</div>
+    ]]
+})}

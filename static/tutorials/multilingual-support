@@ -1,0 +1,309 @@
+<!DOCTYPE HTML>
+<html lang="en" prefix="og: http://ogp.me/ns#">
+
+    <head>
+        <title>Multilingual support · ContentTools</title>
+
+        <!-- Meta data -->
+        <meta http-equiv="x-ua-compatible" content="IE=edge">
+        <meta
+            name="description"
+            content="Setting the editor's language and creating your own translations - a guide for the very talented among you who speak more than one language (hopefully at least one of them is English or this isn't going to help)."
+            >
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta name="author" content="Anthony Blackshaw">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+        <meta name="HandheldFriendly" content="true">
+        <meta name="MobileOptimized" content="320">
+        <meta name="csrf-token" content="1471948619##172a08f98a681f10aad20560459fb956cb79f814">
+        
+        
+
+        <!-- Favicon -->
+        <link rel="icon" type="image/x-icon" href="/favicon.ico">
+        <link rel="apple-touch-icon-precomposed" href="/favicon-152.png">
+        <meta name="msapplication-TileColor" content="#2980b9">
+        <meta name="msapplication-TileImage" content="/favicon-144.png">
+
+        
+            <!-- Twitter card -->
+            <meta name="twitter:card" content="summary">
+            <meta name="twitter:url" content="http://getcontenttools.com/tutorials/multilingual-support">
+            <meta name="twitter:title" content="Multilingual support · ContentTools">
+            <meta name="twitter:description" content="Setting the editor's language and creating your own translations - a guide for the very talented among you who speak more than one language (hopefully at least one of them is English or this isn't going to help).">
+            <meta name="twitter:image" content="http://getcontenttools.com//images/twitter-card-logo.png">
+        
+
+        
+            <!-- Facebook Open Graph -->
+            <meta property="og:type" content="website">
+            <meta property="og:site_name" content="ContentTools">
+            <meta property="og:title" content="Multilingual support">
+            <meta property="og:description" content="Setting the editor's language and creating your own translations - a guide for the very talented among you who speak more than one language (hopefully at least one of them is English or this isn't going to help).">
+            <meta property="og:url" content="http://getcontenttools.com/tutorials/multilingual-support">
+            <meta property="og:image" content="http://getcontenttools.com/images/facebook-share-logo.png">
+            <meta property="og:image:type" content="image/png">
+            <meta property="og:image:width" content="470">
+            <meta property="og:image:height" content="250">
+        
+
+        <!-- CSS -->
+        <link rel="stylesheet" type="text/css" href="/styles/site.css">
+        
+        
+
+        <!-- Google Analytics -->
+        
+            <script>
+              (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+              (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+              m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+              })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+              ga('create', 'UA-66406639-1', 'auto');
+              ga('send', 'pageview');
+            </script>
+        
+    </head>
+
+    <body class="page">
+        
+            <header class="page__header">
+                <nav class="site-nav">
+                    <a href="/" class="site-nav__logo">
+                        <img
+                            src="/images/logo@2x.png"
+                            alt="ContentTools logo"
+                            width="168"
+                            height="36"
+                            >
+                    </a>
+                    <div class="site-nav__toggle">
+                        <span class="sr-only">Toggle navigation</span>
+                    </div>
+                    <ul class="site-nav__items">
+                        <li class="site-nav__item">
+        
+        <a
+            href="/demo"
+            class="
+                site-nav__link
+                
+                "
+            >
+            Demo
+        </a>
+    </li>
+                        <li class="site-nav__item">
+        
+        <a
+            href="/getting-started"
+            class="
+                site-nav__link
+                
+                "
+            >
+            Getting&nbsp;started
+        </a>
+    </li>
+                        <li class="site-nav__item">
+        
+        <a
+            href="/tutorials"
+            class="
+                site-nav__link
+                site-nav__link--you-are-here
+                "
+            >
+            Tutorials
+        </a>
+    </li>
+                        <li class="site-nav__item">
+        
+        <a
+            href="/api"
+            class="
+                site-nav__link
+                
+                "
+            >
+            API
+        </a>
+    </li>
+                        <li class="site-nav__item">
+        
+        <a
+            href="https://github.com/GetmeUK"
+            class="
+                site-nav__link
+                
+                "
+            >
+            GitHub
+        </a>
+    </li>
+                    </ul>
+                </nav>
+                <div class="page__container">
+                    
+    <div data-editable data-name="page__heading">
+
+<h1 class="page__heading">
+    Multilingual support
+</h1>
+
+    </div>
+
+                    
+    <div data-editable data-name="page__opening">
+
+<p class="page__opening">
+    Setting the editor's language and creating your own translations. A guide for the very talented among you who speak more than one language (hopefully at least one of them is English or this isn't going to help).
+</p>
+
+</div>
+
+                </div>
+            </header>
+        
+
+        
+            <main class="page__main">
+                <div class="page__container">
+                    
+    <section
+        class="[ page__content ]  [ formatted ]"
+        data-editable
+        data-name="page__content"
+        >
+
+<h2 id="setting-the-editor-to-use-another-language">
+    Setting the editor to use another language
+</h2>
+<p>
+    First check the <b><a href="https://github.com/GetmeUK/ContentTools/tree/master/translations">translations</a></b> folder at the root of the project to see if the language you require is available (we're going to pretend it is for now and cover creating your own translations later). Each supported language is named after its 2 character <a href="https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes">ISO 639-1 code</a>, for example the <i>French</i> translations would be in the file named <i>fr.json</i>.
+</p>
+<p class="note">
+    At the time of writing the only translation available is&nbsp;<b>pig latin</b>&nbsp;(lp.json) -&nbsp;apollacray! However a number of people have kindly volunteered to provide translations for other languages so hopefully it won't take all that long before there are more available.
+</p>
+<p>
+    Languages have to be added to the <a href="/api/content-edit#translations">ContentEdit</a> namespace. This is done using the <code>ContentTools.addTranslations(language, translations)</code> function. The function expects a 2 character language code and an object mapping English strings to their translated counterparts. Our translations are held in a JSON file (e.g&nbsp;<i>fr.json</i>) and so we'll need to load them via an&nbsp;<i>XMLHttpRequest</i>&nbsp;like so:
+</p>
+<pre><code class="language-javascript">var editor, xhr;
+
+// Get the editor
+editor = new ContentTools.EditorApp.get();
+
+// Define our request for the French translation file
+xhr = new XMLHttpRequest();
+xhr.open('GET', '/translations/fr.json', true);
+
+function onStateChange (ev) {
+    var translations;
+    if (ev.target.readyState == 4) {
+        // Convert the JSON data to a native Object
+        translations = JSON.parse(ev.target.responseText);
+        
+        // Add the translations for the French language
+        ContentEdit.addTranslations('fr', translations);
+
+        // Set French as the editors current language
+        ContentEdit.LANGUAGE = 'fr';
+    }
+}
+
+xhr.addEventListener('readystatechange', onStateChange);
+
+// Load the language
+xhr.send(null);</code>
+</pre>
+<p>
+    Notice that we set the value of <code>ContentEdit.LANGUAGE</code>&nbsp;to <code>'fr'</code>, this changes the language for the editor. If there's no matching translation then the editor will fall back to returning the default English versions of strings.
+</p>
+<p class="note">
+    You could of course add the translations directly without loading a JSON file and if you're working locally you may want to do this as browsers won't allow an&nbsp;<i>XMLHttpRequest</i> to load local files (e.g using the file:// protocol).
+</p>
+<h3 id="roling-your-own-translations">
+    Rolling your own translations
+</h3>
+<p>
+    You may find that the language you want isn't yet supported (in fact right now you can be pretty sure of it), fortunately creating your own language file is straightforward (well provided you speak English and the language you want to translate to).
+</p>
+<p>
+    I recommend using an existing language file from the translations folder in the project root as a basis for your new file and simply replacing the translations. Once you've finished save your new language file using the relevant 2 character ISO 639-1 code.
+</p>
+<h2 id="using-translations-in-your-own-code">
+    Using translations in your own code
+</h2>
+<p>
+    If you want to translate content in your own code then you need to wrap the string you want to translate with&nbsp;<code>ContentEdit._(string)</code>, for example:
+</p>
+<pre><code class="language-javascript">@_domInput.setAttribute(
+    'placeholder', 
+    ContentEdit._('Enter a date/time/duration') + '...'
+    );</code>
+</pre>
+<p>
+    You'll also need to add a translation to the language files:
+</p>
+<pre>&gt;&gt; lp.json
+
+{
+    ...
+    "Enter a date/time/duration": "Enterway away ateday/imetay/urationday"
+}</pre>
+<p>
+    If you want to add dynamic content within a translated string then you can either break it down and add the pieces together, or preferably use a simple replace mechanism:
+</p>
+<pre><code class="language-javascript">// Breaking down a translation for dynamic content
+var welcome = ContentEdit._('Hello ') + user.firstName + ContentEdit._(', welcome back.');
+
+// Using replace (preferred option)
+var welcome = ContentEditor._('Hello #name#, welcome back.');
+welcome = welcome.replace('#name#', user.firstName);</code></pre>
+<p>
+    One last piece of advice; <i>translate at the point you add content to the DOM.</i>&nbsp;Storing the translated value of a string will mean the initial value cannot be easily retrieved, so for example:
+</p>
+<pre><code class="language-javascript">// Avoid doing this
+this._caption = ContentEdit._('Properties');
+@_domCaption.textContent = this._caption;
+
+// Instead do this
+this._caption = 'Properties';
+@_domCaption.textContent = ContentEdit._(this._caption);</code></pre>
+<p>
+    Au revoir.
+</p>
+
+    </section>
+
+                </div>
+            </main>
+        
+
+        
+            <footer class="page__footer">
+                <div class="page__container">
+                    <p class="sign-off">
+                        ContentTools was created by Anthony Blackshaw - a founder of and
+                        developer at <a href="http://getme.co.uk">getme</a>.
+                        The project is maintained by the crew at <a href="https://github.com/orgs/GetmeUK/people">getme</a>
+                        along with <a href="https://github.com/GetmeUK/ContentTools/graphs/contributors">our contributors</a>.
+                        The code is licensed under <a href="https://github.com/GetmeUK/ContentTools/blob/master/LICENSE">MIT</a>.
+                    </p>
+                    <p class="social-handles">
+                        <a href="https://twitter.com/contenttoolsjs" class="[ twitter-follow-button ]  [ social-handles__handle ]" data-show-count="true" data-dnt="true">Follow @contenttoolsjs</a>
+                        <a href="https://github.com/getmeuk/ContentTools" class="[ github-button ]  [ social-handles__handle ]" data-count-href="/getmeuk/ContentTools/stargazers" data-count-api="/repos/getmeuk/ContentTools#stargazers_count" data-count-aria-label="# stargazers on GitHub" aria-label="Star getmeuk/ContentTools on GitHub">Star</a>
+                        <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+                        <script async defer id="github-bjs" src="https://buttons.github.io/buttons.js"></script>
+                    </p>
+                </div>
+            </footer>
+        
+
+        <script src="/scripts/site.js"></script>
+        
+            <script src="/scripts/prism.js"></script>
+        
+        
+    </body>
+</html>

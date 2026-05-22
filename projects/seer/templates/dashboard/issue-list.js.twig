@@ -1,0 +1,142 @@
+<script>
+
+{% set query = "[sql-table json]select name,uid,desc from projects where users like Trevor ORDER BY modified[/sql-table]" %}
+{% set results = (query|shortcodes)| json_decode %}
+
+{% set iiquery = '[sql-table json]select * from issues [/sql-table]' %}
+{% set itable = ( iiquery|shortcodes ) | json_decode %}
+
+{% if not pageidx %}
+{% set pageidx = 1 %}
+{% endif %}
+
+{% if not limit %}
+{% set limit = 15 %}
+{% endif %}
+
+{% if not hidedetails %}
+{% set hidedetails = 'hidden' %}
+{% endif %}
+
+{% set projects = ["Project A", "Project B"] %}
+{% set projects = projects|merge({ (0): "SEER" }) %}
+{% for project in pilist %}
+{% set projects = projects|merge({ (project.uid): project.name}) %}
+{% endfor %}
+
+var allissues = [];
+var allprojects = {{ projects|json_encode }};
+
+function makeIssue( issue ) {
+    var issuehtml = '<tr class="project-issue-summary" id-data="'+issue.uid+'">';
+    issuehtml += '<td class="project-issue-open">'+issue.userid+'</td>';
+    issuehtml += '<td class="project-issue-open">'+issue.name+'</td>';
+    issuehtml += '<td class="issue-time text-nowrap project-issue-open">'+issue.updated+'</td>';
+    issuehtml += '<td class="project-issue-project" id-data-project="'+issue.projectid+'">'+allprojects[issue.projectid]+'</td>';
+    issuehtml += '<td class="project-issue-priority" id-data-priority="'+issue.priority+'"><i class="fe fe-info"></i></td>';
+    issuehtml += '<td class="project-issue-status" id-data-status="'+issue.status+'"><i class="fe fe-circle"></i></td>';
+    issuehtml += '<td class="deleteIssueRow" id-data="'+issue.uid+'" data-toggle="tooltip" title="Archive Issue">';
+    issuehtml += '<a href="#" class="icon"><i class="fe fe-database"></i></a>';
+    issuehtml += '</td>';
+    issuehtml += '</tr>';
+    issuehtml += '<tr class="project-issue-detail">';
+    issuehtml += '<td colspan="7">'+issue.issue+'</td>';
+    issuehtml += '</tr>';
+    return issuehtml;
+}
+
+var priorityicons = [
+  { icon:"fe fe-circle", color:"", title:"Ppriority Not Set" },
+  { icon:"fe fe-disc", color:"green", title:"Priority Idle" },
+  { icon:"fe fe-info", color:"blue", title:"Priority Normal" },
+  { icon:"fe fe-help-circle", color:"orange", title:"Priority Important" },
+  { icon:"fe fe-alert-octagon", color:"red", title:"Priority Critical" }
+];
+
+var statusicons = [
+  { icon:"fe fe-circle", color:"", title:"Issue Created" },
+  { icon:"fe fe-plus-circle", color:"blue", title:"Issue In Progress" },
+  { icon:"fe fe-x-circle", color:"red", title:"Issue Needs Attention!" },
+  { icon:"fe fe-minus-circle", color:"orange", title:"Issue Needs Review" },
+  { icon:"fe fe-check-circle", color:"green", title:"Issue Complete" }
+];
+
+function makeIssueIcon( statusicon ) {
+  var html = '<i class="' + statusicon.icon + '" style="color: '+ statusicon.color;
+  html = html + '" data-toggle="tooltip" data-placement="top" title="' + statusicon.title;
+  html = html + '"></i>';
+  return html;
+}
+
+function ProjectIssuesCheckStatus() {
+      
+  $(".project-issue-status").each( function() {
+
+    // Set initially to nothing
+    $(this).html( makeIssueIcon( statusicons[0] ));
+    if( $(this).attr("id-data-status") ) {
+      var status = parseInt($(this).attr("id-data-status"));
+      if( status >= 1 && status <= 4 ) {
+        $(this).html( makeIssueIcon( statusicons[status] ));
+      }
+    }
+  });
+}
+
+function ProjectIssuesCheckPriority() {
+      
+  $(".project-issue-priority").each( function() {
+
+    // Set initially to nothing
+    $(this).html( makeIssueIcon( priorityicons[0] ));
+    var status = parseInt($(this).attr("id-data-priority"));
+    if( status >= 1 && status <= 4 ) {
+      $(this).html( makeIssueIcon( priorityicons[status] ));
+    }
+  });
+}
+
+function UpdateIssues(page, limit) {
+
+  $('#issues-tablebody').empty();
+  var issuecount = allissues.length;
+  if(page < 1) page = 1;
+
+  var maxpage = Math.floor( issuecount/limit) + 1;
+  if(page > maxpage) page = maxpage;
+
+  var endidx = page * limit;
+  var startidx = endidx - limit;
+  var ii = 0;
+
+  allissues.sort(function(a,b){return new Date(b.updated) - new Date(a.updated);});
+  for(var i =0; i< issuecount; i++) {
+    var issue = allissues[i];
+    if((ii >= startidx) && (ii < endidx) && (issue.severity < 1)) {
+      var html = makeIssue(issue);
+      $('#issues-tablebody').append(html);
+    }
+    if(issue.severity < 1) ii++;
+  }
+
+  ProjectIssuesCheckStatus();
+  ProjectIssuesCheckPriority();
+
+  $(".project-issue-detail").hide(); 
+  $(".project-issue-open").click( function() {
+    $(this).parent().next().toggle();
+  });
+
+  var lastissue = endidx;
+  if( ii < lastissue ) lastissue = ii;
+  $("#issues-pages").text( (startidx + 1) + " - " + lastissue + " of " + issuecount + " issues");
+  return page;
+};
+
+$(document).ready(function() {
+    var page = parseInt('{{ pageidx }}');
+    var limit = parseInt('{{ limit }}');
+
+    UpdateIssues(page, limit);
+});
+</script>

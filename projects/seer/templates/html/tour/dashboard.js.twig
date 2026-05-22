@@ -1,0 +1,42 @@
+<script>
+
+const tourSteps = new Driver();
+
+$(document).ready(function() {
+
+    var id = "{{ grav.uri.query('tour') }}";
+    function startTour(e) {
+        if(e) e.stopPropagation();
+        
+        var pageurl = '{{page.url}}';
+        if( pageurl == '/' ) {
+            {% include "html/tour/dashboard-home.js.twig" %}
+            tourSteps.start();
+        }
+        else if( pageurl.startsWith('/projects') ) {
+            {% include "html/tour/dashboard-projects.js.twig" %}
+            tourSteps.start();
+        }
+        else if( pageurl.startsWith('/project') ) {
+            {% include "html/tour/dashboard-project.js.twig" %}
+            tourSteps.start();
+        }
+        else if( pageurl.startsWith('/issues') ) {
+            {% include "html/tour/dashboard-issues.js.twig" %}
+            tourSteps.start();
+        }
+        else if( pageurl.startsWith('/gallery') ) {
+            {% include "html/tour/dashboard-gallery.js.twig" %}
+            tourSteps.start();
+        }
+        else if( pageurl.startsWith('/documentation') ) {
+            {% include "html/tour/dashboard-docs.js.twig" %}
+            tourSteps.start();
+        }
+    }
+
+    $("#dashboard-tour").on('click', function(e) { startTour(e); });
+    if(id != '') startTour();
+});
+
+</script>

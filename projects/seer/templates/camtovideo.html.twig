@@ -1,0 +1,334 @@
+{% set selectedobject =  grav.uri.query('object') %}
+{% set sceneid = grav.uri.query('sceneid')  %} 
+{% set projectid = grav.uri.query('projectid')  %} 
+{% set viewmode = grav.uri.query('viewmode')  %} 
+{% set cameraeffect = grav.uri.query('cameraeffect') %}
+
+{% embed 'partials/base-nonav.html.twig' with { 'sceneid': sceneid, 'projectid': projectid } %}
+
+	{% set collection = page.collection() %}
+	{% set base_url = page.url %}
+    {% set feed_url = base_url %}
+
+    {% if base_url == '/' %}
+        {% set base_url = '' %}
+    {% endif %}
+
+    {% if base_url == base_url_relative %}
+        {% set feed_url = base_url~'/'~page.slug %}
+    {% endif  %}
+
+	{% block content %}
+
+		{% set userok = (config.plugins.login.enabled and grav.user.authorize('site.login')) %}
+		{% set tokenok = uri.query('token') == "123456Token" %}
+		{# <script>console.log("Token:", "{{tokenok}}");</script> #}
+		{% if userok or tokenok %}
+		{% include 'threejs/threejs-style-main.html.twig' %}
+
+		<div class="loading">Loading&#8230;</div>
+
+		<div id="sensor-status" class="sensor-summary">
+		<div class="row">
+		<div class="col-sm-2"><p>&nbspSENSOR: {{ viewmode }}</p></div>
+		<div id="sensorTilt" class="col-sm-1"><p>AZ: 0</p></div>
+		<div id="sensorHeading" class="col-sm-1"><p>HDG: 000</p></div>
+		<div id="sensorAltitude" class="col-sm-1"><p>ALT: 0</p></div>
+		<div id="sensorSpeed" class="col-sm-1"><p>SPD: 0</p></div>
+		<div id="status-datain" class="col-sm-1"><p>DI:</p></div>
+		<div id="status-dataout" class="col-sm-1"><p>D0:</p></div>
+		<div id="status-simtime" class="col-sm-2"><p>SIM: 00:00:00</p></div>
+		<div id="status-realtime" class="col-sm-2"><p>TIME: 00:00:00</p></div>
+		</div>
+		</div>
+
+<div class="container-fluid allchannels">
+  	<div class="row mainrow">
+	</div>
+</div>
+		{% endif %}
+
+		{% include 'threejs/threejs-scripts.html.twig' %}
+        {% include 'threejs/fx/threejs-scripts-fx.html.twig' %}
+
+		{% include 'threejs/scene/scene-loader.html.twig' %}
+		{% include 'threejs/scene/scene-loader-anim.html.twig' %}
+		{% include 'sim/net-websocket.html.twig' %}
+		{% include 'threejs/threejs-mode-statemgr.html.twig' %}
+
+		{% include 'threejs/threejs-globals.html.twig' %}
+		{% include 'threejs/threejs-globals-sim.html.twig' %}
+
+		{% include 'threejs/fx/threejs-sky.html.twig' %}
+		{% include 'threejs/fx/threejs-ground.html.twig' %}		
+		{% include 'threejs/fx/threejs-materials.html.twig' %}
+		<script>
+
+			if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+
+			{% include 'controllers/scenegraph-update.html.twig' %}
+			{% include 'controllers/scenegraph-render.html.twig' %}
+			{% include 'controllers/link-childobject.html.twig' %}
+
+			{% include 'modules/environments.html.twig' %}
+
+			{% include 'threejs/threejs-mode.html.twig' %}
+
+			{% include 'states/state-defaultSimState.html.twig' %}
+			{% include 'threejs/threejs-select-objects.html.twig' %}
+
+			{% include 'sensors/threejs-sensors.html.twig' %}
+			{% include 'threejs/threejs-nodes.html.twig' %}
+			{% include 'threejs/threejs-ways.html.twig' %}
+
+			{% include 'threejs/threejs-events.html.twig' %}
+
+			{% include 'modules/vehicle-engine.html.twig' %}
+			{% include 'threejs/fx/threejs-effects.html.twig' %}
+			{% include 'threejs/threejs-camview.html.twig' %}
+
+			{% set query = ("[sql-table json]select * from scenes where sceneid = '" ~ sceneid ) ~ "' limit 1[/sql-table]" %}
+			{% set scene = ((query|shortcodes) | json_decode)[0] %}
+			{% if scene.models %}
+			{% set modelmodule = ('modules/' ~ scene.models) ~ '.html.twig' %}
+			{% include modelmodule %}
+			{# {% include 'modules/os-test-pedestrian.html.twig' %} #}
+			{# {% include 'modules/os-test-soccer.html.twig' %} #}
+			{% endif %}
+
+			function loadAnimation(url) {}
+
+			var initDone = false;
+            var vidcapture;
+
+			function init() {
+
+				mappedChannels = {};
+				createScene(true); 		// Scene with depth scene
+
+				addColumn( 0, 12 );
+				addCanvasToColumn( 0, 0 );
+
+				var viewmode = "{{ viewmode }}";
+
+				// AA needs to be done before camera abberations are made. AA can be various types as needed.
+				//renderEffectPass = applyAntiAliasing( composer );
+				var cameraeffect = "{{ cameraeffect }}";
+
+				mapCanvasToCamera( 0, 0, viewmode, cameraeffect ); 
+				mappedChannels[0].active();
+
+				clearScene();
+				window.addEventListener( 'resize', onWindowResize, false );
+
+				mouseMove = false;
+				mode.camera.control = ControlMode.NONE;
+				$("#select-obj").hide();
+				$("#select-spline").hide();
+				initDone = true;
+
+				skyParams( { value: 12.00 } );
+				LinkCameraToObject(0, {{selectedobject}});
+			}
+
+			// Completely clear out the scene
+			function clearScene() {
+
+				clearLookups();
+				clearAllObjects();
+
+				initSky();
+				//initGround();
+
+				initTools();
+				finalizeTools();
+
+				nodes.visible = false;
+				ways.visible = false;
+				
+				mode.state = EditorMode.NONE;
+			}
+
+
+			function onMouseClick( event ) {
+
+				mouseMove = false;
+				// console.log("clicked: ", mode.state);
+				stateManager.MouseEvent( event );
+			}
+
+			function onMouseUp( event ) {
+
+				// check object is spline
+				stateManager.MouseEvent( event );
+
+				mouseMove = false;
+			}
+
+			function onKeyDown( event ) {
+
+				if(event.key === "Shift") { 
+					shiftPressed = true; 
+					//console.log("SHIFT PRESSED");
+				}
+			}
+
+			function onKeyUp( event ) {
+
+				// console.log("KEY RAISED", event);
+				
+				if(event.key === "Shift") { 
+					shiftPressed = false; 
+					//console.log("SHIFT RELEASED");
+				}
+			}			
+
+			function onWindowResize() {
+
+				$('canvas').each( function() {
+					fitToContainer($(this).get(0));
+				});
+
+				render();
+				console.log("Resizing...");
+			}
+
+			// Reorganize the rendering with the new layout.
+			//     Each layout is fixed with 4 views. 1 large and 3 small in most cases with the exception
+			//     of all four the same size.
+			function onSensorLayout() {
+
+			}
+
+			// Render all the view channels per camera 
+			function renderMultiViews() {
+
+				$('.view').each( function( idx, obj ) {
+
+					var width = $(obj).outerWidth();
+					var height = $(obj).outerHeight();
+
+					// set the viewport
+					var seerCam = mappedChannels[idx];
+					if(seerCam) {
+						seerCam.active();
+						seerCam.w = width;
+						seerCam.h = height;
+						renderer.setViewport(0, 0, width, height);
+						if(seerCam.hasOwnProperty('effectUpdate') && seerCam.effectUpdate != undefined)
+							seerCam.effectUpdate( seerCam.renderEffectPass, simstate.deltat, seerCam );
+						
+						if(seerCam.hasOwnProperty('cameraUpdate') && seerCam.cameraUpdate != undefined)
+							seerCam.cameraUpdate( seerCam );
+					} 
+
+					camera.aspect = width / height;
+					camera.updateProjectionMatrix();
+
+					composer.render(scene, camera);
+				});
+			}
+
+			function animate() {
+
+				requestAnimationFrame( animate );
+
+				if(water) {
+					water.material.uniforms.time.value += 1.0 / 60.0;
+					water.material.uniforms.size.value = parameters.size;
+					water.material.uniforms.distortionScale.value = parameters.distortionScale;
+					water.material.uniforms.alpha.value = parameters.alpha;
+				}
+				render();
+			}
+
+			function render() {
+
+				if(initDone === false) return;
+				
+				simstate.deltat = clock.getDelta();
+				simstate.realt = simstate.realt + simstate.delta * 1000.0;				
+
+				stateManager.Update(simstate.deltat);
+				updateAnims(simstate.deltat);			
+
+				if(sky) {
+					//sky.material.uniforms.time.value = simstate.realt * 0.0002;
+					sky.material.uniforms.time.value = simstate.simt * 0.0002;
+					sky.material.uniforms.cloudHeight.value = parameters.cloudHeight;
+					sky.material.uniforms.coverage.value = parameters.coverage;
+					skyUpdate(parameters);
+				}
+
+				if(ocean) {
+					ocean.material.uniforms.sunDirection.value.copy( dirLight.position ).normalize();
+					ocean.material.uniforms.time.value += simstate.delta * 0.2;
+				}
+
+				if(controls) {
+					mode.camera.lon = controls.lon;
+					mode.camera.lat = controls.lat;
+					controls.update(simstate.delta);
+				}
+
+				//camera.getWorldDirection( cameraDir );
+				//camera.updateProjectionMatrix();
+
+				if((selectEditorObj != -1) && (mode.state == EditorMode.NONE)) {
+					handleObjectSelect( SceneGraph.findNodeByUid(selectEditorObj));
+				}
+
+				renderer.toneMappingExposure = Math.pow( 0.95, 4.0 );
+
+				//if(effectMode == "DEPTH") {
+				//	camera.far = 500.0;
+				//	depthEffect.uniforms.cameraNear = camera.near;
+				//	depthEffect.uniforms.cameraFar = camera.far;
+				//}
+
+				renderMultiViews();
+			
+				// update octree post render
+				// this ensures any objects being added
+				// have already had their matrices updated
+				if(useOctree) {
+					octree.update();
+				}
+
+				TWEEN.update();
+			}
+
+
+			// Watch the statemanager, when its good to start, initiate the rendering loop
+			stateManager.watch("ready", function (id, oldval, newval) {
+
+				console.log("stateManager.ready", newval);
+				if(newval == true) {
+
+					console.log("Starting simulation...");
+					CleanupLinkedEvents();
+					onWindowResize();
+					animate();
+					
+					simstate.mode = SimulationMode.PLAY;
+					startSim( {{ sceneid }}, function(data) {
+						simpleConnect();
+					});
+				}
+			});	
+
+			$(document).ready( function() {
+
+			    {% if sceneid  %}
+					scenestatus.scene = {{ sceneid }};
+				{% endif %}
+				// Should enable/disable this when mode changes
+				$(document.documentElement).keydown( onKeyDown );
+				$(document.documentElement).keyup( onKeyUp );
+			});
+
+		</script>
+
+	{% endblock %}
+
+{% endembed %}

@@ -1,0 +1,191 @@
+<script>
+
+//custom shader pass
+glowingEffect  = {
+	uniforms: {
+		"amount":   { value: 1.0 },
+		"color": { type: 'v3', value: new THREE.Vector3( 1, 0, 0 ) }
+	},
+	vertexShader: [
+		"varying vec3 vNormal;",
+		"void main() {",
+	    "	vNormal = normalize( normalMatrix * normal );",
+		"	vec4 mvPosition = modelViewMatrix * vec4(position, 1.0 );",
+    	"	gl_Position = projectionMatrix * mvPosition;",
+		"}"
+	].join( "\n" ),
+	fragmentShader: [
+		"varying vec3 vNormal;",
+		"uniform float amount;",
+		"uniform vec3 color;",
+		"void main() {",
+    	"	gl_FragColor = vec4( color, 1.0 ) * amount;",
+		"}"
+	].join( "\n" )
+};
+
+
+
+// Can take an incoming material and change it to have glowing shader
+function getGlowingMaterial( material ) {
+
+	// create custom material from the shader code above
+	//   that is within specially labeled script tags
+	var customMaterial = new THREE.ShaderMaterial( 
+	{
+	    uniforms: glowingEffect.uniforms,
+		vertexShader:   glowingEffect.vertexShader,
+		fragmentShader: glowingEffect.fragmentShader,
+		side: THREE.FrontSide,
+		blending: THREE.AdditiveBlending,
+		transparent: true
+	}   );	
+
+	return customMaterial;
+}
+
+
+function getEnvMap() {
+        
+    textureEquirec = new THREE.TextureLoader().load( "/assets/models/envmap.jpg" );				
+    textureEquirec.mapping = THREE.EquirectangularReflectionMapping;
+    textureEquirec.magFilter = THREE.LinearFilter;
+    textureEquirec.minFilter = THREE.LinearMipMapLinearFilter;
+    return textureEquirec;
+}
+
+function getRoughnessMap() {
+        
+    textureAomap = new THREE.TextureLoader().load( "/assets/models/aoMap.png" );				
+    textureAomap.magFilter = THREE.LinearFilter;
+    textureAomap.minFilter = THREE.LinearMipMapLinearFilter;
+    return textureAomap;
+}
+
+var simpleEnvMap;
+function checkSimpleEnvMap() {
+    if(simpleEnvMap === undefined) {
+        // env map
+        var path = "{{ theme_url }}/assets/images/cube/skyboxsun25deg/";
+        var format = '.jpg';
+        var urls = [
+            path + 'px' + format, path + 'nx' + format,
+            path + 'py' + format, path + 'ny' + format,
+            path + 'pz' + format, path + 'nz' + format
+        ];
+        simpleEnvMap = new THREE.CubeTextureLoader().load( urls );
+        console.log("SimpleEnvMap loaded.")
+    }    
+}
+
+
+function getSimpleEnvMap() {
+    checkSimpleEnvMap();
+    return simpleEnvMap;
+}
+
+function getCarPaint( col, metal = 0.16, reflect = 0.3, emap = 0.3 ) {
+	
+	return new THREE.MeshPhysicalMaterial({
+		opacity: 1.0,
+		vertexColors: false, 
+		color: new THREE.Color(col), 
+		emissive: new THREE.Color(0, 0, 0),
+		roughness: 0.17,
+		metalness: metal,
+		reflectivity: reflect,
+		clearCoat: 0.6,
+		clearCoatRoughness: 0.1,
+		envMap: getSimpleEnvMap(),
+		envMapIntensity: emap
+ 	});
+}
+
+var carmaterials = {
+	 'missing': new THREE.MeshPhysicalMaterial( { color: new THREE.Color(0xff00ff) }) ,
+	 'red-glass': new THREE.MeshPhysicalMaterial( {
+        color: new THREE.Color(0xdd0000),
+        envMap: getSimpleEnvMap(),
+        opacity: 0.3,
+        transparent: true}) ,
+	'black-glass-80': new THREE.MeshPhysicalMaterial( {
+        color: new THREE.Color(0x020202),
+        envMap: getSimpleEnvMap(),
+		reflectivity: 0.4,
+		roughness: 0.0,
+		envMapIntensity: 0.9,
+        opacity: 0.98,
+        transparent: true}) ,
+	'chrome': new THREE.MeshPhysicalMaterial({ 
+		color: new THREE.Color(0x888888), 
+		envMap: getEnvMap(),
+		envMapIntensity: 0.3,
+		roughness: 0.16,
+		metalness: 0.81 }),
+	'black-rough': new THREE.MeshPhysicalMaterial({
+		color: 0x000000 }),
+	'red-fun': getCarPaint(0x990000),
+	'silver-metal': getCarPaint('rgb(160, 160, 160)', 0.5, 0.5, 0.1),
+	'dark-metal': getCarPaint('rgb(20, 20, 20)'),
+	'green-metal': getCarPaint('rgb(3, 41, 6)'),
+	'green-racing': getCarPaint('rgb(1, 66, 37)'),			
+	'white-beige': getCarPaint('rgb(225,225,200)'),			
+	'black-metal': getCarPaint('rgb(2, 2, 2)'),
+	'white-soft': getCarPaint('rgb(200, 200, 200)'),
+	'blue-metal-dark': getCarPaint('rgb( 0, 5, 24)'),
+	'blue-metal': getCarPaint('rgb( 0, 15, 140)'),
+	'red-metal': getCarPaint('rgb( 119, 0, 2)'),
+	'white-metal': getCarPaint('rgb( 220, 220, 220)'), 
+	'yellow-metal': getCarPaint('rgb( 225, 219, 0)'),
+	'aluminum': new THREE.MeshPhysicalMaterial({ 
+		color: new THREE.Color(0xcccccc), 
+		envMap: getEnvMap(),
+		envMapIntensity: 0.1,
+		roughness: 0.16,
+		metalness: 0.81 }),
+	'white-rough': new THREE.MeshPhysicalMaterial({
+		color: new THREE.Color(0xdddddd),
+		envMap: getEnvMap(),
+		envMapIntensity: 0.1,
+		roughness: 0.7,
+		metalness: 0.2 }),
+	 'yellow-light': new THREE.MeshPhysicalMaterial( {
+        color: new THREE.Color(0xdddd00),
+        emissive: new THREE.Color(0xdddd00),
+		emissiveIntensity: 0.3 })
+};
+
+function updateMaterial( matname, material ) {
+
+	var mat = carmaterials[matname];
+	material.copy( carmaterials[matname] );
+}
+
+function getMaterialByName( name ) {
+	
+	for( var i in carmaterials ) {
+
+		var mat = carmaterials[i];
+		if( i.indexOf( name ) > -1 ) {
+			return mat;
+		}
+	}
+	return carmaterials['missing'];
+}
+
+function chooseMaterial( id, material ) {
+
+	var keys = Object.keys(carmaterials);
+	if(id) {
+		var name = keys[ (Math.abs(id) % 13) + 5 ];
+		//console.log("CHOOSING", name, carmaterials[name]);
+		updateMaterial(name, material);
+	}
+	else { 
+		var name = keys[getRandomInt(5, 17)];
+		//console.log("CHOOSING", name, carmaterials[name]);
+		updateMaterial(name, material);
+	}
+}
+
+</script>

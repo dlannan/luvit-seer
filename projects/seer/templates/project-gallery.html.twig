@@ -1,0 +1,115 @@
+{% embed 'partials/base-dashboard.html.twig' %}
+
+{% block content %}
+{% include 'dashboard/header.html.twig' %}
+
+{% set query = "[sql-table json]select uid from icons[/sql-table]" %}
+{% set icondb = (query|shortcodes)| json_decode %}
+{% set TLIMIT = 12 %}
+{% set TOFFSET = 1 %}
+{% set TMAX_PICS = icondb|length %}
+
+        <div class="my-3 my-md-5">
+          <div class="container">           
+
+            <div id="gallery-controls" class="page-header">
+              <h1 class="page-title">
+                Gallery
+              </h1>
+              <div id="gallery-page-stats" class="page-subtitle">1 - 12 of {{TMAX_PICS}} images</div>
+              <div class="page-options d-flex">
+
+<div class="btn-group">              
+  <label id="gallery-prev-page" class="btn btn-secondary issue-controls-align">
+    <i class="fe fe-chevron-left"></i>
+  </label>
+  <label id="gallery-next-page" class="btn btn-secondary mr-2 issue-controls-align">
+    <i class="fe fe-chevron-right"></i>
+  </label>                
+</div>  
+
+                <select class="form-control custom-select w-auto">
+                  <option value="asc">Newest</option>
+                  <option value="desc">Oldest</option>
+                </select>
+                <div class="input-icon ml-2">
+                  <span class="input-icon-addon">
+                    <i class="fe fe-search"></i>
+                  </span>
+                  <input type="text" class="form-control w-10" placeholder="Search photo">
+                </div>
+              </div>
+            </div>
+
+{% set vars = {'TLIMIT': TLIMIT, 'TOFFSET': TOFFSET, 'GETLIST': 'true'} %}
+{% include 'api-gallery.html.twig' with vars %}
+
+          </div>
+        </div>
+
+      <footer class="footer">
+        <div class="container">
+          <div class="row align-items-center flex-row-reverse">
+            <div class="col-auto ml-lg-auto">
+              <div class="row align-items-center">
+                <div class="col-auto">
+                </div>
+                <div class="col-auto">
+                </div>
+              </div>
+            </div>
+            <div class="col-12 col-lg-auto mt-3 mt-lg-0 text-center">
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+<script>
+
+function UpdateGallery( offset, limit )
+{
+    $.ajax({
+    url: '/api/gallery-list',
+    type: "get",
+    data: { 
+        TOFFSET: offset, 
+        TLIMIT: limit,
+        getlist: true
+    },
+    success: function(data) {
+        $('#gallery-list').html(data);
+        $('#gallery-page-stats').text( offset + " - " + (offset + limit - 1) + " of {{TMAX_PICS}} images");
+    },
+    error: function(xhr) {
+        //Do Something to handle error
+    }
+    });    
+}
+
+var toffset = {{TOFFSET}};
+var tlimit  = {{TLIMIT}};
+var tmax_pics = {{TMAX_PICS}};
+
+$(document).ready(function() {
+
+  $("#gallery-prev-page").click( function() {
+      toffset -= tlimit;
+      if(toffset < 1) toffset = 1;
+    UpdateGallery(  toffset, tlimit);
+  });
+
+  $("#gallery-next-page").click( function() {
+      if(toffset + tlimit > tmax_pics) return;
+      toffset += tlimit;
+    UpdateGallery(  toffset, tlimit);
+  });
+
+});
+
+</script>
+
+{% include 'dashboard/footer.html.twig' %}
+
+{% endblock %}
+{% endembed %}

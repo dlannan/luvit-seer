@@ -1,0 +1,28 @@
+
+<script>
+
+function initGround() {
+
+    if(!gridhelper) {
+        gridhelper = new THREE.GridHelper( 2000, 100 );
+        gridhelper.position.y = 0.0;
+        gridhelper.material.opacity = 0.5;
+        gridhelper.material.transparent = true;
+        editor.add( gridhelper );
+    }
+}
+
+function initOcean() {
+    // Add Ocean
+    {# ocean = new THREE.Ocean();
+    ocean.scale.setScalar( 450 );
+    env.add( ocean ); #}
+}
+
+function initGrass() {
+    // Add a root grass node
+    grass = new THREE.Group();
+    env.add(grass);
+}
+
+</script>

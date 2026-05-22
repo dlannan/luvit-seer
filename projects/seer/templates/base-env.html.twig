@@ -1,0 +1,512 @@
+
+{% set sceneid = grav.uri.query('sceneid')|default(0) %} 
+{% set projectid = grav.uri.query('projectid')|default(0) %} 
+
+{% embed 'partials/base.html.twig' with { 'sceneid': sceneid, 'projectid': projectid } %}
+
+	{% set collection = page.collection() %}
+	{% set base_url = page.url %}
+    {% set feed_url = base_url %}
+
+    {% if base_url == '/' %}
+        {% set base_url = '' %}
+    {% endif %}
+
+    {% if base_url == base_url_relative %}
+        {% set feed_url = base_url~'/'~page.slug %}
+    {% endif  %}
+
+	{% block content %}
+
+		{% if grav.user.authenticated == true %}
+		
+		{% include 'threejs/threejs-style-main.html.twig' %}
+		{% include 'threejs/scene/scenes.html.twig' %}
+
+<div class="container-fluid allchannels">
+  	<div class="row mainrow">
+	</div>
+</div>
+
+<div class="notify-topbar"></div>
+		{# <script>{% include 'layouts/channel-2x2.html.twig' %}</script> #}
+		{# <script>{% include 'layouts/channel-1main3right.html.twig' %}</script> #}
+		{# <script>{% include 'layouts/channel-1main3left.html.twig' %}</script> #}
+		{# <script>{% include 'layouts/channel-1main4bottom.html.twig' %</script>} #}
+		{# <script>{% include 'layouts/channel-1main6right.html.twig' %</script>} #}
+		{# <script>{% include 'layouts/channel-1main6left.html.twig' %}</script> #}
+		{# <script>{% include 'layouts/channel-1main.html.twig' %}</script> #}
+
+		{% include 'menus/popup-menu-main.html.twig'  with { 'sceneid': sceneid, 'projectid': projectid } %}
+		{% include 'menus/main-menu-handler.html.twig'  with { 'sceneid': sceneid, 'projectid': projectid } %}
+
+		{% endif %}
+
+		<div class="loading">
+			<div class="loadinglogo">
+			<div class="loadingspinner">
+			</div>
+			</div>
+		</div>
+
+		{% include 'threejs/threejs-scripts.html.twig' %}
+		{% include 'threejs/fx/threejs-scripts-fx.html.twig' %}
+
+		{% include 'threejs/scene/scene-loader.html.twig' %}
+		{% include 'threejs/scene/scene-loader-anim.html.twig' %}
+		{% include 'sim/net-websocket.html.twig'  with { 'sceneid': sceneid, 'projectid': projectid } %}
+
+		{% include 'scenarist/window-events.js.twig' with { 'sceneid': sceneid, 'projectid': projectid } %}
+		{% include 'threejs/threejs-mode-statemgr.html.twig' %}
+
+		{% include 'threejs/threejs-globals.html.twig' %}
+		{% include 'threejs/threejs-globals-sim.html.twig' %}
+
+		{% include 'threejs/fx/threejs-sky.html.twig' %}
+		{% include 'threejs/fx/threejs-ground.html.twig' %}
+		{% include 'threejs/fx/threejs-materials.html.twig' %}
+
+		{% include 'sensors/sensor-menu.html.twig' %}
+
+		<script>
+
+			if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+
+			// controllers
+			{% include 'controllers/scenegraph-update.html.twig' %}
+			{% include 'controllers/scenegraph-render.html.twig' %}
+			{% include 'controllers/link-childobject.html.twig' %}
+
+			{% include 'modules/environments.html.twig' %}
+			
+			{% include 'threejs/threejs-mode.html.twig' %}
+
+			{% include 'states/state-editorStates.html.twig' %}
+			{% include 'states/state-defaultSimState.html.twig' %}
+
+			{% include 'sensors/threejs-sensors.html.twig' %}
+			{% include 'threejs/threejs-nodes.html.twig' %}
+			{% include 'threejs/threejs-ways.html.twig' %}
+
+			{% include 'threejs/threejs-events.html.twig' %}
+
+			{% include 'threejs/threejs-select-panel.html.twig' %}
+			{% include 'threejs/threejs-select-objects.html.twig' %}
+
+			{% include 'threejs/fx/threejs-effects.html.twig' %}
+			
+			{% include 'modules/vehicle-engine.html.twig' %}
+
+			{% set query = ("[sql-table json]select * from scenes where sceneid = '" ~ sceneid ) ~ "' limit 1[/sql-table]" %}
+			{% set scene = ((query|shortcodes) | json_decode)[0] %}
+			{% if scene.models %}
+			{% set modelmodule = ('modules/' ~ scene.models) ~ '.html.twig' %}
+			{% include modelmodule %}
+			{# {% include 'modules/os-test-pedestrian.html.twig' %} #}
+			{# {% include 'modules/os-test-soccer.html.twig' %} #}
+			{% endif %}
+
+		</script>
+
+		<div id="script-injection">
+		</div>
+
+		<script>
+			var initDone = false;
+
+			function init() {
+
+				mappedChannels = {};
+
+				//TODO: Cleanup a little so that a "Main SEER Camera" is globally accessable 
+				cameras = {
+					ortho: new SEERCamera( CameraType.Ortho ),
+					persp: new SEERCamera( CameraType.Perspective ),
+				};
+
+				//camera.setLens(20);
+				createScene(true); 		// Scene with depth scene
+
+				addColumn( 0, 12 );
+				addCanvasToColumn( 0, 0 );
+
+				container = document.getElementById( 'container0' );
+				cameras.persp.makeRender( container, window.devicePixelRatio );
+				cameras.ortho.makeRender( container, window.devicePixelRatio );
+
+				cameras.persp.active();
+				mappedChannels[0] = cameras.persp;
+				mappedChannels[1] = cameras.ortho;
+				//mappedChannels[0].addDepth();
+
+				//cameras.persp.addSSAO();
+				//cameras.persp.addBloom();
+
+				var title = "{{ scene.name }}";
+				{# console.log("Title: ", title); #}
+				if( title == "Navy UAS 01" ) {
+					setColumnWidth(0, 12);
+
+					addColumn( 1, 3, 1 );
+					addCanvasToColumn( 1, 1 );
+					addCanvasToColumn( 2, 1 );
+					addCanvasToColumn( 3, 1 );
+					setCanvasNull( 3 );
+
+					addColumn( 2, 12, 1 );
+					addCanvasToColumn( 4, 2 );
+					setColumnHeight( 2, "33.2%");
+					var yoff = window.innerHeight * 0.332;
+					setColumnTop( 2, (window.innerHeight - yoff) + "px");
+					//$('#container2').parent().
+					onWindowResize();
+
+					mapCanvasToCamera( 1, 1, "ECHO" );
+					LinkCameraToObject( 1, 1590420059285 );
+					//mapCanvasToCamera( 2, 2, "TimeBearing" );
+					//LinkCameraToObject( 2, 1587805948972 );
+					// mapCanvasToCamera( 3, 3, "THERMAL" );
+					// LinkCameraToObject( 3, 1576758703443 );
+
+					mapCanvasToCamera( 4, 4, "RGB360" );
+					LinkCameraToObject( 4, 1590420019052 );
+
+					// Add sensor menus and borders
+					var newmenu = $("#sensor-menu").clone();
+					newmenu.attr("id", "sensor-menu4");
+					$('#container2').parent().append( newmenu );
+					initSensorMenu( $("#sensor-menu4 > nav" ) );
+					newmenu.show();					
+				}
+
+				clearScene();
+				window.addEventListener( 'resize', onWindowResize, false );
+
+				// Selector init - should move this.
+				//mode.state = EditorMode.NONE;
+				mouseMove = false;
+				$("#select-obj").hide();
+				$("#select-spline").hide();
+				initDone = true;
+
+				//addSplineObject();				
+				skyParams( { value: 12.00 } );
+			}
+
+			// Completely clear out the scene
+			function clearScene() {
+
+				clearAllObjects();
+
+				initSky();
+				initGround();
+				initGrass();
+
+				initTools();
+				finalizeTools();
+
+				//initSplines();
+			}
+
+			function onWindowResize() {
+
+				$('canvas').each( function() {
+					fitToContainer(this);
+				});
+
+				render();
+				console.log("Resizing...");
+			}
+
+			// Reorganize the rendering with the new layout.
+			//     Each layout is fixed with 4 views. 1 large and 3 small in most cases with the exception
+			//     of all four the same size.
+			function onSensorLayout() {
+
+			}
+
+			// Render all the view channels per camera 
+			function renderMultiViews() {
+
+				SceneGraph.sceneRender();
+				$('.view').each( function( idx, obj ) {
+
+					var width = $(obj).outerWidth();
+					var height = $(obj).outerHeight();
+
+					// set the viewport
+					var seerCam = mappedChannels[idx];
+					if(seerCam) {
+						seerCam.active();
+						seerCam.w = width;
+						seerCam.h = height;
+						renderer.setViewport(0, 0, width, height);
+						if(seerCam.effectUpdate) seerCam.effectUpdate( seerCam.renderEffectPass, simstate.deltat, seerCam );
+						if(seerCam.cameraUpdate) seerCam.cameraUpdate( seerCam, seerCam.objectlink );
+					} else {
+						cameras.persp.active();
+					}
+
+					seerCamera.camera.aspect = width / height;
+					seerCamera.camera.updateProjectionMatrix();
+
+					composer.render(scene, seerCamera.camera);
+
+					if(ocean.surface != undefined) {
+
+    					composer.renderToScreen = false;
+						renderOceanSpecial( scene, composer.renderer, seerCamera.camera );
+						composer.renderToScreen = true;
+					}
+
+				});
+				cameras.persp.active();
+			}
+
+			function animate() {
+
+				requestAnimationFrame( animate );
+
+				if(water) {
+					water.material.uniforms.time.value += 1.0 / 60.0;
+					water.material.uniforms.size.value = parameters.size;
+					water.material.uniforms.distortionScale.value = parameters.distortionScale;
+					water.material.uniforms.alpha.value = parameters.alpha;
+				}
+				
+				render();
+			}
+
+			function render() {
+
+				if(initDone === false) return;
+
+				simstate.deltat = clock.getDelta();
+
+				stateManager.Update(simstate.deltat);
+				SceneGraph.sceneUpdate(simstate.mode);
+				updateAnims(simstate.deltat);
+
+				if(mouse) {
+					mouse.diffx = 0;
+					mouse.diffy = 0;
+				}
+
+
+				if(sky) {
+					if(earth) {
+					sky.material.uniforms.time.value = clock.elapsedTime * 0.2;
+					sky.material.uniforms.cloudHeight.value = parameters.cloudHeight;
+					sky.material.uniforms.coverage.value = parameters.coverage;
+					}
+					skyUpdate(parameters);
+				}
+
+				if(controls) {
+					mode.camera.lon = controls.lon;
+					mode.camera.lat = controls.lat;
+
+					if(shiftPressed == true) {
+						controls.movementSpeed = 20;
+					} else {
+						controls.movementSpeed = 70;
+					}
+
+					controls.update(simstate.deltat);
+				}
+
+				camera.getWorldDirection( cameras.persp.dir );
+
+				//renderer.render( scene, camera );
+				//renderer.toneMappingExposure = Math.pow( 0.95, 4.0 );
+				
+				//composer.render();
+				renderMultiViews();
+				
+				// update octree post render
+				// this ensures any objects being added
+				// have already had their matrices updated
+				if(useOctree) {
+					octree.update();
+				}
+
+				TWEEN.update();
+			}
+
+			function onMouseMove( event ) {
+
+				event.preventDefault();
+
+				// Main window is _always_ channel 0 in the editor
+				var canvaswin = $('.view').get(0);
+				var mousex = ( event.clientX / $(canvaswin).outerWidth() ) * 2 - 1;
+				var mousey = - ( event.clientY / $(canvaswin).outerHeight() ) * 2 + 1;
+				
+				mouse.diffx = mouse.x - mousex;
+				mouse.x = mousex;
+				mouseMove = true;
+
+				mouse.diffy = mouse.y - mousey;
+				mouse.y = mousey;
+				mouseMove = true;
+			}
+
+			function onMouseClick( event ) {
+
+				mouseMove = false;
+				// console.log("clicked: ", mode.state);
+				stateManager.MouseEvent( event );
+			}
+
+			function onMouseUp( event ) {
+
+				// check object is spline
+				stateManager.MouseEvent( event );
+				mouseMove = false;
+			}
+
+			function onKeyDown( event ) {
+
+				if(event.key === "Shift") { 
+					shiftPressed = true; 
+					//console.log("SHIFT PRESSED");
+				}
+			}
+
+			function onKeyUp( event ) {
+
+				// console.log("KEY RAISED", event);
+				
+				if(event.key === "Shift") { 
+					shiftPressed = false; 
+					//console.log("SHIFT RELEASED");
+				}
+			}
+
+			window.onload = function(){
+
+				{% set query = ("[sql-table json]select * from projects where uid = '" ~ projectid ) ~ "' limit 1[/sql-table]" %}
+				{% set project = ((query|shortcodes) | json_decode)[0] %}
+
+				{% set query = ("[sql-table json]select * from scenes where sceneid = '" ~ sceneid ) ~ "' limit 1[/sql-table]" %}
+				{% set scene = ((query|shortcodes) | json_decode)[0] %}
+
+				{% set projectvalid = project and scene and uservalid %}
+
+				{% if projectvalid %}
+				{% else %}
+				window.location.href = "/projects";
+				{% endif %}
+				$('#top-menu').show();				
+
+				var tour = "{{ grav.uri.query('tour') }}";
+				if(tour) startTour();
+			};
+
+			// Watch the statemanager, when its good to start, initiate the rendering loop
+			stateManager.watch("ready", function (id, oldval, newval) {
+
+				console.log("stateManager.ready", newval);
+				if(newval == true) {
+
+					console.log("Starting simulation...");
+					onWindowResize();
+					animate();
+					
+					CleanupLinkedEvents();
+
+					// TODO: Move this to a controller or module!
+					var title = "{{ scene.name }}";
+				    {# console.log("Title: ", title); #}
+				    if( title == "Navy UAS 01" ) {
+					    var contacts = SensorContacts( 1590420575200 );
+					    pnlTimeBearing.setup( '#container2', 1590420575200, contacts );
+                    }
+
+                    {% set camquery = ( ("[sql-table json]select * from cameras where projectid = '" ~ projectid ) ~ "' and sceneid = '" ~ sceneid ) ~"' [/sql-table]" %}
+                    {% set cameradb = ((camquery|shortcodes) | json_decode)[0] %}
+                    //console.log("Damera DB: ", "{{ cameradb.position|string }}");
+					// If a saved camera exists, then load it into perp camera (will support others later)
+					{% if cameradb %}
+						var posstr = ("{{ cameradb.position }}").replace(/'/g, '"');
+						var pos = JSON.parse( posstr );
+						var pvec = new THREE.Vector3( pos.x, pos.y, pos.z );
+						var tarstr = ("{{ cameradb.target }}").replace(/'/g, '"');
+						var target = JSON.parse( tarstr );
+						//console.log("Controls:" + controls.lat + "   " + controls.lon);			
+
+						var tvec = new THREE.Vector3( target.x, target.y, target.z );
+						cameras.persp.camera.position.copy( pvec );
+						controls.lon = THREE.Math.radToDeg( Math.atan2( tvec.z, tvec.x ));
+						var hyp = Math.sqrt( tvec.x * tvec.x + tvec.z * tvec.z );
+						controls.lat = 90-THREE.Math.radToDeg( Math.atan2( hyp, tvec.y ));	
+						controls.update(0.16);		
+						//console.log("Controls:" + controls.lat + "   " + controls.lon);			
+					{% endif %}		
+				}
+				return newval;
+			});			
+
+			$(document).ready( function() {
+
+				// TODO: Move all this out. Very little is framework specific
+				init();
+
+			    {% if sceneid  %}
+					scenestatus.scene = {{ sceneid }};
+					loadGeneratedScene( function() {
+						// addObjectToSceneDepth(world.clone());
+					});
+                {% endif %}
+
+				// Should enable/disable this when mode changes
+				renderer.domElement.addEventListener( 'mousemove', onMouseMove, false );
+				renderer.domElement.addEventListener( 'mousedown', onMouseClick, false );
+				renderer.domElement.addEventListener( 'mouseup', onMouseUp, false );
+
+				$(document.documentElement).keydown( onKeyDown );
+				$(document.documentElement).keyup( onKeyUp );
+
+				$('#ex10').slider({ id: 'slider10',	min: 0,	max: 100, step: 1, value: 50 });	
+				$('#ex10').slider().on('slide', function( newval ) {
+					parameters.coverage = newval.value / 100.0;
+					parameters.cloudHeight = 300.0 + (newval.value * 2.0 - 100);
+				});
+
+				$('#menu-settings-grid').on('click', function(e) {
+					var grid = $('#grid-icon');
+					if( grid.hasClass('fa-square-o') ) {
+						grid.removeClass('fa-square-o');
+						grid.addClass('fa-th-large');
+						gridhelper.visible = true;
+					} else {
+						grid.addClass('fa-square-o');
+						grid.removeClass('fa-th-large');
+						gridhelper.visible = false;
+					}
+				});
+
+				$('#ex11').slider({ id: 'slider11',	min: 0,	max: 24, step: 0.1, value: 12,
+						rangeHighlights: [{ "start": 6, "end": 8, "class": "category1" },
+										{ "start": 18, "end": 20, "class": "category1" },
+										{ "start": 8, "end": 18, "class": "category2" } ]});	
+
+				$('#ex11').slider().on('slide', function( newval ) {
+
+					skyParams( newval );
+				}).data('slider');																			
+			});
+
+			window.onbeforeunload = function (e) {
+				//localStorage.setItem('cameraSaved', JSON.stringify(camera) );
+			};
+    		$('#scenarist-dulled').hide();
+			$('.nav-circlepop').fadeOut();
+		</script>
+
+		{% include 'panels/timebearing.html.twig' %}
+		{% include 'sensors/sensor-js.html.twig' %}
+
+	{% endblock %}
+
+{% endembed %}

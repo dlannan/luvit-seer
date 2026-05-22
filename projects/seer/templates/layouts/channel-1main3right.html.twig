@@ -1,0 +1,21 @@
+
+
+channelsUpdate = function( crect ) {
+
+    channels = [];
+    var ratio = 1.0 / renderer.getPixelRatio();
+    var wide = crect.width * ratio;
+    var high = crect.height * ratio;
+
+    var smallwidth = wide * 0.35;
+    var smallheight = high * 0.33334;
+
+    var mainwidth = wide - smallwidth;
+    var mainheight = high;
+    // Always push main channel in first!
+    channels.push( { top: 0, left: 0, width: mainwidth, height: mainheight } );
+
+    channels.push( { top: 0, left: wide - smallwidth, width: smallwidth, height: smallheight } );
+    channels.push( { top: smallheight, left: wide - smallwidth, width: smallwidth, height: smallheight } );
+    channels.push( { top: smallheight * 2.0, left: wide - smallwidth, width: smallwidth, height: smallheight } );
+}

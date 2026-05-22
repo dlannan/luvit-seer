@@ -1,0 +1,374 @@
+<script>
+// -------------------------------------------------------
+
+var APIKEY = "1234567";
+
+var msgVehicleInputs = {
+    cmd: "input",
+    vehicle: {
+        id: "{{ selectedobject }}",
+        steering: 0.0,
+        throttle: 0.0,
+        brake: 0.0
+    }
+};
+
+var msgUpdateAll = {
+    cmd: "updateall"
+};
+
+var msgSimulateAll = {
+    cmd: "simulateall"
+};
+
+var msgUpdateObject = {
+    cmd: "updateobject",
+    vehicle: {
+        id: ""
+    }
+};
+
+// -------------------------------------------------------
+
+var nokeys = false;
+//var url = "wss://sim.kakutai.com:3000/gr/vehicles";
+//var simUrl = "https://sim.kakutai.com:3000";
+
+var url = "ws://127.0.0.1:3000/gr/vehicles";
+var simUrl = "http://127.0.0.1:3000";
+var connection = undefined;
+var connectTrying = false;
+var vehicleListCounter = 0;
+
+// -------------------------------------------------------
+
+function getAvailableVehicle() {
+    
+    vehicleListCounter = 0;
+    {% set ppage = page.find('/assets/models') %}
+    {% set gloader = ppage.header.gloader %}
+
+    {% for env in ppage.children %}
+        {% set mediaasset = env.header.asset|striptags %}
+        // Add click for loading in the data
+        var data = {
+
+            name: "{{ env.header.name }}",
+            format: "{{ env.header.format }}",
+            json: "{{ env.header.json }}",
+            loadscene: "{{ env.header.loadscene }}",
+            url: "{{ env.media[mediaasset].url }}",
+            gloadscene: "{{ gloader }}"
+        };
+
+        loadScene( data, UID(), function(object) {
+            vehicleList[vehicleListCounter] = object;
+            vehicleListCounter = vehicleListCounter + 1;
+        });
+        
+    {% endfor %}    
+}
+
+// -------------------------------------------------------
+
+function applyVehicleColor(sceneTrav) {
+
+    {# sceneTrav.traverse( function( node ) {
+
+        if(node) {
+        if ( node.material ) { 
+            
+            if( node.material.name === "body" )
+            {
+                var choice = chooseMaterial();
+                node.material = choice.material;
+            }
+            else if( node.material.name === "interior" ||
+                node.material.name === "black" || 
+                node.material.name === "plastic" )
+            {
+                node.material = carmaterials[0].material;
+            }
+            else if( node.material.name === "glass" ||
+                node.material.name === "glassblk" )
+            {
+                node.material = carmaterials[1].material;
+            }
+            else if( node.material.name === "chrome" || 
+                node.material.name === "wheel" )
+            {
+                node.material = carmaterials[2].material;
+            }
+            else if ( node.material.name === 'glaslght' ) 
+            { 
+                node.material.emissive = new THREE.Color( 0xffffff );
+                node.material.emissiveMap = colorTexture( 16, 16, 0xffffff);
+            }  
+            else if ( node.material.name === "tyre" ) 
+            {
+                node.material = carmaterials[3].material;
+            }
+        }
+        }
+    }); #}
+}
+
+// -------------------------------------------------------
+
+function tryConnect() {
+    
+    connection = new WebSocket(url);
+}
+
+
+// -------------------------------------------------------
+
+function simpleConnect() {
+    
+    getAvailableVehicle();
+
+    if(connection !== undefined) {
+        connection.close();
+    }
+
+    tryConnect();
+    connection.onopen = function (evt) {
+
+        console.log("Connected to " + url);
+        connection.send( JSON.stringify(msgSimulateAll) );
+        connectTrying = false;
+    };
+
+    connectionError();
+    connectionMessage();
+}
+
+
+// -------------------------------------------------------
+
+function startWebSocket() {
+
+    getAvailableVehicle();
+
+    if(connection !== undefined) return;
+
+    connectTrying = true;
+    tryConnect();
+    if(connection === undefined) return;
+
+    connection.onopen = function (evt) {
+
+        console.log("Connected to " + url);
+        setInterval(update, 100);
+
+        update();
+
+        // Start message send - this is a request to begin recieving from host
+        //connection.send( JSON.stringify(msgUpdateAll) );
+        connection.send( JSON.stringify(msgSimulateAll) );
+        connectTrying = false;
+    };
+
+    // AVEV Commands are send here. Make sure your API key is set above!!
+    // Note: Usually you will send two commands:
+    //       1. Send Vehicle Inputs
+    //  There are other special commands we can provide, that extends this interaction
+    function update() {
+
+        if(nokeys == true) {
+            // idle down throttle.
+            if( msgVehicleInputs.vehicle.throttle > 0)
+                msgVehicleInputs.vehicle.throttle -= 0.1;
+            else
+                msgVehicleInputs.vehicle.throttle = 0;
+
+            msgVehicleInputs.vehicle.brake = 0;
+            msgVehicleInputs.vehicle.steering *= 0.95;
+
+            //console.log(msgVehicleInputs.vehicle.steering);
+        }
+        //console.log(msgVehicleInputs.vehicle.throttle, msgVehicleInputs.vehicle.steering);
+        if( connection !== undefined ) {
+            connection.send( JSON.stringify(msgVehicleInputs) );
+            nokeys = true;
+        }
+    }
+
+    connectionError();
+    connectionMessage();
+};
+
+function connectionError() {
+    connection.onerror = function (evt) {
+        console.error("Problem connecting to: " + url);
+        connection = undefined;
+
+        connectTrying = false;
+        if(connectTrying === false) {
+            connectTrying = true;
+            setTimeout(function() { tryConnect(); }, 5000);
+        }
+    };
+};
+
+function connectionMessage() {
+    // Recv response then act on it.
+    connection.onmessage = function (evt) {
+       
+        // console.log(evt);
+        var response = JSON.parse(evt.data);
+        if(response == undefined) return;
+       
+        // Update all assumes that the vehicles in the scene are
+        //   mapped to vehicles in the simulator. The simulator will
+        //   thow away any unknow vehicles that are not in the scene.
+        if(response.cmd === "updateall") {
+
+            for (var i=0; i<models.children.length; i++) {
+                
+                var obj = models.children[i];
+                var key = obj.userData.uid + '';
+                
+                if(key in response.vehicle ) {
+                    var pos = response.vehicle[obj.userData.uid].pos;
+                    var angle = response.vehicle[obj.userData.uid].angle;
+                    models.children[i].position.x = pos.x;
+                    models.children[i].position.y = pos.y;
+                    models.children[i].position.z = pos.z;
+
+                    if(angle) {
+                        models.children[i].rotation.y = angle;
+                    }
+                }
+            }
+        }
+
+        // Simulate is different to update
+        //   All vehicles are coming in from externally mapped ones 
+        //   If new vehicle is found, we randomly spawn one from a set
+        if(response.cmd === "simulateall") {
+            
+            var thisTime = appClock.getElapsedTime();
+
+            var vehicles = response.vehicle;
+            // console.log("Vehicle Length: " + Object.keys(vehicles).length);
+
+            for (var key in vehicles) {
+       
+                var vehicle = vehicles[key];
+                var vobject = vehicleObjects[vehicle.name];
+
+                // Check if this is new or needs position updates
+                if (vobject) {
+
+                    var pos = vehicle.pos;
+                    var angle = vehicle.rot;
+                    //console.log(pos.x + "," + pos.z +","+ -pos.y)
+
+                    //vobject.position.set( pos.x, pos.z, -pos.y);
+                    var targetP = new THREE.Vector3( pos.x, pos.z, -pos.y);
+                    var targetR = angle.h;
+
+                    var diff = targetP - vobject.position;
+                    //var distance = diff.length();
+
+                    vehicle["updatetime"] = thisTime;
+                    vehicle["tweenpos"] = animateVector3(vobject, targetP, targetR, {
+                        
+                        duration: vehicle.duration, 
+                        easing : TWEEN.Easing.Linear.None,
+                        callback : function(){
+                            //console.log("Completed");
+                        }
+                    });                 
+
+                    loadedVehicles[vehicle.name] = vehicle;
+                }
+                else {
+
+                    var randVehicle = Math.floor(Math.random() * Object.keys(vehicleList).length); 
+                    var tobject = vehicleList[randVehicle].clone();   
+                    applyVehicleColor(tobject);         
+                    movePivot(tobject, 0.05 );     
+
+                    var pos = vehicle.pos;
+                    var angle = vehicle.rot;
+                    tobject.rotation.set( 0.0, angle.h, 0.0 );
+                    tobject.position.set( pos.x, pos.z, -pos.y);
+
+                    vehicleObjects[vehicle.name] = tobject;
+
+                    vehicle["updatetime"] = thisTime;
+                    loadedVehicles[vehicle.name] = vehicle;
+                    simentities.add(tobject);
+                }
+            }
+
+            // Cleanup
+            for (var i=0; i<Object.keys(loadedVehicles).length; i++) { 
+
+                var key = Object.keys(loadedVehicles)[i];
+                var vehicle = loadedVehicles[key];
+                // After 2 seconds of updates.. this vehicle needs removal
+                if(thisTime - vehicle["updatetime"] > 1.0) {
+                    simentities.remove( vehicleObjects[vehicle.name] );
+                    delete loadedVehicles[vehicle.name];
+                    delete vehicleObjects[vehicle.name];
+                }
+            }
+        }
+    };
+};
+
+document.onkeydown = checkKey;
+
+function checkKey(e) {
+
+    e = e || window.event;
+    nokeys = false;
+    if (e.key == 'ArrowUp') {
+        // up arrow
+	    if( msgVehicleInputs.vehicle.throttle < 100) {
+			msgVehicleInputs.vehicle.throttle += 10;
+            msgVehicleInputs.vehicle.brake = 0;
+        }
+    }
+    else if (e.key == 'ArrowDown') {
+        // down arrow
+	    msgVehicleInputs.vehicle.brake = 100;
+	    msgVehicleInputs.vehicle.throttle = 0;
+    }
+    else if (e.key == 'ArrowRight') {
+       // left arrow
+        if( msgVehicleInputs.vehicle.steering > -Math.PI/4.0 )
+            msgVehicleInputs.vehicle.steering -= Math.PI/180.0;
+    }
+    else if (e.key == 'ArrowLeft') {
+       // right arrow
+        if( msgVehicleInputs.vehicle.steering < Math.PI/4.0 )
+            msgVehicleInputs.vehicle.steering += Math.PI/180.0;
+    }
+}
+
+function startSim( sceneid, doneCB ) {
+  $.get(simUrl + "/gr/simstart?sceneid=" + sceneid, function(data, status){ 
+      doneCB(data);
+  });
+}
+
+function stopSim( sceneid ) {
+  $.get(simUrl + "/gr/simstop?sceneid=" + sceneid, function(data, status){ 
+  });
+}
+
+function resetSim( sceneid ) {
+  $.get(simUrl + "/gr/simreset?sceneid=" + sceneid, function(data, status){ 
+  });
+}
+
+function killSim( sceneid ) {
+  $.get(simUrl + "/gr/simkill?sceneid=" + sceneid, function(data, status){ 
+  });
+}
+
+</script>

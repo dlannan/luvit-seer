@@ -1,0 +1,75 @@
+<script>
+var htmleditor;
+var jseditor;
+
+function loadSensorView(sensorData) {
+  
+  $("#sensor").empty();
+  $(".clearLink").click();
+  $("#preview").empty();
+  $("#sensor").val(sensorData);
+
+  // Clear all event handlers from any previous mess
+  (preview.contentWindow.document).write( sensor.value );
+  
+//    header+htmleditor.getText()+"<style>"+css.value+"<\/style><script>"+jseditor.getText()+"<\/script>"
+    
+  (preview.contentWindow.document).close();
+}
+
+$(document).ready(function() {
+
+  var header = "<script src='/user/themes/seerAV/assets/js/vendors/jquery-3.2.1.min.js'><\/script>";
+
+  // initialize code editor
+  var htmlelement = document.getElementById('html');
+  htmleditor = CodeMirror(htmlelement, {
+    value: "/* html and css for simulation window. */\n",
+    mode:  "htmlmixed", 
+    theme: "cobalt"
+  });
+
+//  htmleditor.getSession().setMode("ace/mode/javascript");
+
+  var jselement = document.getElementById('js');
+  jseditor = CodeMirror(jselement, {
+    value: "/* Javascript for simulation window. */\n",
+    mode:  "javascript", 
+    theme: "cobalt"
+  });
+
+//  jseditor.getSession().setMode("ace/mode/javascript");
+
+  $("#sensor").html(sessionStorage["sensor"]);
+  if(sessionStorage["html"]) htmleditor.setValue(sessionStorage["html"]);
+  $("#css").html(sessionStorage["css"]);
+  if(sessionStorage["js"]) jseditor.setValue(sessionStorage["js"]);
+
+  function init() {
+    if (sessionStorage["html"]) {
+        htmleditor.setValue(sessionStorage["html"]);
+      }
+    if (sessionStorage["sensor"]) {
+        $("#sensor").val(sessionStorage["sensor"]);
+      }
+    if (sessionStorage["css"]) {
+        $("#css").val(sessionStorage["css"]);
+    }  
+    if (sessionStorage["js"]) {
+        jseditor.setValue(sessionStorage["js"]);
+      }
+  }
+
+  // Clear textareas with button
+  $(".clearLink").click(clearAll);
+
+  function clearAll(){
+    document.getElementById("sensor").value = "";
+    htmleditor.setValue("");
+    document.getElementById("css").value = "";
+    jseditor.setValue("");
+    sessionStorage.clear();
+  }
+
+});
+</script>

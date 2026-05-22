@@ -1,0 +1,123 @@
+
+function updateAllNodes() {
+
+    for( var i=0; i<nodes.children.length; i++) {
+        //updateNode( nodes.children[i]);
+    }
+}
+
+function isNode( obj ) {
+    var check = obj && (obj.userData.parentType == "nodes");
+    return check;
+}
+
+function getNodeAsset( callback ) { 
+
+    var geometry = new THREE.BoxGeometry( 1, 1, 1 );
+    var material = new THREE.MeshBasicMaterial( { color: new THREE.Color(0x00ffff),  } );
+    var mesh = new THREE.Mesh( geometry, material );
+    mesh.visible = true;
+
+    var obj = new THREE.Object3D();
+    obj.add(mesh);
+    nodes.add(obj);    
+    callback(obj, mesh);
+}
+
+function newNode( callback, newobj ) {
+
+    getNodeAsset( function(object, mesh) {
+
+        if(newobj) {
+            var pos = new THREE.Vector3();
+            pos.fromArray(newobj.position);
+
+            object.position.copy(pos);
+            var rot = new THREE.Euler();
+
+            rot.fromArray(newobj.rotation);
+            object.rotation.copy(rot);
+            object.scale = new THREE.Vector3(1, 1, 1);
+
+            object.name = newobj.name;
+            if(newobj.userData) {
+                object.userData = JSON.parse(JSON.stringify(newobj.userData));
+            } else {
+                object.userData = {};
+            }
+
+            object.userData.uid = newobj.uid;
+            if(debug.buildIds) object.userData.uid = UID();
+        } else {
+            
+            uidNode(object);
+            object.name = "NODE_" + object.id;
+        } 
+
+        object.userData.parentType = ObjectTypes.NODES;
+        object.userData.parentId = object.userData.uid;
+        mesh.userData.parentType = ObjectTypes.NODES;
+        mesh.userData.parentId = object.userData.uid;
+
+        SceneGraph.addStaticObject( object );
+
+        // Add mesh to the Pool not the Object3D
+        addNodeToRaycastPool(mesh);
+        callback( object );
+    });
+}
+
+function newNodeSelect() {
+
+    hidePopups();
+
+    newNode( function(newnode) {
+
+        // clear other Selections first
+        clearSelection();
+        selection.add( newnode );
+
+        // Enable placement first!!
+        mode.state = EditorMode.NODENEW;
+        mode.object = newnode;        
+    });
+}
+
+function uidNode( node ) {
+
+    if(!node.userData.uid) {
+        node.userData.uid = UID();
+        //console.log("UID:", node.userData.uid);
+        nodelu[node.userData.uid] = node;
+    }
+}
+
+function checkNodeHit() {
+
+    // find intersections
+    raycaster.setFromCamera( mouse, camera );
+    var intersects = raycaster.intersectObjects( parentTransform.children, true);
+
+    if ( intersects.length > 0 ) {
+
+        if ( currentIntersected !== undefined ) {
+
+            currentIntersected.material.linewidth = 1;
+        }
+
+        currentIntersected = intersects[ 0 ].object;
+        currentIntersected.material.linewidth = 5;
+
+        sphereInter.visible = true;
+        sphereInter.position.copy( intersects[ 0 ].point );
+    } else {
+
+        if ( currentIntersected !== undefined ) {
+
+            currentIntersected.material.linewidth = 1;
+        }
+
+        currentIntersected = undefined;
+        sphereInter.visible = false;
+    }
+}

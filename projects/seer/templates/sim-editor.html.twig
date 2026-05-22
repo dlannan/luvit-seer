@@ -1,0 +1,302 @@
+{% embed 'partials/base-sim.html.twig' %}
+
+	{% set collection = page.collection() %}
+	{% set base_url = page.url %}
+    {% set feed_url = base_url %}
+
+    {% if base_url == '/' %}
+        {% set base_url = '' %}
+    {% endif %}
+
+    {% if base_url == base_url_relative %}
+        {% set feed_url = base_url~'/'~page.slug %}
+    {% endif  %}
+
+    {% set simeditor = true %}
+
+	{% block content %}
+
+		{% include 'threejs/threejs-style-main.html.twig' %}
+		{% if grav.user.authenticated == true %}
+		{% include 'threejs/scene/scenes.html.twig' %}
+
+		{% include 'menus/popup-menu-main.html.twig' %}
+		{% include 'menus/main-menu-sim-handler.html.twig' %}
+
+		{% endif %}
+
+		<div class="loading">Loading&#8230;</div>
+
+		{% include 'threejs/threejs-scripts.html.twig' %}
+		{% include 'threejs/fx/threejs-scripts-fx.html.twig' %}
+
+		{% include 'threejs/threejs-globals.html.twig' %}
+
+		{% include 'threejs/scene/scene-loader.html.twig' %}
+		{% include 'threejs/scene/scene-loader-anim.html.twig' %}
+		{% include 'threejs/threejs-mode-statemgr.html.twig' %}
+
+        {% include 'threejs/fx/threejs-sky.html.twig' %}
+        {% include 'threejs/fx/threejs-ground.html.twig' %}
+		{% include 'threejs/fx/threejs-materials.html.twig' %}
+
+		<script>
+
+			if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+
+			{% include 'threejs/threejs-mode.html.twig' %}
+
+			{% include 'threejs/threejs-nodes.html.twig' %}
+			{% include 'threejs/threejs-ways.html.twig' %}
+
+			{% include 'threejs/threejs-select-panel.html.twig' %}
+			{% include 'threejs/threejs-select-objects.html.twig' %}
+
+
+			THREE.OrthographicCamera.prototype.updateProjectionMatrix = function () {
+				var dx = ( this.right - this.left ) / ( 2 * this.zoom );
+				var dy = ( this.top - this.bottom ) / ( 2 * this.zoom );
+				var cx = ( this.right + this.left ) / 2;
+				var cy = ( this.top + this.bottom ) / 2;
+				this.projectionMatrix.makeOrthographic( cx - dx, cx + dx, cy + dy, cy - dy, this.near, this.far );
+			};					
+
+
+			init();
+			animate();
+
+			function init() {
+
+				var orthoDiv = 8;
+				orthoCamera = new THREE.OrthographicCamera( window.innerWidth / - orthoDiv, window.innerWidth / orthoDiv, window.innerHeight / orthoDiv, window.innerHeight / - orthoDiv, nearCamera, farCamera );
+				// perspCamera = new THREE.PerspectiveCamera( cameraFov, window.innerWidth / window.innerHeight, nearCamera, farCamera );
+				
+				orthoCamera.position.set( 0.0, 100.0, 0.0 );
+				// perspCamera.position.set( cameraPos.x, cameraPos.y, cameraPos.z );
+
+				var target = new THREE.Object3D();
+				target.position.set( 0,0,0 );
+
+				// perspCamera.target = target;
+				orthoCamera.target = target;
+				orthoCamera.lookAt( target.position );
+				camera = orthoCamera;
+
+				//camera.setLens(20);
+				createScene();
+
+				container = document.getElementById( 'container' );
+				var w = container.offsetWidth;
+				var h = container.offsetHeight;
+				rtScale = 1.0;
+
+				renderer = new THREE.WebGLRenderer({
+					canvas: container,
+					antialias: true,
+					physicallyCorrectLights: true,
+					preserveDrawingBuffer   : true   // required to support .toDataURL()
+				});
+
+				renderer.setClearColor(0xffffff);
+				renderer.shadowMap.enabled = true;
+    			renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+				renderer.toneMapping = THREE.LinearToneMapping;
+
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( w, h );
+				//container.appendChild( renderer.domElement );
+				
+				renderer.gammaFactor = 2.2;
+				renderer.gammaInput = true;
+				renderer.gammaOutput = true;
+
+				// assuming here that _gl is the webgl context
+				//var extensions = new THREE.WebGLExtensions( renderer );
+
+				// the return value is null if the extension is not supported,
+				// or otherwise an extension object 
+				//console.log(extensions.get( "gl_FragDepthEXT" ));
+
+				composer = new THREE.EffectComposer(renderer);
+				baseRenderPass = new THREE.RenderPass(scene, camera);
+				composer.addPass(baseRenderPass);
+
+				baseRenderPass.renderToScreen = true;
+				clearScene();
+				window.addEventListener( 'resize', onWindowResize, false );
+				
+				// Selector init - should move this.
+				//mode.state = EditorMode.NONE;
+				mouseMove = false;
+				$("#select-obj").hide();
+				$("#select-spline").hide();
+
+                mode.camera.control = ControlMode.ORTHO;
+                enableControls();
+				//addSplineObject();
+			}
+
+			// Completely clear out the scene
+			function clearScene() {
+
+				clearLookups();
+				clearAllObjects();
+
+                initSky();
+				initGround();
+
+				initTools();
+				finalizeTools();
+
+				//initSplines();
+			}
+
+			function onWindowResize() {
+
+				var w = container.offsetWidth;
+				var h = container.offsetHeight;
+
+				camera.aspect = w / h;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( w, h );
+
+				render();
+				console.log("Resizing...");
+			}
+
+			function animate() {
+
+				requestAnimationFrame( animate );
+
+				if(water) {
+					water.material.uniforms.time.value += 1.0 / 60.0;
+					water.material.uniforms.size.value = parameters.size;
+					water.material.uniforms.distortionScale.value = parameters.distortionScale;
+					water.material.uniforms.alpha.value = parameters.alpha;
+				}
+				
+				render();
+			}
+
+			function render() {
+				var delta = clock.getDelta();
+				
+				stateManager.Update(delta);
+				updateAnims(delta);
+
+				if(ocean) {
+					ocean.material.uniforms.sunDirection.value.copy( dirLight.position ).normalize();
+					ocean.material.uniforms.time.value += delta * 0.2;
+				}
+
+				if(controls) {
+					mode.camera.lon = controls.lon;
+					mode.camera.lat = controls.lat;
+					controls.update(delta);
+				}
+
+				camera.getWorldDirection( cameraDir );
+
+				//renderer.render( scene, camera );
+				composer.render();
+				
+				// update octree post render
+				// this ensures any objects being added
+				// have already had their matrices updated
+				if(useOctree) {
+					octree.update();
+				}
+
+				TWEEN.update();
+			}
+
+			function onMouseMove( event ) {
+
+				event.preventDefault();
+
+				var mousex = ( event.clientX / window.innerWidth ) * 2 - 1;
+				var mousey = - ( event.clientY / window.innerHeight ) * 2 + 1;
+				if(mousex !== mouse.x) {
+					mouse.x = mousex;
+					mouseMove = true;
+				}
+			
+				if(mousey !== mouse.y) {
+					mouse.y = mousey;
+					mouseMove = true;
+				}
+			}
+
+			function onMouseClick( event ) {
+
+				mouseMove = false;
+				// console.log("clicked: ", mode.state);
+				stateManager.MouseEvent( event );
+			}
+
+			function onMouseUp( event ) {
+
+				// check object is spline
+				stateManager.MouseEvent( event );
+
+				mouseMove = false;
+			}
+
+			function onKeyDown( event ) {
+
+				if(event.key === "Shift") { 
+					shiftPressed = true; 
+					//console.log("SHIFT PRESSED");
+				}
+			}
+
+			function onKeyUp( event ) {
+
+				// console.log("KEY RAISED", event);
+				
+				if(event.key === "Shift") { 
+					shiftPressed = false; 
+					//console.log("SHIFT RELEASED");
+				}
+			}
+
+			window.onload = function(){
+
+				{% set projectid = grav.uri.query('projectid')  %} 
+				{% set sceneid = grav.uri.query('sceneid')  %} 
+
+				{% set query = ("[sql-table json]select * from projects where uid = '" ~ projectid ) ~ "' limit 1[/sql-table]" %}
+				{% set project = ((query|shortcodes) | json_decode)[0] %}
+
+				{% set query = ("[sql-table json]select * from scenes where sceneid = '" ~ sceneid ) ~ "' limit 1[/sql-table]" %}
+				{% set scene = ((query|shortcodes) | json_decode)[0] %}
+
+				{% set projectvalid = project and scene and uservalid %}
+
+				{% if projectvalid %}
+				{% else %}
+				window.location.href = "/projects";
+				{% endif %}
+
+			    {% if grav.uri.query('sceneid')  %}
+					loadGeneratedScene( function() {} );
+                {% endif %}
+
+				$('#top-menu').show();
+			};
+
+			$(document).ready( function() {
+
+				// Should enable/disable this when mode changes
+				renderer.domElement.addEventListener( 'mousemove', onMouseMove, false );
+				renderer.domElement.addEventListener( 'mousedown', onMouseClick, false );
+				renderer.domElement.addEventListener( 'mouseup', onMouseUp, false );
+				$(document.documentElement).keydown( onKeyDown );
+				$(document.documentElement).keyup( onKeyUp );
+			});			
+		</script>
+
+	{% endblock %}
+
+{% endembed %}

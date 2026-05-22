@@ -1,0 +1,178 @@
+
+function splineParts( obj ) {
+
+    var parts = 
+    {
+        up: obj.getObjectByName('arrow_up'),
+        left: obj.getObjectByName('arrow_left'),
+        right: obj.getObjectByName('arrow_right')
+    };
+    return parts;
+}
+
+function toggleSpline( obj ) {
+
+    var spline = scene.getObjectById(obj.userData.parentId);
+    if(!spline) { return; }
+
+    // Switch through the different spline modes
+    mode.splinestate = mode.splinestate + 1;
+    if (mode.splinestate > SplineState.SPLINEALL) {
+        mode.splinestate = SplineState.SPLINEFWD;
+    }
+
+    spline.userData.splinestate = mode.splinestate;
+    //updateSpline( spline );
+}
+
+function  updateSpline( spline ) {
+
+    var parts =  splineParts(spline);
+    parts.up.visible = false;
+    parts.left.visible = false;
+    parts.right.visible = false;
+
+    var ss = spline.userData.splinestate;
+
+    if( ss == SplineState.SPLINEFWD || 
+        ss == SplineState.SPLINEFWDLEFT ||
+        ss == SplineState.SPLINEFWDRIGHT ||
+        ss == SplineState.SPLINEALL) {
+            parts.up.visible = true;
+        }
+    if( ss == SplineState.SPLINELEFT || 
+        ss == SplineState.SPLINEFWDLEFT ||
+        ss == SplineState.SPLINELEFTRIGHT ||
+        ss == SplineState.SPLINEALL) {
+            parts.left.visible = true;
+        }
+    if( ss == SplineState.SPLINERIGHT || 
+        ss == SplineState.SPLINEFWDRIGHT ||
+        ss == SplineState.SPLINELEFTRIGHT ||
+        ss == SplineState.SPLINEALL) {
+            parts.right.visible = true;
+        }
+}
+
+function addSplineObject( position ) {
+
+    // Create a sine-like wave
+    var curve = new THREE.SplineCurve( [
+        new THREE.Vector3( -10, 2, 0 ),
+        new THREE.Vector3( -5, 2, 5 ),
+        new THREE.Vector3( 0, 2, 0 ),
+        new THREE.Vector3( 5, 2, -5 ),
+        new THREE.Vector3( 10, 2, 0 )
+    ]);
+
+    var points = curve.getPoints( 50 );
+    var geometry = new THREE.BufferGeometry().setFromPoints( points );
+    var material = new THREE.MeshLambertMaterial( { color: new THREE.Color(Math.random() * 0xffffff) } );
+
+    // Create the final object to add to the scene
+    var splineObject = new THREE.Line( geometry, material );
+
+    splines.add( splineObject );
+    selectEditorSpline = splineObject.id;
+
+    return splineObject;
+}
+
+function addSplineObjectTwo( position ) {
+
+    var material = new THREE.MeshLambertMaterial( { color: new THREE.Color(Math.random() * 0xffffff) } );
+    var object = new THREE.Mesh( geometry, material );
+
+    if ( position ) {
+
+        object.position.copy( position );
+    } else {
+
+        // Raycast position
+    }
+
+    object.castShadow = true;
+    object.receiveShadow = true;
+    splineHelperObjects.push( object );
+    return object;
+}
+
+function addPoint() {
+
+    splinePointsLength ++;
+    positions.push( addSplineObject().position );
+    updateSplineOutline();
+}
+
+function removePoint() {
+
+    if ( splinePointsLength <= 4 ) {
+
+        return;
+
+    }
+    splinePointsLength --;
+    positions.pop();
+    scene.remove( splineHelperObjects.pop() );
+
+    updateSplineOutline();
+}
+
+function updateSplineOutline() {
+
+    for ( var k in splines ) {
+
+        var spline = splines[ k ];
+
+        var splineMesh = spline.mesh;
+        var position = splineMesh.geometry.attributes.position;
+
+        for ( var i = 0; i < ARC_SEGMENTS; i ++ ) {
+
+            var t = i /  ( ARC_SEGMENTS - 1 );
+            spline.getPoint( t, point );
+            position.setXYZ( i, point.x, point.y, point.z );
+
+        }
+
+        position.needsUpdate = true;
+    }
+}
+
+function exportSpline() {
+
+    var strplace = [];
+
+    for ( var i = 0; i < splinePointsLength; i ++ ) {
+
+        var p = splineHelperObjects[ i ].position;
+        strplace.push( 'new THREE.Vector3({0}, {1}, {2})'.format( p.x, p.y, p.z ) )
+
+    }
+
+    console.log( strplace.join( ',\n' ) );
+    var code = '[' + ( strplace.join( ',\n\t' ) ) + ']';
+    prompt( 'copy and paste code', code );
+
+}
+
+function load( new_positions ) {
+
+    while ( new_positions.length > positions.length ) {
+
+        addPoint();
+    }
+
+    while ( new_positions.length < positions.length ) {
+
+        removePoint();
+    }
+
+    for ( var i = 0; i < positions.length; i ++ ) {
+
+        positions[ i ].copy( new_positions[ i ] );
+    }
+
+    updateSplineOutline();
+}
+

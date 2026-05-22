@@ -1,0 +1,112 @@
+
+function checkPlacement( ) {
+
+    var ok = (mode.state === EditorMode.INITIALPLACE) || 
+                (mode.state === EditorMode.PLACE);
+    if(!ok) return;
+
+    // If shift is pressed then the cursor moves on the Y axis
+    if(shiftPressed == true) {
+
+        // Dont do hit detect, this is to move up
+        var prevpos = selectCursor.position;
+        var heightmove = -camera.position.distanceTo( prevpos ) * 3.0;
+        var yposition = mouse.diffy * heightmove + prevpos.y;
+        selectCursor.position.set( prevpos.x, yposition, prevpos.z );
+        selectCursor.rotation.set( 0.0, 0.0, 0.0 );
+
+        SceneGraph.updateEntityPosition( mode.object.userData.uid, prevpos.x, yposition, prevpos.z );        
+        renewLinks(mode.object.userData.uid);
+        SceneGraph.forceUpdate( mode.object.userData.uid );        
+        SceneGraph.forceRender( mode.object.userData.uid );        
+
+        return;
+    }
+
+    var intersections = checkHit();
+
+    if ( intersections.length > 0 ) {
+
+        var intersected = closestHit( mode.object, intersections );
+        if(intersected != undefined) {
+            selectCursor.position.copy(intersected.point );
+            selectCursor.rotation.set( -Math.PI/2, 0.0, 0.0 );
+
+            var n = intersected.normal;
+            var d = camera.position.distanceTo( intersected.point );
+            
+            selectCursor.scale.set( d, d, d );
+            //selectCursor.lookAt( intersected.point + n );
+            if(mode.object && mode.object.userData) {
+
+                var pt = intersected.point;
+                SceneGraph.updateEntityPosition( mode.object.userData.uid, pt.x, pt.y, pt.z );   
+                //mode.object.position.copy( intersected.point );
+                //mode.object.lookAt( intersected.point + n );
+                SceneGraph.forceUpdate( mode.object.userData.uid );        
+                SceneGraph.forceRender( mode.object.userData.uid );        
+                return;
+            }
+        }
+    }
+
+    var line = new THREE.Line3(camera.position, camera.position + cameraDir * 5000.0);
+    var target = new THREE.Vector3();
+    var pt =  cameras.persp.worldPlane.intersectLine(line, target);
+    var d = pt.distanceTo(camera.position);
+    
+    selectCursor.position.copy(pt);
+
+    //selectCursor.scale.set( d, d, d );
+    //selectCursor.lookAt( pt + worldUp );
+    {# if(mode.object && mode.object.userData) {
+        SceneGraph.updateEntityPosition( mode.object.userData.uid, pt.x, pt.y, pt.z );        
+    } #}
+    //intersected = null;
+}
+
+var placeObjectState = {
+
+    name: "placeobject",
+    value: 0,              // Set this value to react to external state control
+    parent: undefined,      // If this is set, exit ensures the parent state is reactivated
+
+    onenter: function(init) {
+
+        selectCursor.material.color.setHex(0xff0000);
+        selectCursor.visible = true;
+        disableControls();
+        hidePopups();
+        //console.log("Initializing Place..");
+    },
+
+    onupdate: function(dt) {
+
+        // Dont do much - its an init state, nothing to see here.
+        checkPlacement();
+    },
+
+    onmouse: function( event ) {
+
+        if(event.type === "mouseup") {
+
+            check = (mode.state === EditorMode.INITIALPLACE); 
+            if(check) {
+                SceneGraph.forceUpdate( mode.object.userData.uid );        
+                SceneGraph.forceRender( mode.object.userData.uid );        
+                mode.state = EditorMode.INITIALROTATE;
+            } else {
+
+                SceneGraph.forceUpdate( mode.object.userData.uid );        
+                SceneGraph.forceRender( mode.object.userData.uid );        
+                FinishPlacement();
+                mode.state = EditorMode.NONE;
+                mode.popup = PopupMode.MAIN;
+            }
+        }
+    },
+
+    onexit: function() {
+
+    }
+};

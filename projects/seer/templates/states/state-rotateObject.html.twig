@@ -1,0 +1,70 @@
+
+function checkRotation() {
+
+    var ok = (mode.state === EditorMode.INITIALROTATE) || 
+            (mode.state === EditorMode.ROTATE);
+    if(!ok) return;
+
+    var d = camera.position.distanceTo( mode.object.position );
+    
+    selectCursor.scale.set( d, d, d );
+    var rotation = mouse.x * config.rotateSpeed;
+    if(shiftPressed) {
+        var rmod = rotation % ( 10.0 * Math.PI / 180.0 );
+        rotation = rotation - rmod;
+    } 
+    selectCursor.rotation.set( -Math.PI/2, rotation, 0.0 );
+
+    if(mode.object) {
+
+        selectCursor.position.copy( mode.object.position );
+//        mode.object.rotation.set( 0.0, rotation, 0.0 );
+        SceneGraph.updateEntityForward( mode.object.userData.uid, -Math.sin(rotation), 0.0, -Math.cos(rotation) );
+        SceneGraph.forceUpdate( mode.object.userData.uid );        
+        SceneGraph.forceRender( mode.object.userData.uid );        
+    }
+}
+
+var rotateObjectState = {
+
+    name: "rotateobject",
+    value: 0,              // Set this value to react to external state control
+    parent: undefined,      // If this is set, exit ensures the parent state is reactivated
+
+    onenter: function(init) {
+
+        selectCursor.material.color.setHex(0x00ff00);
+        selectCursor.visible = true;
+        disableControls();
+        hidePopups();
+    },
+
+    onupdate: function(dt) {
+        // Dont do much - its an init state, nothing to see here.
+        checkRotation();
+    },
+
+    onmouse: function( event ) {
+
+        if(event.type === "mouseup") {
+
+            var check = (mode.state == EditorMode.INITIALROTATE);
+            if(check) {
+                SceneGraph.forceUpdate( mode.object.userData.uid );        
+                SceneGraph.forceRender( mode.object.userData.uid );        
+                FinishPlacement();
+            } else {
+                SceneGraph.forceUpdate( mode.object.userData.uid );        
+                SceneGraph.forceRender( mode.object.userData.uid );        
+                FinishMovement();
+                showPopupObject();
+            }
+
+            mode.state = EditorMode.NONE;
+        }
+    },
+
+    onexit: function() {
+
+    }
+};

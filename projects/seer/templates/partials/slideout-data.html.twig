@@ -1,0 +1,40 @@
+<!-- // SlideOut -->
+<div id="slideOut">
+<!--   // Tab -->
+  <div class="slideOutTab">
+    <div class="btn fa fa-th-list" data-toggle="tooltip" title="Vehicle Data">
+    </div>
+  </div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <div id="btn_vehicle_reset" class="btn slideOutBtn"><span class="fa fa-repeat" data-toggle="tooltip" title="Reset Sim"></span></div>
+      <div id="btn_vehicle_pause" class="btn slideOutBtn"><span class="fa fa-pause" data-toggle="tooltip" title="Pause Sim"></span></div>
+      <div id="btn_vehicle_steering"class="btn slideOutBtn" data-toggle="tooltip" title="Switch Steering"><span class="fa fa-circle-o-notch"></span></div>
+      <div id="btn_vehicle_camera"  class="btn slideOutBtn" data-toggle="tooltip" title="Follow Vehicle"><span class="fa fa-crosshairs"></span></div>
+      <div id="btn_vehicle_steering" class="btn slideOutBtn" data-toggle="tooltip" title="Switch Camera"><span class="fa fa-video-camera"></span></div>      
+    </div>
+
+    <div class="modal-body">
+      <h5 class="modal-title">Telemetry</h5> 
+      <canvas id="chartSPD" width="100" height="35"></canvas>
+      <canvas id="chartSTEER" width="100" height="35"></canvas>
+      <canvas id="chartACCEL" width="100" height="35"></canvas>
+      <canvas id="chartBRAKE" width="100" height="35"></canvas>
+      <h5>Parameters</h5>
+      <div class="container">
+      <div class="row"><div class="col-md-6">Mass:</div><div class="col-md-6"></div></div>
+      <div class="row"><div class="col-md-6">Engine Power:</div><div class="col-md-6"></div></div>
+      <div class="row"><div class="col-md-6">Braking Power:</div><div class="col-md-6"></div></div>
+      <div class="row"><div class="col-md-6">Front Springs:</div><div class="col-md-6"></div></div>
+      <div class="row"><div class="col-md-6">Rear Springs:</div><div class="col-md-6"></div></div>
+      <div class="row"><div class="col-md-6">Front Dampner:</div><div class="col-md-6"></div></div>
+      <div class="row"><div class="col-md-6">Rear Dampner:</div><div class="col-md-6"></div></div>
+      <div class="row"><div class="col-md-6">Roll Tension:</div><div class="col-md-6"></div></div>
+      <div class="row"><div class="col-md-6">Front Friction:</div><div class="col-md-6"></div></div>
+      <div class="row"><div class="col-md-6">Rear Friction:</div><div class="col-md-6"></div></div>
+      </div>
+    </div>
+    
+    <div class="modal-footer"> 
+  </div>
+</div>

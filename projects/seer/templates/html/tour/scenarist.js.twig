@@ -1,0 +1,46 @@
+<script>
+
+const tourSteps = new Driver();
+
+function startTour(e) {
+    if(e) e.stopPropagation();
+
+    var id = scenaristMode;
+    
+    if( id == "Main" ) {
+        {% include "html/tour/scenarist-main.js.twig" %}
+        tourSteps.start();
+    }
+    else if( id == "Settings" ) {
+        {% include "html/tour/scenarist-settings.js.twig" %}
+        tourSteps.start();
+    }
+    else if( id == "Editor" ) {
+        {% include "html/tour/scenarist-editor.js.twig" %}
+        tourSteps.start();
+    }
+    else if( id == "Simulation" ) {
+        {% include "html/tour/scenarist-simulation.js.twig" %}
+        tourSteps.start();
+    }
+    else if( id == "Sensors" ) {
+        {% include "html/tour/scenarist-sensors.js.twig" %}
+        tourSteps.start();
+    }
+    else if( id == "Events" ) {
+        {% include "html/tour/scenarist-events.js.twig" %}
+        tourSteps.start();
+    }
+    else {
+        {% include "html/tour/scenarist-main.js.twig" %}
+        tourSteps.start();
+    }
+}
+
+$(document).ready(function() {
+
+    var tour = "{{ grav.uri.query('tour') }}";
+    $("#dashboard-tour").on('click', function(e) { startTour(e); });
+});
+
+</script>

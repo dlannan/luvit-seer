@@ -1,0 +1,242 @@
+function MakeArrow( first, last, color ) {
+
+    var dir = new THREE.Vector3();
+    dir.subVectors( last.position, first.position );
+
+    var length = dir.length();
+    // Same/Similar event position - we dont allow close events!!
+    if(length < 0.01) { return undefined; }
+    length -= last.userData.radius;
+    dir.normalize();
+
+    var arrow = new THREE.ArrowHelper( dir, first.position, length, color, 3.0, 2.0 );
+    return arrow;
+}
+
+function updateArrow( idx, first, last, color ) {
+
+}
+
+// These should go into a color map - fixed color list that 
+//    is globally shared.
+var LEselcolor = 0x0000ff;
+var LEclearcolor = 0xffff00;
+var LEagroup = undefined; // Arrow group
+
+function ClearLinkedEvents() {
+    if(!LEagroup) return;
+
+    // Remove the arrows!
+    while(LEagroup.children.length > 0){ 
+        LEagroup.remove(LEagroup.children[0]); 
+    }
+    scene.remove(LEagroup);
+}
+
+function ShowLinkedEvents( obj ) {
+
+    ClearLinkedEvents();
+
+    LEagroup = new THREE.Group();
+    for(var okeys = 0; okeys<obj.userData.linked.length; okeys++) {
+
+        var removelink = false;
+        var linkobjid = obj.userData.linked[okeys];
+        var linkobj = eventlu[linkobjid];
+
+        if(linkobj != undefined) { 
+            var newArrow = MakeArrow( obj, linkobj, LEselcolor ); 
+            if(newArrow) {
+                LEagroup.add(newArrow);
+                removelink = false;
+            } else {
+                removelink = true;
+            }
+        } else {
+            removelink = true;
+        }
+
+        if(removelink == true) {
+            // Auto remove links that are not valid
+            obj.userData.linked.splice(okeys,1);
+        }
+    }
+
+    scene.add(LEagroup);
+    LEagroup.visible = true;
+}
+
+
+function uidEvent( node ) {
+
+    if(!node.userData.uid) {
+        node.userData.uid = UID();
+        //console.log("UID:", node.userData.uid);
+    }
+    eventlu[node.userData.uid] = node;
+}
+
+function ShowEvent( obj ) {
+
+    obj.traverse ( function (child) {
+        if (child instanceof THREE.Mesh) {
+            child.visible = true;
+        }
+    });
+
+    // Show any linked events
+    ShowLinkedEvents(obj);
+}
+
+function FinishEventMovement() {
+
+    // Ensure the object is visible when finished moving.
+    var obj = SceneGraph.findNodeByUid(selectEditorObj);
+    //if(obj) ShowEvent(obj); 
+    EndSelection();
+}
+
+function FinishEventPlacement() {
+
+    // if intersection of an object, localise it to the parent
+
+    //objects.push( mode.object );
+    events.add( mode.object );
+
+    // Push this event into the database so it will be associated with the
+    //   parent object, and scene.
+
+    EndSelection();
+}
+
+function isEvent( obj ) {
+    var check = obj && (obj.userData.parentType == ObjectTypes.EVENTS);
+    return check;
+}
+
+function getEventAsset( callback ) { 
+
+    var geometry = new THREE.SphereBufferGeometry( 1, 20, 20 );
+    //var wireframe = new THREE.WireframeGeometry( geometry );
+    var material = new THREE.MeshBasicMaterial( { color: new THREE.Color(0xffff00),  } );
+
+    //var line = new THREE.LineSegments( wireframe, material );
+    var line = new THREE.Mesh( geometry, material );
+    //line.material.depthTest = false;
+    line.material.opacity = 0.65;
+    line.material.transparent = true;
+
+    var obj = new THREE.Object3D();
+    obj.add(line);
+    obj.userData.parentType = ObjectTypes.EVENTS;
+    obj.userData.radius = 1.0;
+
+    line.userData.parentType = ObjectTypes.EVENTS;
+    line.userData.parentId = obj.id;
+
+    events.add(obj);                          
+
+    //ShowEvent(obj);
+    callback(obj);
+}
+
+function newEvent( callback, newobj ) {
+
+    getEventAsset( function(object) {
+
+        if(newobj) {
+
+            // console.log("EVENT: ",newobj);            
+            var pos = new THREE.Vector3();
+            pos.fromArray(newobj.position);
+            object.position.copy(pos);
+
+            var rot = new THREE.Euler();
+            rot.fromArray(newobj.rotation);
+            object.rotation.copy(rot);
+
+            object.scale = new THREE.Vector3(1, 1, 1);
+            
+            object.name = newobj.name;
+
+            object.userData.uid = newobj.uid;
+            if(debug.buildIds) object.userData.uid = UID();
+            object.userData.radius = newobj.radius;
+
+            // Collection of linked events
+            object.userData.linked = [];
+            if(newobj.linked) {
+                object.userData.linked = newobj.linked;
+            }
+
+            uidEvent(object);
+        
+        } else {
+            
+            uidEvent(object);
+            object.name = "EVENT_" + object.id;
+        }          
+
+        object.userData.parentType = ObjectTypes.EVENTS;
+        object.userData.parentId = object.userData.uid;
+
+        SceneGraph.addStaticObject( object );
+
+        var sc = object.userData.radius;
+        if(!sc) sc = 1.0;
+        SceneGraph.updateEntityScale( object.id, sc, sc, sc );        
+
+        // Add mesh to the Pool not the Object3D
+        addNodeToRaycastPool(object.children[0]);
+        callback( object );
+    });
+}
+
+function newEventSelect() {
+
+    hidePopups();
+
+    newEvent( function(newnode) {
+
+        // clear other Selections first
+        clearSelection();
+        selection.add( newnode );
+
+        // Enable placement first!!
+        mode.state = EditorMode.EVENTNEW;
+        mode.object = newnode;        
+    });
+}
+
+
+function hideEvents() {
+    for(var i=0; i<events.children.length; i++) {
+        var event = events.children[i];
+        event.visible = false;
+    }
+}
+
+function showEvents() {
+    for(var i=0; i<events.children.length; i++) {
+        var event = events.children[i];
+        event.visible = true;
+    }
+}
+
+// Go through all the events and remove any links that are not valid anymore
+//   invalid links are: - links point to own object
+//                      - links that no longer have a valid event object
+function CleanupLinkedEvents() {
+
+    for(var i=0; i<events.children.length; i++) {
+        var event = events.children[i];
+        for(var j=0; j<event.userData.linked.length; j++) {
+            var eventlinked = eventlu[event.userData.linked[j]];
+            if((event.userData.uid == event.userData.linked[j]) || (!eventlinked)) {
+                // Remove the dodgy link
+                event.userData.linked.splice(j, 1);
+            }
+        }
+    }
+}
+

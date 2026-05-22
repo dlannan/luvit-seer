@@ -1,0 +1,20 @@
+{% extends 'partials/base-nonav.html.twig' %}
+
+{% block body %}
+    <body id="page">
+{% endblock %}
+
+{% block content %}
+<script>
+$(document).ready(function() {
+
+    {% set projectid = grav.uri.query('projectid')  %} 
+
+    const params = jQuery.param({ 
+        'projectid': '{{ projectid }}', 
+        'sceneid': '{{ sqliteEmptyRow("scenes")|int }}'
+    });
+    window.location.href = "/scenarist?" + params;
+});
+</script>
+{% endblock %}

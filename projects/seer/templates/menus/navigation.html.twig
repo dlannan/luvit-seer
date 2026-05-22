@@ -1,0 +1,189 @@
+{% set pid = grav.uri.query("projectid") %}
+{% set sid = grav.uri.query("sceneid") %}
+
+{% set query = ("[sql-table json]select name from projects where uid = '" ~ pid ) ~ "' limit 1[/sql-table]" %}
+{% set pname = ((query|shortcodes) | json_decode)[0] %}
+
+{% set modelq = ("[sql-table json]select models from scenes where sceneid = '" ~ sid ) ~ "' [/sql-table]" %}
+{% set modelres = ((modelq|shortcodes) | json_decode(true))[0] %}
+
+<div class="scenarist-menu-main">
+    <button class="btn menu-mode-item" type="button" data-menu="Main" data-toggle="tooltip" data-placement="top" title="Main Save/Load and Quit"><i class="fa fa-bars"></i></button>
+    <button class="btn menu-mode-item" type="button" data-menu="Settings" data-toggle="tooltip" data-placement="top" title="Environment Settings"><i class="fa fa-cog"></i></button>
+    <button class="btn menu-mode-item" type="button" data-menu="Editor" data-toggle="tooltip" data-placement="top" title="Add and Modify scene objects"><i class="fa fa-edit"></i></button>
+    <button class="btn menu-mode-item" type="button" data-menu="Simulation" data-toggle="tooltip" data-placement="top" title="Start/Stop simulation runs"><i class="fa fa-road"></i></button>
+    <button class="btn menu-mode-item" type="button" data-menu="Splines" data-toggle="tooltip" data-placement="top" title="Add and Modify splines"><i class="fa fa-arrows-v"></i></button>
+    <button class="btn menu-mode-item" type="button" data-menu="Sensors" data-toggle="tooltip" data-placement="top" title="Add and Modify sensors"><i class="fa fa-video-camera"></i></button>
+{#    <button class="btn menu-mode-item" type="button" data-menu="Events" data-toggle="tooltip" data-placement="top" title="Add and Modify events"><i class="fa fa-calendar"></i></button> #}
+</div>  
+
+<nav id="top-menu" class="navbar navbar-expand-sm nav-pills nav-justified" role="navigation" style="display: none;">
+
+    <div class="scenarist-project-scene">
+    <div id="menu-main-project" class="nav-link btn-info scenarist-project-name">{{ pname.name }}</div>
+
+    <div id="scene-title" class="scene-title">
+    <form class="navbar-form navbar-left">
+        <div class="form-group">
+            <input type="text" class="form-control" placeholder="Scene 01" value="Scene 01">
+        </div>
+    </form>
+    </div>
+    </div>
+
+    <div class="scenarist-menu-right">
+    <div id="menu-main-perf-indicator" class="icon-buttons" data-toggle="tooltip" title="Performance indicator with fps. High is good.">
+        <div id="menu-main-fps" class="perf-text">100</div>
+        <i id="menu-main-perf" class="fa fa-thermometer-full"></i>
+    </div>
+    <div id="menu-settings-grid" class="icon-buttons" data-toggle="tooltip" data-placement="top" title="Adjust time settings">
+        <i id="grid-icon" class="fa fa-th-large"></i>
+    </div>
+    <div id="menu-main-icons" class="icon-buttons btn-info" data-toggle="tooltip" title="Toggle object icons">
+        <i class="fa fa-toggle-off"></i>
+    </div>
+    <div id="dashboard-tour" class="icon-buttons btn-warning" data-toggle="tooltip" title="Guided Tour of this page">
+        <i class="fa fa-question"></i>
+    </div>
+    </div>
+
+    <div id="menu-settings-weather" class="nav-link menu-settings">
+        <i class="fa fa-sun-o"></i>
+        &nbsp
+        <input id="ex10" type="text" data-slider-id="slider10" data-slider-min="0" data-slider-max="100" data-slider-step="1" data-slider-value="50" />
+        &nbsp
+    </div>
+    <div id="menu-settings-time" class="nav-link menu-settings" data-toggle="tooltip" data-placement="top" title="Adjust time settings">
+        <i class="fa fa-clock-o"></i>
+        &nbsp
+        <input id="ex11" type="text" data-slider-id="slider11" data-slider-min="0" data-slider-max="24" data-slider-step="1" data-slider-value="12" />
+        &nbsp
+    </div>
+    {# <div id="menu-settings-camera" class="nav-link menu-settings btn-group dropright">
+    <button type="button" class="btn dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-toggle="tooltip" data-placement="top" title="Change camera modes">
+        <i class="fa fa-camera"></i>
+    </button> #}
+    <div class="dropdown-menu">
+        <button id="cameraType" class="dropdown-item" type="button">Orthographic</button>
+        <div class="well dropdown-item">FOV&nbsp&nbsp
+            <input id="cameraDepth" type="text"
+                  data-provide="slider"
+                  data-slider-min="0"
+                  data-slider-max="10"
+                  data-slider-step=".1"
+                  data-slider-value="0"
+                  data-slider-tooltip="hide" />
+        </div>
+        <button class="dropdown-item" type="button">Another action</button>
+        <button class="dropdown-item" type="button">Something else here</button>
+    </div>
+    </div>  
+
+    <div id="menu-editor-envs" class="nav-link threed-selection menu-editor" collection="environments" data-toggle="tooltip" data-placement="top" title="Set 3D Environment">
+        <i class="fa fa-image"></i>
+    </div>
+    <div id="menu-editor-models" class="nav-link threed-selection menu-editor" collection="models" data-toggle="tooltip" data-placement="top" title="Add 3D Vehicle to Scene">
+        <i class="fa fa-car"></i>
+    </div>
+    <div id="menu-editor-models-naval" class="nav-link threed-selection menu-editor" collection="models-naval" data-toggle="tooltip" data-placement="top" title="Add 3D Vessel to Scene">
+        <i class="fa fa-ship"></i>
+    </div>
+    <div id="menu-editor-models-air" class="nav-link threed-selection menu-editor" collection="models-air" data-toggle="tooltip" data-placement="top" title="Add 3D Aircraft to Scene">
+        <i class="fa fa-plane"></i>
+    </div>
+    <div id="menu-editor-objects" class="nav-link threed-selection menu-editor" collection="objects" data-toggle="tooltip" data-placement="top" title="Add 3D Buildings to Scene">
+        <i class="fa fa-cube"></i>
+    </div>
+    <div id="menu-editor-actors" class="nav-link threed-selection menu-editor" collection="actors" data-toggle="tooltip" data-placement="top" title="Add 3D Actors to a Scene">
+        <i class="fa fa-male"></i>
+    </div>
+    <div id="menu-editor-outdoors" class="nav-link threed-selection menu-editor" collection="outdoors" data-toggle="tooltip" data-placement="top" title="Add outdoor items to a Scene">
+        <i class="fa fa-tree"></i>
+    </div>
+
+    <div id="menu-spline-new" class="nav-link menu-spline">
+        <i class="fa fa-edit"></i>
+    </div>
+
+    <div id="menu-spline-class" class="scene-title menu-spline">
+        <form class="navbar-form navbar-left">
+            <div class="form-group">
+                <input id="spline-name" class="form-control" type="text" />
+            </div>
+        </form>
+    </div>
+
+    <div id="menu-spline-test" class="nav-link menu-spline">
+        <i class="fa fa-road"></i>
+    </div>
+    <div id="menu-spline-scatter" class="nav-link menu-spline">
+        <i class="fa fa-ellipsis-h"></i>
+    </div>
+    <div id="menu-spline-extrude" class="nav-link menu-spline">
+        <i class="fa fa-external-link-alt"></i>
+    </div>
+
+    <div id="menu-sensor-new" class="nav-link menu-sensor">
+        <i class="fas fa fa-plus"></i>
+    </div>
+
+    <div id="menu-sensor-class" class="scene-title menu-sensor">
+        <form class="navbar-form navbar-left">
+            <div class="form-group">
+                <input id="sensor-name" class="form-control" type="text" />
+            </div>
+        </form>
+    </div>
+    <div id="menu-sensor-type" class="nav-link menu-sensor">
+        <i class="fas fa fa-cog"></i>
+    </div>
+    <div id="menu-sensor-channels" class="nav-link menu-sensor">
+        <i class="fa fa-tv"></i>       
+    </div>
+    <div id="menu-sensor-save" class="nav-link menu-sensor">
+        <i class="fa fa-save"></i>       
+    </div>
+
+    <div id="menu-event-new" class="nav-link menu-event">
+        <i class="fas fa fa-plus"></i>
+    </div>
+
+    <div id="menu-event-type" class="scene-title menu-event">
+    <form class="navbar-form navbar-left">
+        <div class="form-group">
+            <input id="event-name" class="form-control" type="text" />
+        </div>
+    </form>
+    </div>
+
+    <div id="menu-event-show" class="nav-link menu-event">
+        <i class="fa fa-adjust"></i>       
+    </div>
+
+{% if modelres.models|length > 0 %}
+    <div id="menu-simulator-start" class="nav-link menu-simulator">
+        <i class="fas fa fa-play"></i>
+    </div>
+    <div id="menu-simulator-pause" class="nav-link menu-simulator">
+        <i class="fas fa fa-pause"></i>
+    </div>
+    <div id="menu-simulator-reset" class="nav-link menu-simulator">
+        <i class="fa fa-repeat"></i>       
+    </div>
+    <div id="menu-simulator-kill" class="nav-link menu-simulator">
+        <i class="fas fa fa-close"></i>
+    </div>
+{% endif %}
+
+    <a id="menu-main-snapshot" class="nav-link threed-selection menu-main" collection="scenes" data-toggle="tooltip" data-placement="top" title="Screenshot for Icon">
+        <i class="fa fa-camera-retro"></i>
+    </a>    
+
+    <div id="menu-main-savescene" class="nav-link threed-selection menu-main" collection="scenes" data-toggle="tooltip" data-placement="top" title="Save the current Scene">
+        <i class="fa fa-save"></i>
+    </div>
+
+    <div id="menu-main-exit" class="nav-link threed-selection menu-main" collection="scenes" data-toggle="tooltip" data-placement="top" title="Return to Project page">
+        <i class="fa fa-power-off"></i>
+    </div>
+</nav>

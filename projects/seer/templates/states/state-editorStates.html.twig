@@ -1,0 +1,41 @@
+// Add states here... easy to find them all!!!
+// 
+// Should only need this if in editor!
+
+{% include 'states/state-initState.html.twig' %}
+{% include 'states/state-editorNone.html.twig' %}
+{% include 'states/state-placeObject.html.twig' %}
+{% include 'states/state-rotateObject.html.twig' %}
+{% include 'states/state-placeNode.html.twig' %}
+{% include 'states/state-placeSensor.html.twig' %}
+{% include 'states/state-rotateSensor.html.twig' %}
+{% include 'states/state-placeEvent.html.twig' %}
+{% include 'states/state-scaleEvent.html.twig' %}
+{% include 'states/state-linkEvent.html.twig' %}
+{% include 'states/state-linkSensor.html.twig' %}
+
+stateManager.AddState("initialize", initState);
+stateManager.AddState("placeobject", placeObjectState);
+stateManager.AddState("rotateobject", rotateObjectState);        
+
+stateManager.AddState(EditorMode.PLACE, placeObjectState);
+stateManager.AddState(EditorMode.INITIALPLACE, placeObjectState);
+
+stateManager.AddState(EditorMode.NODENEW, placeNodeState);
+stateManager.AddState(EditorMode.NODEPLACE, placeNodeState);
+
+stateManager.AddState(EditorMode.SENSORNEW, placeSensorState);
+stateManager.AddState(EditorMode.SENSORPLACE, placeSensorState);
+stateManager.AddState(EditorMode.SENSORROTATE, rotateSensorState);
+stateManager.AddState(EditorMode.SENSORLINK, linkSensorState);
+
+stateManager.AddState(EditorMode.EVENTNEW, placeEventState);
+stateManager.AddState(EditorMode.EVENTPLACE, placeEventState);
+stateManager.AddState(EditorMode.EVENTSCALE, scaleEventState);
+stateManager.AddState(EditorMode.EVENTLINK, linkEventState);
+
+stateManager.AddState(EditorMode.ROTATE, rotateObjectState);
+stateManager.AddState(EditorMode.INITIALROTATE, rotateObjectState);
+
+stateManager.AddState(EditorMode.NONE, noneState);
+
