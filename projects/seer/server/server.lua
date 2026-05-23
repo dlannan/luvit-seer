@@ -67,7 +67,7 @@ _G.SEARCH   = search
 --       REDIS uses localhost requests for security, no remote requests are allowed!!
 --_G.LOCALHOST_IP         = "127.0.0.1"
 _G.LOCALHOST_WWW_IP     = "127.0.0.1"
-_G.LOCALHOST_IP = "192.168.50.152"
+_G.LOCALHOST_IP         = "192.168.50.152"
 _G.LOCALHOST_PORT       = 8443
 _G.LOCALHOST_REDIS_PORT = 6379
 
@@ -148,6 +148,48 @@ dataset.page = {
     },
 }
 
+dataset.projects = {
+    [1]     = {
+        name    = "Project 1",
+        uid     = "012345", 
+        desc    = "Project 1 description",
+        modified = "01/01/2001",
+        scenes  = {
+            [1] = {
+                icon    = "/content/images/plywood.jpg",
+            },
+        },
+    },
+    [2]     = {
+        name    = "Project 2",
+        uid     = "012346", 
+        desc    = "Project 2 description",
+        modified = "01/02/2001",
+        scenes  = {
+            [1] = {
+                icon    = "/content/images/wood.jpg",
+            },
+            [2] = {
+                icon    = "/content/images/waternormals.jpg",
+            }
+        },
+    },
+    [3]     = {
+        name    = "Project 3",
+        uid     = "012347", 
+        desc    = "Project 3 description",
+        modified = "01/03/2001",
+        scenes  = {
+            [1] = {
+                icon    = "/content/images/rocks.jpg",
+            },
+            [2] = {
+                icon    = "/content/images/grass.png",
+            }
+        },
+    },
+}
+
 _G.loginrequired = false
 if _G.editing == true or _G.SESSIONS.loginrequired == true then
     _G.loginrequired = true
@@ -163,6 +205,10 @@ local fontspath = pathJoin(apppath, pathJoin(project, "userassets/fonts"))
 local scriptspath = pathJoin(apppath, pathJoin(project, "userassets/scripts"))
 local videospath = pathJoin(apppath, pathJoin(project, "userassets/videos"))
 local imagespath = require('imagecache')
+
+_G.IMAGES_PATH = pathJoin(apppath, pathJoin(project, "userassets/images"))
+_G.PROJECT_USERASSETS = pathJoin(apppath, pathJoin(project, "userassets"))
+_G.PROJECT_FOLDER = apppath
 
 -- p('Building search table...')
 search.init()
@@ -198,6 +244,9 @@ require('weblit-app')
 .route({ path = "/images/:path:" }, static(pathJoin(apppath, "static/images")))
 .route({ path = "/fonts/:path:" }, static(fontspath))
 
+.route({ path = "/:name:.html" }, resty(pathJoin(project, "templates"), dataset) )
+.route({ path = "/:path:/:name:.html" }, resty(pathJoin(project, "templates"), dataset) )
+
 --Special static routes for templates - same data though.
 .route({ path = "/:name:.twig" }, resty(pathJoin(project, "templates"), dataset) )
 .route({ path = "/:path:/:name:.twig" }, resty(pathJoin(project, "templates"), dataset) )
@@ -210,6 +259,7 @@ require('weblit-app')
 -- .route({ path = "/userassets/html/:path:" }, static(htmlpath))
 .route({ path = "/css/:path:" }, static(csspath))
 .route({ path = "/icons/:path:" }, static(iconspath))
+-- .route({ path = "/images/:path:" }, static(imagespath))
 .route({ path = "/scripts/:path:" }, static(scriptspath))
 .route({ path = "/js/:path:" }, static(jspath))
 .route({ path = "/videos/:path:" }, static(videospath))
@@ -218,8 +268,10 @@ require('weblit-app')
 
 -- .route({ path = "/admin/:name:.html" }, require('controllers/admin'))
 -- .route({ path = "/admin/:path:/:name:.html" }, require('controllers/admin'))
--- .route({ path = "/:name" }, require('controllers/template'))
--- .route({ path = "/:path:/:name:.html" }, require('controllers/template'))
+.route({ path = "/:name:" }, resty(pathJoin(project, "templates"), dataset) )
+.route({ path = "/images/:name:" },  static(pathJoin(project, "userassets/images")) )
+
+.route({ path = "/" }, require('controllers/index')(pathJoin(project, "templates"), dataset))
 
 -- .route({ path = "/functions/event" }, require('html_event_details'))
 

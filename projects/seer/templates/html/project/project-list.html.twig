@@ -1,22 +1,14 @@
-{% set query = "[sql-table json]select name,uid,desc from projects where users like '%{{ grav.user.username }}%'[/sql-table]" %}
-{% set results = (query|shortcodes)| json_decode %}
+
+{% set username = grav.user.username %}
+{% set query = "select name,uid,desc from projects where users like " ~ username %}
+{% set results = projects %}
 
 
 {% for pp in results %}  
 {% if pp %}
 
-    {% set query = ("[sql-table json]select * from scenes where projectid = '" ~ pp.uid ) ~ "' [/sql-table]" %}
-    {% set scenedb = ((query|shortcodes) | json_decode) %}
-    {% if scenedb %}
-        {% set randomscene = random(scenedb) %}
-
-        {% set iconquery = ("[sql-table json]select * from icons where uid = '" ~ randomscene.icon ) ~ "' [/sql-table]" %}
-        {% if iconquery %}
-        {% set icondb = ((iconquery|shortcodes)| json_decode)[0] %}
-        {% endif %}
-    {% endif %}
-
-
+        {% set randomscene = random(pp.scenes) %}
+        {% set icondb = loadicon(randomscene.icon) %}
                 <div class="col-sm-6">
                 <div class="card">
                     <div class="card-header" style="justify-content: space-between;">
@@ -32,7 +24,7 @@
                     <div class="row">
                         <div class="col-sm-6">{{ pp.desc }}</div>
                         <div class="col-sm-6 scene-card" onclick="location.href='/project?projectid={{pp.uid}}'" id="{{ pp.uid|md5 }}">
-                        <img src="data:image/png;base64,{{ icondb.data }}" />                        
+                        <img src="data:image/png;base64,{{ icondb }}" />                        
                         </div>                    
                     </div>
                     </div>

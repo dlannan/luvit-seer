@@ -15,7 +15,7 @@
 local getType       = require("mime").getType
 local jsonStringify = require('json').stringify
 local makeChroot    = require('coro-fs').chroot
-local md5           = require("md5")
+local pathJoin      = require('luvi').path.join
 
 -- local template = require "resty.template"
 -- local html = require "resty.template.html"
@@ -25,66 +25,8 @@ local aspect        = require("aspect.template").new({
     -- cache       = false,
 })
 
-local filters       = require("aspect.filters")
-local funcs         = require("aspect.funcs")
-
-
-filters.add("shortcodes", {
-    input = "string", -- input value type
-    output = "string", -- output value type
-    args = {
-        [1] = {name = "arg1", type = "string"}, 
-    }
-}, function (v, arg1) 
-  return arg1
-end)
-
-filters.add("json_decode", {
-    input = "string", -- input value type
-    output = "json", -- output value type
-    args = {
-        [1] = {name = "arg1", type = "string"}, 
-    }
-}, function (v, arg1) 
-  return arg1
-end)
-
-filters.add("md5", {
-    input = "string", -- input value type
-    output = "string", -- output value type
-    args = {
-        [1] = {name = "arg1", type = "string"}, 
-    }
-}, function (v, arg1) 
-  return md5.sumhexa(arg1)
-end)
-
-funcs.add("addJs", {
-    args = {
-        [1] = {name = "arg1", type = "string"},
-    }
-}, function (__, args) 
-  p(args)
-  return string.gsub(args[1], "theme:////assets(.+)", "<script type=\"text/javascript\" src=\"%1\"></script>")
-end)
-
-funcs.add("addCss", {
-    args = {
-        [1] = {name = "arg1", type = "string"},
-    }
-}, function (__, arg1) 
-  p(arg1)
-  return string.match(arg1, "theme:////assets(.+)", "<link rel=\"stylesheet\" href=\"%1\">")
-end)
-
-funcs.add("url", {
-    args = {
-        [1] = {name = "arg1", type = "string"},
-    }
-}, function (__, arg1) 
-  p(arg1)
-  return arg1
-end)
+require("aspect.custom_filters")
+require("aspect.custom_functions")
 
 -- Lua Resty specific setup
 -- Disable template caching
@@ -97,9 +39,9 @@ end)
 return function (rootPath, datasrc)
 
   local fs = makeChroot(rootPath)
-  aspect.loader = require("aspect.loader.filesystem").new( "/mnt/f/dev/web/luvit-seer/"..rootPath )
+  aspect.loader = require("aspect.loader.filesystem").new( pathJoin(_G.PROJECT_FOLDER, rootPath) )
 
-  return function (req, res, go)
+  return function(req, res, go)
     if req.method ~= "GET" then return go() end
     local path = (req.params and req.params.path) or req.path
     path = path:match("^[^?#]*")
@@ -107,13 +49,27 @@ return function (rootPath, datasrc)
       path = path:sub(2)
     end
     local stat = fs.stat(path)
-    if not stat then return go() end
+    if not stat or stat.type == "directory" then 
+      stat = fs.stat(path..".twig")
+      if not stat then 
+        stat = fs.stat(path..".html.twig")
+        if not stat then return go() end
+      end
+    end
 
     local function renderFile()
 
       res.code = 200
       res.headers["Content-Type"] = getType(path)
-      local output, err = aspect:render(path, datasrc)
+      local output = ""
+      if(string.match(path, ".+%.twig$")) then 
+        output, err = aspect:render(path, datasrc)
+      elseif(string.match(path, ".+%.html$")) then 
+        output, err = aspect:render(path..".twig", datasrc)
+      else
+        output, err = aspect:render(path..".html.twig", datasrc)
+        res.headers["Content-Type"] = getType("test.html")
+      end
       res.body = output.result
       return 
     end
@@ -140,9 +96,9 @@ return function (rootPath, datasrc)
       return
     end
 
-    if stat.type == "directory" then
-      return renderDirectory()
-    elseif stat.type == "file" then
+    -- if stat.type == "directory" then
+    --   return renderDirectory()
+    if stat.type == "file" then
       if req.path:byte(-1) == 47 then
         res.code = 301
         res.headers.Location = req.path:match("^(.*[^/])/+$")

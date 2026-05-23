@@ -64,9 +64,9 @@ return function (rootPath)
       return
     end
 
-    if stat.type == "directory" then
-      return renderDirectory()
-    elseif stat.type == "file" then
+    -- if stat.type == "directory" then
+    --   return renderDirectory()
+    if stat.type == "file" then
       if req.path:byte(-1) == 47 then
         res.code = 301
         res.headers.Location = req.path:match("^(.*[^/])/+$")
