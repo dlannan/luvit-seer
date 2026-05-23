@@ -5,6 +5,8 @@ A new luvit based web system based loosely around the luvit blog.
 
 I have been looking for a decent open source asset management tool (specifically for 3D assets and animations) and most of the good tools are commercial and very expensive, as well as being fairly mediocre in their capabilities. 
 
+![Initial Projects Page](/projects/media/2026-05-23_17-52-initial-projects-page.png)
+
 ## How
 
 The development will follow some basic first steps:
