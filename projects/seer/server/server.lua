@@ -187,12 +187,16 @@ require('weblit-app')
 .route({ path = "/js/:path:" }, static(jspath))
 .route({ path = "/videos/:path:" }, static(videospath))
 
+-- Routes for handling params to specific pages
+.route({ path = "/project?:name:" },  resty(pathJoin(project, "templates"), dataset))
+
+
 -- .route({ path = "/userassets/images/:path:" }, imagespath(apppath) )
 
 -- .route({ path = "/admin/:name:.html" }, require('controllers/admin'))
 -- .route({ path = "/admin/:path:/:name:.html" }, require('controllers/admin'))
 .route({ path = "/:name:" }, resty(pathJoin(project, "templates"), dataset) )
-.route({ path = "/images/:name:" },  static(pathJoin(project, "userassets/images")) )
+.route({ path = "/images/:name:" },  static(pathJoin(project, "userassets")) )
 
 .route({ path = "/" }, require('controllers/index')(pathJoin(project, "templates"), dataset))
 

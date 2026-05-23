@@ -68,24 +68,11 @@
 <script>
 $(document).ready(function() {
 
-    {% set query = "select uid from projects where users like Trevor" %}
-    {% set projects = (query|shortcodes)| json_decode %}
+    {% set results = projects %}
 
-    {% set basequery = "select * from scenes where" %}
-    {% for uid in projects %}
-    {% set basequery = (basequery ~ (" projectid = '" ~ uid.uid )) ~ "' or " %}
-    {% endfor %}
-    {% set basequery = basequery ~ (" projectid = '999999'") %}
-    {% set orderquery = " order by edittime desc [/sql-table]" %}
-    {% set query = basequery ~ orderquery %}
-    {% set results = (query|shortcodes)| json_decode %}
-
-    {% for i in range(0, 3) %}  
-    {% set pp = results[i] %}
-    {% set iconquery = ("select * from icons where uid = '" ~ pp.icon ) ~ "' " %}
-    {% if iconquery %}
-    {% set icondb = ((iconquery|shortcodes)| json_decode) %}
-    {% endif %}
+    {% for pp in results %}  
+    {% set scene = pp.scenes[1] %}
+    {% set icondb = loadicon(scene.icon) %}
 
     var html = '<div class="col-sm-3">';
     var html = html + '    <div class="card">';
@@ -96,7 +83,7 @@ $(document).ready(function() {
     var html = html + '        <div class="row">';
     var clickstring = "onclick=\"location.href='/project?projectid={{pp.projectid}}'\"";    
     var html = html + '                <div class="col-sm-6 scene-card single-image" ' + clickstring + ' id="Some Id">';
-    var html = html + '                <img src="data:image/png;base64,{{ icondb[0].data }}" />';
+    var html = html + '                <img src="data:image/png;base64,{{ icondb }}" />';
     var html = html + '            </div>';
     var html = html + '        </div>';
     var html = html + '    </div>';

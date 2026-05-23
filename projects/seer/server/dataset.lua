@@ -10,12 +10,16 @@ local dataset = {
         language = {
             getLanguage = "en",
         },
+        session = {
+            form    = {},
+        }
     },
     site = {
         title       = "site title",
         description = "site description",
         metadata    = {
-            seerbuild = "Luvit Seer 1.0.0",
+            title           = "Luvit Seer",
+            seerbuild       = "Luvit Seer 1.0.0",
         }
     },
     theme_url = "",
@@ -32,47 +36,103 @@ local dataset = {
             property = "",
             content = "",
         },
+        uri = {
+            query   = {},
+        },
     },
 
     projects = {
         [1] = {
             name     = "Project 1",
+            projectid = 1,
             uid      = "012345",
             desc     = "Project 1 description",
             modified = "01/01/2001",
             scenes   = {
                 [1] = {
+                    name        = "Scene 1",
+                    sceneid     = 1,
+                    edituser    = "Joe Smith",
+                    edittime    = "01-01-2001-12-30",
                     icon = "/content/images/plywood.jpg",
                 },
+            },
+            users   = {
+                [1] = {
+                    name    = "Joe Smith",
+                    email   = "joesmith@gmail.com",
+                },
+                [2] = {
+                    name    = "Wendy Mundane",
+                    email   = "wmundane@gmail.com",
+                }
             },
         },
         [2] = {
             name     = "Project 2",
+            projectid = 2,
             uid      = "012346",
             desc     = "Project 2 description",
             modified = "01/02/2001",
             scenes   = {
                 [1] = {
+                    name        = "Scene 1",
+                    sceneid     = 1,
+                    edituser    = "Joe Smith",
+                    edittime    = "01-01-2001-12-31",
                     icon = "/content/images/wood.jpg",
                 },
                 [2] = {
+                    name        = "Scene 2",
+                    sceneid     = 2,
+                    edituser    = "Joe Smith",
+                    edittime    = "01-01-2001-12-32",
                     icon = "/content/images/waternormals.jpg",
                 }
             },
+            users   = {
+                [1] = {
+                    name    = "Joe Smith",
+                    email   = "joesmith@gmail.com",
+                },
+                [2] = {
+                    name    = "Wendy Mundane",
+                    email   = "wmundane@gmail.com",
+                }
+            },            
         },
         [3] = {
             name     = "Project 3",
+            projectid = 3,
             uid      = "012347",
             desc     = "Project 3 description",
             modified = "01/03/2001",
             scenes   = {
                 [1] = {
+                    name        = "Scene 1",
+                    sceneid     = 1,
+                    edituser    = "Joe Smith",
+                    edittime    = "01-01-2001-12-33",
                     icon = "/content/images/rocks.jpg",
                 },
                 [2] = {
+                    name        = "Scene 2",
+                    sceneid     = 2,
+                    edituser    = "Joe Smith",
+                    edittime    = "01-01-2001-12-34",
                     icon = "/content/images/grass.png",
                 }
             },
+            users   = {
+                [1] = {
+                    name    = "Joe Smith",
+                    email   = "joesmith@gmail.com",
+                },
+                [2] = {
+                    name    = "Wendy Mundane",
+                    email   = "wmundane@gmail.com",
+                }
+            },            
         },
     }
 }

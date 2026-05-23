@@ -13,6 +13,16 @@ funcs.add("addJs", {
     return string.gsub(arg1, "theme:////assets(.+)", "<script type=\"text/javascript\" src=\"%1\"></script>")
 end)
 
+funcs.add("addInlineJs", {
+    args = {
+        [1] = {name = "arg1", type = "string"},
+    }
+}, function (__, args) 
+    local arg1 = args.arg1
+    return "<script type=\"text/javascript\">"..arg1.."</script>"
+end)
+
+
 funcs.add("addCss", {
     args = {
         [1] = {name = "arg1", type = "string"},
@@ -69,6 +79,17 @@ funcs.add("print", {
     }
 }, function (__, args) 
     local arg1 = args.arg1
+    print("---------->>> WTF")
     p(arg1)
 end)
 
+funcs.add("starts_with", {
+    args = {
+        [1] = {name = "arg1", type = "string"},
+        [2] = {name = "arg2", type = "string"},
+    }
+}, function (__, args) 
+    local arg1 = args.arg1
+    local arg2 = args.arg2
+    return arg1:find("^"..arg2) ~= nil
+end)

@@ -16,17 +16,19 @@ local getType       = require("mime").getType
 local jsonStringify = require('json').stringify
 local makeChroot    = require('coro-fs').chroot
 local pathJoin      = require('luvi').path.join
+local url           = require("url")
+local urlcode       = require("urlcode")
 
 -- local template = require "resty.template"
 -- local html = require "resty.template.html"
+
+require("aspect.custom_filters")
+require("aspect.custom_functions")
 
 local aspect        = require("aspect.template").new({
     -- debug       = true,
     -- cache       = false,
 })
-
-require("aspect.custom_filters")
-require("aspect.custom_functions")
 
 -- Lua Resty specific setup
 -- Disable template caching
@@ -59,17 +61,23 @@ return function (rootPath, datasrc)
 
     local function renderFile()
 
+      datasrc.page.uri.query = {}
+      local utbl = url.parse(req.path)
+      datasrc.page.url = utbl
+      urlcode.parse(utbl.query, datasrc.page.uri.query)
+
       res.code = 200
-      res.headers["Content-Type"] = getType(path)
+      res.headers["Content-Type"] = "text/html"
       local output = ""
+      local err = nil
       if(string.match(path, ".+%.twig$")) then 
         output, err = aspect:render(path, datasrc)
       elseif(string.match(path, ".+%.html$")) then 
         output, err = aspect:render(path..".twig", datasrc)
       else
         output, err = aspect:render(path..".html.twig", datasrc)
-        res.headers["Content-Type"] = getType("test.html")
       end
+      if(err) then print(err) end
       res.body = output.result
       return 
     end

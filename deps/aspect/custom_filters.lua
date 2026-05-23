@@ -32,4 +32,3 @@ filters.add("md5", {
 }, function (arg1) 
   return md5.sumhexa(arg1)
 end)
-

@@ -1,5 +1,5 @@
-{% set collection = page.collection() %}
-{% set base_url = page.url %}
+{% set collection = page.collection %}
+{% set base_url = page.pathname %}
 {% set feed_url = base_url %}
 
 {% if base_url == '/' %}

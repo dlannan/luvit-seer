@@ -1,12 +1,9 @@
-{% embed 'partials/base-dashboard.html.twig' %}
+{% extends 'partials/base-dashboard.html.twig' %}
 
-{% if config.plugins.login.enabled and grav.user.authorize('site.login') %}
 {% set uservalid = true %}
-{% endif %}
 
-{% set projectid = grav.uri.query('projectid') %}
-{% set query = ("[sql-table json]select * from projects where uid = '" ~ projectid ) ~ "' limit 1[/sql-table]" %}
-{% set project = ((query|shortcodes) | json_decode)[0] %}
+{% set projectid = page.uri.query.projectid %}
+{% set project = projects[projectid] %}
 {% set projectvalid = project and uservalid %}
 
 {% block content %}
@@ -60,13 +57,11 @@
                 </div>
             </div>
 
-            {% set scenequery = ("[sql-table json]select * from scenes where projectid = '" ~ projectid ) ~ "' [/sql-table]" %}
-            {% set scenedb = ((scenequery|shortcodes) | json_decode) %}
+            {% set scenedb = project.scenes %}
 
             {% for scene in scenedb %}
             {% if scene %}
-            {% set iconquery = ("[sql-table json]select * from icons where uid = '" ~ scene.icon ) ~ "' [/sql-table]" %}
-            {% set icondb = ((iconquery|shortcodes) | json_decode)[0] %}
+            {% set icondb = loadicon(scene.icon) %}
 
             <div class="col-sm-3">
                 <div class="card scene-body">
@@ -79,7 +74,7 @@
                         <h6>User: {{ scene.edituser }}</h6>
                         <p><small>{{ scene.edittime }}</small></p>
                         <div class="scene-card projectscene" sceneid="{{ scene.sceneid }}">
-                            <img src="data:image/png;base64,{{ icondb.data }}" />
+                            <img src="data:image/png;base64,{{ icondb }}" />
                         </div>
                     </div>
                 </div>
@@ -96,7 +91,7 @@
                 <div class="card-header">
                     <h3 class="card-title">Latest Project Messages</h3>
                 </div>
-                {% include 'dashboard/message-list.html.twig' with { 'limit': '8', 'projectset': projectid } %}
+                {% include 'dashboard/message-list.html.twig' with { limit: '8', projectset: projectid } %}
             </div>
         </div>
     </div>
@@ -107,7 +102,7 @@
                 <div class="card-header">
                     <h3 class="card-title">Latest Project Issues</h3>
                 </div>
-                {% include 'dashboard/issue-list.html.twig' with { 'limit': '8', 'projectset': projectid } %}
+                {% include 'dashboard/issue-list.html.twig' with { limit: '8', projectset: projectid } %}
             </div>
         </div>
     </div>
@@ -132,9 +127,9 @@
 </footer>
 </div>
 
-{% include 'sim/net-websocket.html.twig' %}
+{# {% include 'sim/net-websocket.html.twig' %} #}
 
-<script src="{{ theme_url }}/assets/js/object-watch.js"></script>
+<script src="/js/object-watch.js"></script>
 {% include 'html/project/project-simstatus.js' %}
 
 {% include 'html/project/project-scenemodule.js.twig' %}
@@ -145,11 +140,13 @@
 {% include 'html/project/project-developer.js.twig' %}
 
 <script>
+{#
 {% if projectvalid == true %}
 var waitClick = true;
 {% else %}
 window.location.href = "/projects";
 {% endif %}
+#}
 
 function getDateString() {
     var d = new Date().toISOString();
@@ -229,4 +226,3 @@ $(document).ready(function() {
 
 {% include 'dashboard/footer-edit.html.twig' %}
 {% endblock %}
-{% endembed %}

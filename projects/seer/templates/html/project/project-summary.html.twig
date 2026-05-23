@@ -63,11 +63,7 @@
 
                                 <div class="card-body o-auto" style="height: 15rem">
                                   <ul class="list-unstyled list-separated">
-{% set users = project.users|split(',') %}
 {% for user in users %}
-
-{% set query = ("[sql-table json]select * from users where name = '" ~ user ) ~ "' limit 1[/sql-table]" %}
-{% set userdb = ((query|shortcodes) | json_decode)[0] %}
 
                                     <li class="list-separated-item">
                                       <div class="row align-items-center">
@@ -76,9 +72,9 @@
                                         </div>
                                         <div class="col">
                                           <div>
-                                            <a href="javascript:void(0)" class="text-inherit">{{ userdb.fullname }}</a>
+                                            <a href="javascript:void(0)" class="text-inherit">{{ user.fullname }}</a>
                                           </div>
-                                          <small class="d-block item-except text-sm text-muted h-1x">{{ userdb.email }}</small>
+                                          <small class="d-block item-except text-sm text-muted h-1x">{{ user.email }}</small>
                                         </div>
                                         <div class="col-auto">
                                           <div class="item-action dropdown">
