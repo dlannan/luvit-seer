@@ -1,0 +1,6 @@
+blob_storage/
+*.o
+*.lib
+aspect-error.log
+
+./projects/assets/
