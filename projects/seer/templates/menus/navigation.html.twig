@@ -1,11 +1,10 @@
-{% set pid = grav.uri.query("projectid") %}
-{% set sid = grav.uri.query("sceneid") %}
+{% set pid = page.uri.query.projectid %}
+{% set sid = page.uri.query.sceneid %}
 
-{% set query = ("[sql-table json]select name from projects where uid = '" ~ pid ) ~ "' limit 1[/sql-table]" %}
-{% set pname = ((query|shortcodes) | json_decode)[0] %}
+{% set pname = projects[pid].name %}
 
 {% set modelq = ("[sql-table json]select models from scenes where sceneid = '" ~ sid ) ~ "' [/sql-table]" %}
-{% set modelres = ((modelq|shortcodes) | json_decode(true))[0] %}
+{% set modelres = {} %}
 
 <div class="scenarist-menu-main">
     <button class="btn menu-mode-item" type="button" data-menu="Main" data-toggle="tooltip" data-placement="top" title="Main Save/Load and Quit"><i class="fa fa-bars"></i></button>

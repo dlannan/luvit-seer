@@ -1,8 +1,6 @@
 {% embed 'partials/base-dashboard.html.twig' %}
 
-{% if config.plugins.login.enabled and grav.user.authorize('site.login') %}
 {% set uservalid = true %}
-{% endif %}
 
 {% block content %}
 {% include 'dashboard/header.html.twig' %}

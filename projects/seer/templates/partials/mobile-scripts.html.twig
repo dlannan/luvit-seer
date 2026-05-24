@@ -1,4 +1,5 @@
 <script> 
+var isMobile = {{ site.isMobile|default(false) }}
 $(document).ready( function() {
     if(isMobile) {
     $("#mobilebtn-steer-left").on('touchstart', function(e) {

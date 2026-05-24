@@ -45,19 +45,18 @@ var vehicleListCounter = 0;
 function getAvailableVehicle() {
     
     vehicleListCounter = 0;
-    {% set ppage = page.find('/assets/models') %}
-    {% set gloader = ppage.header.gloader %}
+    {% set gloader = "" %}
 
-    {% for env in ppage.children %}
+    {% for env in envpages %}
         {% set mediaasset = env.header.asset|striptags %}
         // Add click for loading in the data
         var data = {
 
-            name: "{{ env.header.name }}",
-            format: "{{ env.header.format }}",
-            json: "{{ env.header.json }}",
-            loadscene: "{{ env.header.loadscene }}",
-            url: "{{ env.media[mediaasset].url }}",
+            name: "{{ env.name }}",
+            format: "{{ env.format }}",
+            json: "{{ env.json }}",
+            loadscene: "{{ env.loadscene }}",
+            url: "{{ env.path }}",
             gloadscene: "{{ gloader }}"
         };
 

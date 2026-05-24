@@ -132,11 +132,14 @@ local iconspath = pathJoin(apppath, pathJoin(project, "userassets/icons"))
 local fontspath = pathJoin(apppath, pathJoin(project, "userassets/fonts"))
 local scriptspath = pathJoin(apppath, pathJoin(project, "userassets/scripts"))
 local videospath = pathJoin(apppath, pathJoin(project, "userassets/videos"))
+local animspath = pathJoin(apppath, pathJoin(project, "userassets/anims"))
 local imagespath = require('imagecache')
 
 _G.IMAGES_PATH = pathJoin(apppath, pathJoin(project, "userassets/images"))
 _G.PROJECT_USERASSETS = pathJoin(apppath, pathJoin(project, "userassets"))
 _G.PROJECT_FOLDER = apppath
+
+local contentpath = pathJoin(apppath, dataset.site.datasources[1].params.path)
 
 -- p('Building search table...')
 search.init()
@@ -182,10 +185,14 @@ require('weblit-app')
 
 .route({ path = "/css/:path:" }, static(csspath))
 .route({ path = "/icons/:path:" }, static(iconspath))
+.route({ path = "/anims/:path:" }, static(animspath))
 -- .route({ path = "/images/:path:" }, static(imagespath))
 .route({ path = "/scripts/:path:" }, static(scriptspath))
 .route({ path = "/js/:path:" }, static(jspath))
 .route({ path = "/videos/:path:" }, static(videospath))
+
+-- Path for asset sources
+.route({ path = "/content/:path:" }, static(contentpath))
 
 -- Routes for handling params to specific pages
 .route({ path = "/project?:name:" },  resty(pathJoin(project, "templates"), dataset))

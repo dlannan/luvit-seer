@@ -8,14 +8,13 @@
 </head>
 <body>
 
-{% if config.plugins.login.enabled and grav.user.authorize('site.login') %}
 {% set uservalid = true %}
 
 {% include 'threejs/threejs-utils.html.twig' %}
 {% include 'threejs/threejs-tools.html.twig' %}
 
 {% include 'menus/navigation.html.twig' %}
-{% endif %}
+
 
 {% block header %}
     <div class="entry-header">

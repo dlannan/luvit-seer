@@ -6,6 +6,7 @@ local dataset = {
     grav = {
         user     = {
             username = "Trevor",
+            authenticated = true,
         },
         language = {
             getLanguage = "en",
@@ -14,14 +15,35 @@ local dataset = {
             form    = {},
         }
     },
+
     site = {
         title       = "site title",
         description = "site description",
         metadata    = {
             title           = "Luvit Seer",
             seerbuild       = "Luvit Seer 1.0.0",
+        },
+        isMobile    = false,
+
+        -- Data sources are a list of all data sources this server can access
+        -- They will include git repo links, databases, and file paths.
+        datasources     = {
+            [1]     = {
+                name        = "Local Seer Assets",
+                type        = "filepath",
+                params      = {
+                    path        = "/mnt/f/dev/web/test-assets",
+                    readonly    = true,
+                    security    = true,
+                    excluded    = { },      -- List of excluded folder within the path that is not allowed
+                },
+                modified    = "01-01-2001-00-00-00",  -- last modified
+                updated     = "01-01-2001-00-00-00",  -- last updated (pulled from git, or checked db/fs)
+                created     = "01-01-2001-00-00-00",  -- Creation datetime
+            }
         }
     },
+
     theme_url = "",
     page = {
         title = "page title",
@@ -41,6 +63,11 @@ local dataset = {
         },
         sceneid     = 1,
         projectid   = 1,
+
+        threed = {
+            nearCamera = 1.0,
+            farCamera = 1000.0,
+        }
     },
 
     projects = {
@@ -144,6 +171,7 @@ local dataset = {
             asset       = "cityroadsystem.gltf",
             format      = "gltf",
             loadscene   = "loadScene.js",
+            path        = "/data/"
         },
         [2] = {
             title       = "Football Pitch",
@@ -152,7 +180,11 @@ local dataset = {
             format      = "glb",
             loadscene   = "loadScene.js",
         },
-    }
+    },
+    cameras = {
+        position    = "{ pos = { x: 0, y: 0, z: -100 }  }",
+        target      = "{ target = { x: 0, y: 0, z: 0 }  }",
+    },
 }
 
 return dataset

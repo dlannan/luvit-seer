@@ -18,8 +18,6 @@ function SaveCameraPosition(callback) {
     camtarget = camtarget.replace(/"/g, '\'');
 
     // If a saved camera exists, then overwrite (update) the db
-    {% set query = ( ("[sql-table json]select * from cameras where projectid = '" ~ projectid ) ~ "' and sceneid = '" ~ sceneid ) ~"' [/sql-table]" %}
-    {% set cameradb = ((query|shortcodes) | json_decode)[0] %}
 
     {% if cameradb %}
         $('#update-cameras input[name="data[where]"]').val(' sceneid = "{{ sceneid }}" and projectid = "{{ projectid }}"');

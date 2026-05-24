@@ -304,8 +304,8 @@ function initPopupMenus() {
         // scene as params to the thermal view.      
         var obj =SceneGraph.findNodeByUid(selectEditorObj, true);
         var params = { 
-            projectid: {{ projectid }}, 
-            sceneid: {{ sceneid }}, 
+            projectid: {{ projectid|default(1) }}, 
+            sceneid: {{ sceneid|default(1) }}, 
             object: obj.userData.uid,
             viewmode: "LUMINOS"
         };
@@ -333,8 +333,8 @@ function initPopupMenus() {
         // scene as params to the thermal view.      
         var obj = SceneGraph.findNodeByUid(selectEditorObj, true);
         var params = { 
-            projectid: {{ projectid }}, 
-            sceneid: {{ sceneid }}, 
+            projectid: {{ projectid|default(1) }}, 
+            sceneid: {{ sceneid|default(1) }}, 
             object: obj.userData.uid,
             viewmode: "LUMINOS"
         };

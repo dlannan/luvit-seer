@@ -286,7 +286,7 @@ function makeEchoScopeSALDO( seerCamera ) {
 
     var echoPass = new THREE.EchoSonarSALDO( 256, 256, params );
 
-    echoPass.params.colorMap = new THREE.TextureLoader().load( "{{ theme_url }}/assets/images/echocolormap.png" );
+    echoPass.params.colorMap = new THREE.TextureLoader().load( "/images/echocolormap.png" );
     echoPass.params.colorMap.magFilter = THREE.LinearFilter;
     echoPass.params.colorMap.minFilter = THREE.LinearFilter;
 
@@ -316,7 +316,7 @@ function makeTimeBearingSALDO( seerCamera ) {
     var vertlines = 120;
     var echoPass = new THREE.TimeBearingSALDO( 90, vertlines, params, 1 );
 
-    echoPass.params.colorMap = new THREE.TextureLoader().load( "{{ theme_url }}/assets/images/timebearing.png" );
+    echoPass.params.colorMap = new THREE.TextureLoader().load( "/images/timebearing.png" );
     echoPass.params.colorMap.magFilter = THREE.LinearFilter;
     echoPass.params.colorMap.minFilter = THREE.LinearFilter;
 
@@ -352,7 +352,7 @@ function makeLidar16SALDO( seerCamera ) {
     var vertlines = params.vertAzimuth / params.angularResV + 1;
     var lidarPass = new THREE.LidarPassSALDO( 360, vertlines, params, 4);
 
-    lidarPass.params.colorMap = new THREE.TextureLoader().load( "{{ theme_url }}/assets/images/lidarcolormap.png" );
+    lidarPass.params.colorMap = new THREE.TextureLoader().load( "/images/lidarcolormap.png" );
     lidarPass.params.colorMap.magFilter = THREE.LinearFilter;
     lidarPass.params.colorMap.minFilter = THREE.LinearFilter;
 
@@ -382,7 +382,7 @@ function makeLidar64SALDO( seerCamera ) {
     var h = seerCamera.h * seerCamera.rtScale;
     var lidarPass = new THREE.LidarPassSALDO( 800, 480, params, 4 );
 
-    lidarPass.params.colorMap = new THREE.TextureLoader().load( "{{ theme_url }}/assets/images/lidarcolormap.png" );				
+    lidarPass.params.colorMap = new THREE.TextureLoader().load( "/images/lidarcolormap.png" );				
     lidarPass.params.colorMap.magFilter = THREE.LinearFilter;
     lidarPass.params.colorMap.minFilter = THREE.LinearFilter;
 
@@ -410,7 +410,7 @@ function makeLidar128SALDO( seerCamera ) {
 
     var lidarPass = new THREE.LidarPassSALDO( 800, 480, params, 4 );
 
-    lidarPass.params.colorMap = new THREE.TextureLoader().load( "{{ theme_url }}/assets/images/lidarcolormap.png" );				
+    lidarPass.params.colorMap = new THREE.TextureLoader().load( "/images/lidarcolormap.png" );				
     lidarPass.params.colorMap.magFilter = THREE.LinearFilter;
     lidarPass.params.colorMap.minFilter = THREE.LinearFilter;
     lidarPass.clear = false;

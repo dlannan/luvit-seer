@@ -115,14 +115,14 @@ function initMainMenus() {
         $(".loading").show();
 
         // Determine update or insert
-        var sceneid = {{ sceneid|int }};
+        var sceneid = {{ sceneid|default(1) }};
 
         {% set scenedb = projects[projectid].scenes %}
 
         {% if scenedb %}
             $('#project-update input[name="data[where]"]').val(' sceneid = "{{ scenedb.sceneid }}"');
 
-            var sceneJson = getSceneData( {{ sceneid|int }}, {{ projectid|int }} );      
+            var sceneJson = getSceneData( sceneid, {{ projectid|default(1) }} );      
             var jsonStr = JSON.stringify(sceneJson);
             
             //console.log("Form submit: " + form);
@@ -163,7 +163,7 @@ function initMainMenus() {
         event.stopPropagation();
         
         simstate.mode = SimulationMode.PLAY;
-        startSim( {{ sceneid }}, function(data) {
+        startSim( {{ sceneid|default(1) }}, function(data) {
             simpleConnect();
         });
     });
@@ -172,21 +172,21 @@ function initMainMenus() {
         event.stopPropagation();
         
         simstate.mode = SimulationMode.PAUSED;
-        stopSim({{ sceneid }});
+        stopSim({{ sceneid|default(1) }});
     });
 
     $("#menu-simulator-reset").unbind('mouseup').mouseup( function (event) {
         event.stopPropagation();
 
         simstate.mode = SimulationMode.RESET;
-        resetSim({{ sceneid }});
+        resetSim({{ sceneid|default(1) }});
     });
 
     $("#menu-simulator-kill").unbind('mouseup').mouseup( function (event) {
         event.stopPropagation();
 
         simstate.mode = SimulationMode.NONE;
-        killSim({{ sceneid }});
+        killSim({{ sceneid|default(1) }});
     });
 
 

@@ -67,6 +67,7 @@ function skyUpdate(effectController) {
     var sunFade = clamp((0.1 + sunDir.y) * 10.0, 0.0, 1.0);
     var scatterFade = clamp((0.15 + sunDir.y) * 4.0, 0.0, 1.0); 
 
+    if(ocean) {
     if(ocean.surface != undefined) {
 
         ocean.surface.material.uniforms.sunPos.value = sunDir;
@@ -87,6 +88,7 @@ function skyUpdate(effectController) {
 		ocean.floor.material.uniforms.sunFade.value = sunFade;
 		ocean.floor.material.uniforms.scatterFade.value = scatterFade;
         ocean.floor.material.uniforms.sunTransmittance.value = trans;
+    }
     }
     
     if(grass != undefined && grass.children.length > 0) {

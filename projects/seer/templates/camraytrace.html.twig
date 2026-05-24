@@ -28,7 +28,7 @@
 
 		<div id="sensor-status" class="sensor-summary">
 		<div class="row">
-		<div class="col-sm-2"><p>&nbspSENSOR: {{ grav.uri.query('viewmode') }}</p></div>
+		<div class="col-sm-2"><p>&nbspSENSOR: {{ page.uri.query.viewmode }}</p></div>
 		<div class="col-sm-1"><p>AZ: 0</p></div>
 		<div class="col-sm-1"><p>HDG: 000</p></div>
 		<div class="col-sm-1"><p>ALT: 0</p></div>
@@ -62,7 +62,7 @@
 		{% include 'threejs/fx/threejs-ground.html.twig' %}		
 		{% include 'threejs/fx/threejs-materials.html.twig' %}
 
-		<script src="{{ theme_url }}/assets/js/threejs/renderers/RaytracingRenderer.js"></script>
+		<script src="/js/threejs/renderers/RaytracingRenderer.js"></script>
 
 		<script>
 
@@ -141,7 +141,7 @@
 
 				renderer = new THREE.RaytracingRenderer( {
 					workers: WORKERS,
-					workerPath: '{{ theme_url }}/assets/js/threejs/renderers/RaytracingWorker.js',
+					workerPath: '/js/threejs/renderers/RaytracingWorker.js',
 					randomize: true,
 					blockSize: 64
 				} );

@@ -79,7 +79,6 @@ funcs.add("print", {
     }
 }, function (__, args) 
     local arg1 = args.arg1
-    print("---------->>> WTF")
     p(arg1)
 end)
 

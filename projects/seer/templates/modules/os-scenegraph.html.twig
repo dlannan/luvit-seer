@@ -487,11 +487,13 @@ var SceneGraph = {
         this.oldTime = this.currentTime;
         this.currentTime = Date.now() * 0.001;
         this.elapsedTime = this.currentTime - this.oldTime;
+
         if(simstate.mode == SimulationMode.NONE) 
             this.elapsedTime = this.currentTime;
 
         if(simstate.mode == SimulationMode.PAUSED) 
             return;
+
 
         // Updater is slower than render - we interpolate vision.
         this.update( this.currentTime, this.elapsedTime );

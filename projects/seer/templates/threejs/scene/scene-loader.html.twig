@@ -94,7 +94,7 @@
         if(data.format.toLowerCase() === "glb") {
             uloader = threeloaders["gltf"];
             // Optional: Provide a DRACOLoader instance to decode compressed mesh data
-            THREE.DRACOLoader.setDecoderPath( '{{ theme_url }}/assets/js/threejs/libs/draco' );
+            THREE.DRACOLoader.setDecoderPath( '/js/threejs/libs/draco' );
             uloader.setDRACOLoader( threeloaders["draco"] );
         }
 
@@ -192,7 +192,7 @@
     function loadRoadSystem() {
 
         var uloader = new THREE.UTF8Loader();
-        uloader.load( "{{ theme_url }}/assets/content/envs/roads/roadways.js", 
+        uloader.load( "/content/envs/roads/roadways.js", 
             function ( object ) {
 
             object.position.y = -80.0;
@@ -229,7 +229,7 @@
                             {
                                 textureWidth: 512,
                                 textureHeight: 512,
-                                waterNormals: new THREE.TextureLoader().load( '{{ theme_url }}/assets/content/images/waternormals.jpg', 
+                                waterNormals: new THREE.TextureLoader().load( '/content/images/waternormals.jpg', 
                                 function ( texture ) {
                                     texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
                                 }),

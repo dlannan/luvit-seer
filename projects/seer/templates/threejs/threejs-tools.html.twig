@@ -1,10 +1,10 @@
-
-{% set projectid = page.uri.query.projectid|int %}
-{% set sceneid = page.uri.query.sceneid|int %}
-
 {% include "threejs/scene/threejs-scene-utils.html.twig"  with { sceneid: sceneid, projectid: projectid } %}
 
+{% include 'threejs/scene/scene-loader.html.twig' %}
+
 <script>
+
+{% include 'sensors/threejs-sensors.html.twig' %}
 
 {% include 'menus/main-menu-js.html.twig'  with { sceneid: sceneid, projectid: projectid } %}
 {% include 'menus/popup-menu-js.html.twig'  with { sceneid: sceneid, projectid: projectid } %}
