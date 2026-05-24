@@ -8,14 +8,15 @@
 </head>
 <body>
 
-{% if config.plugins.login.enabled and grav.user.authorize('site.login') %}
 {% set uservalid = true %}
 
-{% include 'threejs/threejs-utils.html.twig' with { 'sceneid': sceneid, 'projectid': projectid } %}
-{% include 'threejs/threejs-tools.html.twig' with { 'sceneid': sceneid, 'projectid': projectid } %}
+{% set projectid = page.uri.query.projectid|int %}
+{% set sceneid = page.uri.query.sceneid|int %}
 
-{% include 'menus/navigation-sim.html.twig' with { 'sceneid': sceneid, 'projectid': projectid } %}
-{% endif %}
+{% include 'threejs/threejs-utils.html.twig' with { sceneid: sceneid, projectid: projectid } %}
+{% include 'threejs/threejs-tools.html.twig' with { sceneid: sceneid, projectid: projectid } %}
+
+{% include 'menus/navigation-sim.html.twig' with { sceneid: sceneid, projectid: projectid } %}
 
 {% block header %}
     <div class="entry-header">

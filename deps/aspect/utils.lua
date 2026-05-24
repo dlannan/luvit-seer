@@ -129,7 +129,7 @@ local function has_lquote(s)
     repeat
         _, finish, _, new_equals = s:find(lstring_pat, finish)
         if new_equals then
-            equals = max(equals or 0, #new_equals)
+            equals = math.max(equals or 0, #new_equals)
         end
     until not new_equals
 

@@ -2,32 +2,33 @@
 var id = 0;
 selectionList = {};
 
-{% set ppage = page.find(envpages) %}
-{% set gloader = ppage.header.gloader %}
+{% set ppages = envpages %}
+{% set gloader = page.header.gloader %}
 
-{% for env in ppage.children %}
+{% for env in ppages %}
 
-    {% set mediaasset = env.header.asset|striptags %}
+    {% set mediaasset = env.asset|striptags %}
+    {% set env_icon = env.path ~ "icon.png" %}
 
     {# var child = "<div class='selection-item' uid='" + id + "'>";
-    child = child + '{{ env.media["icon.png"].cropZoom(110,80) }}' + "<div>{{ env.header.name }}</div></div>"; #}
+    child = child + '{{ env_icon }}' + "<div>{{ env.name }}</div></div>"; #}
 
     var child = "<div class='d-md-inline-block'>";
     child = child + "<div class='selection-item clearfix d-none d-md-block' uid='" + id + "'>";
     child = child + '<div class="card">';
 
-    var img = '{{ env.media["icon.png"].cropZoom(200,150) }}';
-    if(img.length < 1) { img = '<img width=200 height=150 src="{{theme_url}}/assets/images/placeholder.jpg">'; }
+    var img = '{{ env_icon }}';
+    if(img.length < 1) { img = '<img width=200 height=150 src="/images/placeholder.jpg">'; }
     child = child + img;
-    child = child + '<div class="select-card-body">' + "{{ env.header.name }}</div></div></div></div>";
+    child = child + '<div class="select-card-body">' + "{{ env.name }}</div></div></div></div>";
 
     // Add click for loading in the data
     var data = {
-        name: "{{ env.header.name }}",
-        format: "{{ env.header.format }}",
-        json: "{{ env.header.json }}",
-        loadscene: "{{ env.header.loadscene }}",
-        url: "{{ env.media[mediaasset].url }}",
+        name: "{{ env.name }}",
+        format: "{{ env.format }}",
+        json: "{{ env.json }}",
+        loadscene: "{{ env.loadscene }}",
+        url: "{{ env.path }}",
         gloadscene: "{{ gloader }}",
         child: child
     };

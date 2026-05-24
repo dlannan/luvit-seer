@@ -39,6 +39,8 @@ local dataset = {
         uri = {
             query   = {},
         },
+        sceneid     = 1,
+        projectid   = 1,
     },
 
     projects = {
@@ -133,6 +135,22 @@ local dataset = {
                     email   = "wmundane@gmail.com",
                 }
             },            
+        },
+    },
+    envpages = {
+        [1] = {
+            title       = "City Road System",
+            name        = "cityroadsystem",
+            asset       = "cityroadsystem.gltf",
+            format      = "gltf",
+            loadscene   = "loadScene.js",
+        },
+        [2] = {
+            title       = "Football Pitch",
+            name        = "footballpitch",
+            asset       = "FootballPitch.glb",
+            format      = "glb",
+            loadscene   = "loadScene.js",
         },
     }
 }

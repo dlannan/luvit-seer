@@ -1,11 +1,12 @@
-{% set pid = projectid %}
-{% set sid = sceneid %}
+{% set pid = projectid|int %}
+{% set sid = sceneid|int %}
 
-{% set query = ("[sql-table json]select name from projects where uid = '" ~ pid ) ~ "' limit 1[/sql-table]" %}
-{% set pname = ((query|shortcodes) | json_decode)[0] %}
+{% set pname = projects[pid].name %}
 
+{#
 {% set modelq = ("[sql-table json]select models from scenes where sceneid = '" ~ sid ) ~ "' [/sql-table]" %}
 {% set modelres = ((modelq|shortcodes) | json_decode(true))[0] %}
+#}
 
 <nav class="navbar navbar-default nav-pills nav-justified" id="top-menu" role="navigation" style="display: none;">
 

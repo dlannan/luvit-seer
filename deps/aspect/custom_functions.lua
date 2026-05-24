@@ -10,7 +10,7 @@ funcs.add("addJs", {
     }
 }, function (__, args) 
     local arg1 = args.arg1
-    local res = string.gsub(arg1, "^w%+:////assets(.+)", "<script type=\"text/javascript\" src=\"%1\"></script>")
+    local res = string.gsub(arg1, "^%w+://assets(.+)", "<script type=\"text/javascript\" src=\"%1\"></script>")
     return res
 end)
 
@@ -29,7 +29,7 @@ funcs.add("addCss", {
     }
 }, function (__, args) 
     local arg1 = args.arg1
-    local res = string.gsub(arg1, "^w%+:////assets(.+)", '<link rel=\"stylesheet\" href=\"%1\">')
+    local res = string.gsub(arg1, "^%w+://assets(.+)", '<link rel=\"stylesheet\" href=\"%1\">')
     return res
 end)
 

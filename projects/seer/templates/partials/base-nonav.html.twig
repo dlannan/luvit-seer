@@ -13,7 +13,10 @@
 {% if userok or tokenok %}
 {% set uservalid = true %}
 
-{% include 'threejs/threejs-utils.html.twig' %}
+{% set projectid = page.uri.query.projectid|int %}
+{% set sceneid = page.uri.query.sceneid|int %}
+
+{% include 'threejs/threejs-utils.html.twig' with { sceneid: sceneid, projectid: projectid } %}
 {% include 'threejs/threejs-tools.html.twig' with { sceneid: sceneid, projectid: projectid } %}
 {% endif %}
 

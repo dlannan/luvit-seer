@@ -1,3 +1,7 @@
+
+{% set projectid = page.uri.query.projectid|int %}
+{% set sceneid = page.uri.query.sceneid|int %}
+
 {% include "threejs/scene/threejs-scene-utils.html.twig"  with { sceneid: sceneid, projectid: projectid } %}
 
 <script>
@@ -7,7 +11,7 @@
 
 function initTools() {
 
-    loadTexture( "{{ theme_url }}/assets/images/select-cursor01.png", function(texObj) {
+    loadTexture( "/images/select-cursor01.png", function(texObj) {
 
         if(selectCursor === undefined) {
             var material = new THREE.MeshBasicMaterial( { map: texObj, flatShading: true, transparent: true, opacity:1, side: THREE.DoubleSide, depthTest: false });      
@@ -44,7 +48,7 @@ function enableControls() {
         controls.lon = mode.camera.lon;
         controls.lat = mode.camera.lat;
         controls.update(0.16);
-        //console.log("----------------> CHASE MODE");
+        //console.log("----------------> CHASE MODE") };
     }
 
     if(mode.camera.control === ControlMode.FPS) {
@@ -65,7 +69,7 @@ function enableControls() {
         controls.lon = mode.camera.lon;
         controls.lat = mode.camera.lat;
         controls.update(0.16);
-        //console.log("----------------> FPS MODE");
+        //console.log("----------------> FPS MODE") };
     }
 
     if(mode.camera.control === ControlMode.TARGET) {
@@ -118,10 +122,10 @@ function enableControls() {
         controls.lat = mode.camera.lat;
         controls.update(0.16);
         
-        //console.log("----------------> ORTHO MODE");
+        //console.log("----------------> ORTHO MODE")};
     }    
 
-    //} else {
+    // else {
     //    controls.lon = Math.atan2(-100, -100) * (180/Math.PI);
     //    controls.lat = Math.atan2(-80, 141.42) * (180/Math.PI);
     //}

@@ -3,4 +3,4 @@ blob_storage/
 *.lib
 aspect-error.log
 
-./projects/assets/
+projects/assets/

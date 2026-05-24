@@ -5,15 +5,18 @@
 {% endblock %}
 
 {% block content %}
+
 <script>
 $(document).ready(function() {
 
-    {% set projectid = page.uri.query.projectid  %}
+    {% set projectid = page.uri.query.projectid|int %}
+    {% set sceneid = projects[projectid].scenes|length + 1 %}
 
     const params = jQuery.param({ 
         'projectid': '{{ projectid }}', 
-        'sceneid': '{{ projects[projectid].scenes|length }}'
+        'sceneid': '{{ sceneid }}'
     });
+    console.log("/scenarist?" + params);
     window.location.href = "/scenarist?" + params;
 });
 </script>

@@ -139,7 +139,7 @@ function initMainMenus() {
     $("#menu-main-exit").unbind('mouseup').mouseup( function (event) {
         event.stopPropagation(); 
         SaveCameraPosition( function() {    
-	    window.location.href = "/project?projectid={{ projectid }}";
+	    window.location.href = "/project?projectid={{ page.projectid }}";
 	});
     });
 

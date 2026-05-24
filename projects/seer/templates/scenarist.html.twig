@@ -1,6 +1,9 @@
 {% extends 'partials/base-sim.html.twig' %}
 
-	{% set collection = page.collection() %}
+	{% set projectid = page.uri.query.projectid|int %}
+	{% set sceneid = page.uri.query.sceneid|int %}
+
+	{% set collection = page.collection %}
 	{% set base_url = page.url %}
     {% set feed_url = base_url %}
 
@@ -263,14 +266,11 @@
 
 			window.onload = function(){
 
-				{% set projectid = grav.uri.query('projectid')  %} 
-				{% set sceneid = grav.uri.query('sceneid')  %} 
+				{% set projectid = page.uri.query.projectid|int  %} 
+				{% set sceneid = grav.uri.query.sceneid|int  %} 
 
-				{% set query = ("[sql-table json]select * from projects where uid = '" ~ projectid ) ~ "' limit 1[/sql-table]" %}
-				{% set project = ((query|shortcodes) | json_decode)[0] %}
-
-				{% set query = ("[sql-table json]select * from scenes where sceneid = '" ~ sceneid ) ~ "' limit 1[/sql-table]" %}
-				{% set scene = ((query|shortcodes) | json_decode)[0] %}
+				{% set project = projects[projectid] %}
+				{% set scene = project.scenes[sceneid] %}
 
 				{% set projectvalid = project and scene and uservalid %}
 
@@ -279,7 +279,7 @@
 				window.location.href = "/projects";
 				{% endif %}
 
-			    {% if grav.uri.query('sceneid')  %}
+			    {% if page.uri.query.sceneid  %}
 					loadGeneratedScene( function() {} );
                 {% endif %}
 
@@ -299,4 +299,3 @@
 
 	{% endblock %}
 
-{% endembed %}
