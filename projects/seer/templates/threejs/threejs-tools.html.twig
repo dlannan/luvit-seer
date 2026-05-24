@@ -1,9 +1,9 @@
-{% include "threejs/scene/threejs-scene-utils.html.twig"  with { 'sceneid': sceneid, 'projectid': projectid } %}
+{% include "threejs/scene/threejs-scene-utils.html.twig"  with { sceneid: sceneid, projectid: projectid } %}
 
 <script>
 
-{% include 'menus/main-menu-js.html.twig'  with { 'sceneid': sceneid, 'projectid': projectid } %}
-{% include 'menus/popup-menu-js.html.twig'  with { 'sceneid': sceneid, 'projectid': projectid } %}
+{% include 'menus/main-menu-js.html.twig'  with { sceneid: sceneid, projectid: projectid } %}
+{% include 'menus/popup-menu-js.html.twig'  with { sceneid: sceneid, projectid: projectid } %}
 
 function initTools() {
 

@@ -1,16 +1,22 @@
 {% extends 'partials/base-dashboard.html.twig' %}
 
-{% set uservalid = true %}
+{% block content %}
 
-{% set projectid = page.uri.query.projectid %}
-{% set project = projects[projectid] %}
+{% set uservalid = true %}
+{% set pid = page.uri.query.projectid|int %}
+{% set project = projects[pid] %}
 {% set projectvalid = project and uservalid %}
 
-{% block content %}
 {% include 'dashboard/header-edit.html.twig' %}
 
 <div class="my-3 my-md-5">
 <div class="container">
+
+    <div class="page-header">
+        <h1 class="page-title">
+            {{ project.name }}
+        </h1>
+    </div>
 
     <div class="col-md-12">
         <div class="row">
@@ -170,8 +176,8 @@ $(document).ready(function() {
           /* console.log(name + "      " + desc); */
           $('#project-data input[name="data[name]"]').val(name);
           $('#project-data input[name="data[desc]"]').val(desc);
-          $('#project-data input[name="data[where]"]').val(' uid = "{{ projectid }}"');
-          $("#project-data").attr("action", "/project?projectid={{ projectid }}");
+          $('#project-data input[name="data[where]"]').val(' uid = "{{ pid }}"');
+          $("#project-data").attr("action", "/project?projectid={{ pid }}");
 
           $("#project-data").submit();
         } 
@@ -181,34 +187,33 @@ $(document).ready(function() {
     //*  scenes returned id. */
     $("#newscene").on('click', function(e) {
       const params = jQuery.param({ 
-        'projectid': '{{ projectid }}'
+        'projectid': '{{ pid }}'
       });
       window.location.href = "/scenarist-new?" + params;
     });
 
     $(".projectscene").on('click', function(e) {
       const params = jQuery.param({ 
-          'projectid': '{{ projectid }}', 
+          'projectid': '{{ pid }}', 
           'sceneid': $(this).attr('sceneid')
       });
       window.location.href = "/scenarist?" + params;      
     });
 
-    {% set query = ("[sql-table json]select * from scenes where projectid = '" ~ projectid ) ~ "' [/sql-table]" %}
-    {% set scenedb = ((query|shortcodes) | json_decode) %}
+    {% set scenedb = projects[pid].scenes %}
     {% if scenedb %}
       {% set randomscene = random(scenedb) %}
       console.log("Random scene: {{ randomscene.sceneid }}");
 
       $("#{{ projectid|md5 }}").on('click', function(e) {
         const params = jQuery.param({ 
-            'projectid': '{{ projectid }}', 
+            'projectid': '{{ pid }}', 
             'sceneid': '{{ randomscene.sceneid }}'
         });
         window.location.href = "/scenarist?" + params;      
       });   
       var htmlicon = $("[sceneid='{{ randomscene.sceneid }}']").html();
-      $("#{{ projectid|md5 }}").html( htmlicon );
+      $("#{{ pid|md5 }}").html( htmlicon );
     {% endif %}
 
     var statusUpdate = setInterval( function () {

@@ -150,8 +150,8 @@ require('weblit-app')
     host = _G.LOCALHOST_WWW_IP,
     port = _G.LOCALHOST_PORT,
     tls = {
-        key = lfs.readFileSync(pathJoin(apppath, "/mnt/f/dev/web/blog_backup_23_03_2017/ssl/keys/server.key")),
-        cert = lfs.readFileSync(pathJoin(apppath, "/mnt/f/dev/web/blog_backup_23_03_2017/ssl/keys/server.crt"))
+        key = lfs.readFileSync(pathJoin(apppath, pathJoin(_G.PROJECT_FOLDER, "ssl/keys/server.key"))),
+        cert = lfs.readFileSync(pathJoin(apppath, pathJoin(_G.PROJECT_FOLDER, "ssl/keys/server.crt")))
     }
 })
 

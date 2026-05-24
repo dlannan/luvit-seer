@@ -117,8 +117,7 @@ function initMainMenus() {
         // Determine update or insert
         var sceneid = {{ sceneid|int }};
 
-        {% set query = ("[sql-table json]select * from scenes where sceneid = '" ~ sceneid ) ~ "' LIMIT 1 [/sql-table]" %}
-        {% set scenedb = ((query|shortcodes) | json_decode)[0] %}
+        {% set scenedb = projects[projectid].scenes %}
 
         {% if scenedb %}
             $('#project-update input[name="data[where]"]').val(' sceneid = "{{ scenedb.sceneid }}"');

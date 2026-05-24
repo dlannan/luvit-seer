@@ -7,14 +7,14 @@
 {% include 'partials/head.html.twig' %}
 </head>
 <body>
-{% set userok = (config.plugins.login.enabled and grav.user.authorize('site.login')) %}
-{% set tokenok = uri.query('token') == "123456Token" %}
+{% set userok = true %}
+{% set tokenok = page.uri.query.token == "123456Token" %}
 {# <script>console.log("Token:", "{{tokenok}}");</script> #}
 {% if userok or tokenok %}
 {% set uservalid = true %}
 
 {% include 'threejs/threejs-utils.html.twig' %}
-{% include 'threejs/threejs-tools.html.twig' with { 'sceneid': sceneid, 'projectid': projectid } %}
+{% include 'threejs/threejs-tools.html.twig' with { sceneid: sceneid, projectid: projectid } %}
 {% endif %}
 
 {% block header %}

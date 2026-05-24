@@ -23,40 +23,33 @@
 <!-- 144x144 (precomposed) for iPad 3rd and 4th generation -->
 <link rel="apple-touch-icon-precomposed" sizes="144x144" href="{{ theme_url }}/images/apple-touch-icon-144x144-precomposed.png">
 
-{% block stylesheets %}
-{% do assets.addCss('theme://assets/css/fontawesome.min.css') %}
-{% do assets.addCss('theme://assets/css/bootstrap.min.css') %}
-{% do assets.addCss('theme://assets/css/bootstrap-slider.min.css') %}
+{% do addCss('theme://assets/css/fontawesome.min.css') %}
+{% do addCss('theme://assets/css/bootstrap.min.css') %}
+{% do addCss('theme://assets/css/bootstrap-slider.min.css') %}
 
-{% do assets.addCss('theme://assets/css/main.css') %}
-{% do assets.addCss('theme://assets/css/custom.css') %}
-{% do assets.addCss('theme://assets/js/slick/slick.css') %}
-{% do assets.addCss('theme://assets/js/slick/slick-theme.css') %}
+{% do addCss('theme://assets/css/main.css') %}
+{% do addCss('theme://assets/css/custom.css') %}
+{% do addCss('theme://assets/js/slick/slick.css') %}
+{% do addCss('theme://assets/js/slick/slick-theme.css') %}
 
-{% do assets.addCss('theme://assets/css/slideout-data.css') %}
-{% do assets.addCss('theme://assets/css/performance-buttons.css') %}
+{% do addCss('theme://assets/css/slideout-data.css') %}
+{% do addCss('theme://assets/css/performance-buttons.css') %}
 
-{% do assets.addCss('theme://assets/css/sensors/normalize.css') %}
-{% do assets.addCss('theme://assets/css/sensors/icons.css') %}
-{% do assets.addCss('theme://assets/css/sensors/sensor-menu.css') %}
+{% do addCss('theme://assets/css/sensors/normalize.css') %}
+{% do addCss('theme://assets/css/sensors/icons.css') %}
+{% do addCss('theme://assets/css/sensors/sensor-menu.css') %}
 
-{% do assets.addCss("theme://assets/css/driver.min.css") %}
+{% do addCss("theme://assets/css/driver.min.css") %}
 
-{% endblock %}
-{{ assets.css() }}
+{% do addJs('theme://assets/js/vendors/jquery-3.2.1.min.js') %}
+{% do addJs('theme://assets/js/vendors/bootstrap.min.js') %}
+{% do addJs('theme://assets/js/vendors/bootstrap-slider.min.js') %}
 
-{% block javascripts %}
-  {% do assets.addJs('jquery',101) %}
-  {% do assets.addJs('theme://assets/js/vendors/bootstrap.min.js') %}
-  {% do assets.addJs('theme://assets/js/vendors/bootstrap-slider.min.js') %}
+{% do addJs('theme://assets/js/vendors/modernizr-2.6.2.custom.min.js') %}
+{% do addJs('theme://assets/js/scripts.min.js') %}
+{% do addJs('theme://assets/js/Tween.js') %}
 
-  {% do assets.addJs('theme://assets/js/vendors/modernizr-2.6.2.custom.min.js',100) %}
-  {% do assets.addJs('theme://assets/js/scripts.min.js') %}
-  {% do assets.addJs('theme://assets/js/Tween.js') %}
-
-  {% do assets.addJs('theme://assets/js/vendors/driver.min.js') %}
-{% endblock %}
-{{ assets.js() }}
+{% do addJs('theme://assets/js/vendors/driver.min.js') %}
 
 <style type="text/css">
 {% if page.header.image.background or site.background %}

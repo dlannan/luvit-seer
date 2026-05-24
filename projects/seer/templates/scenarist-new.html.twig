@@ -8,11 +8,11 @@
 <script>
 $(document).ready(function() {
 
-    {% set projectid = grav.uri.query('projectid')  %} 
+    {% set projectid = page.uri.query.projectid  %}
 
     const params = jQuery.param({ 
         'projectid': '{{ projectid }}', 
-        'sceneid': '{{ sqliteEmptyRow("scenes")|int }}'
+        'sceneid': '{{ projects[projectid].scenes|length }}'
     });
     window.location.href = "/scenarist?" + params;
 });

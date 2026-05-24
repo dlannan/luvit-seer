@@ -180,8 +180,8 @@ function getObjectTypes( objs, typename, output ) {
 function getSceneData(sceneid, projectid) {
 
 // To be implemented
-{% set langobj  = grav['language'] %}
-{% set curlang  = langobj.getLanguage() %}
+{% set langobj  = grav.language %}
+{% set curlang  = langobj.getLanguage %}
 
 {% set user = grav['user'] %}
     var output = {};
@@ -423,8 +423,7 @@ function loadSceneFromId( completeCallback ) {
     
     scenestatus.loaded = false;     
     {% set id = sceneid|int %}
-    {% set query = ('[sql-table json]select * from scenes where sceneid = "' ~ id ) ~ '" LIMIT 1 [/sql-table]' %}
-    {% set scenedb = ((query|shortcodes) | json_decode)[0] %}
+    {% set scenedb = projects[projectid].scenes[id] %}
     {% set scenename = scenedb.name %}
 
     {% if scenename %}

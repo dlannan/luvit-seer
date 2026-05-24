@@ -10,7 +10,8 @@ funcs.add("addJs", {
     }
 }, function (__, args) 
     local arg1 = args.arg1
-    return string.gsub(arg1, "theme:////assets(.+)", "<script type=\"text/javascript\" src=\"%1\"></script>")
+    local res = string.gsub(arg1, "^w%+:////assets(.+)", "<script type=\"text/javascript\" src=\"%1\"></script>")
+    return res
 end)
 
 funcs.add("addInlineJs", {
@@ -22,14 +23,14 @@ funcs.add("addInlineJs", {
     return "<script type=\"text/javascript\">"..arg1.."</script>"
 end)
 
-
 funcs.add("addCss", {
     args = {
         [1] = {name = "arg1", type = "string"},
     }
-}, function (__, arg1) 
+}, function (__, args) 
     local arg1 = args.arg1
-    return string.match(arg1, "theme:////assets(.+)", "<link rel=\"stylesheet\" href=\"%1\">")
+    local res = string.gsub(arg1, "^w%+:////assets(.+)", '<link rel=\"stylesheet\" href=\"%1\">')
+    return res
 end)
 
 funcs.add("url", {
@@ -40,7 +41,6 @@ funcs.add("url", {
     local arg1 = args.arg1
     return arg1
 end)
-
 
 funcs.add("random", {
     args = {
@@ -67,10 +67,10 @@ funcs.add("loadicon", {
     if arg1:byte(1) == 47 then
       arg1 = arg1:sub(2)
     end    
-    local data = ""
+    local data = nil
     local stat = fs.stat(arg1)
     if(stat) then data = fs.readFile(arg1) end
-  return b64.enc(data)
+  return b64.enc(data or "")
 end)
 
 funcs.add("print", {

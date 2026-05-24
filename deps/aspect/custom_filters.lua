@@ -32,3 +32,13 @@ filters.add("md5", {
 }, function (arg1) 
   return md5.sumhexa(arg1)
 end)
+
+filters.add("int", {
+    input = "any", -- input value type
+    output = "number", -- output value type
+    args = {
+        [1] = {name = "arg1", type = "any"}, 
+    }
+}, function (arg1) 
+  return tonumber(arg1)
+end)
