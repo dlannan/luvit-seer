@@ -69,8 +69,13 @@ funcs.add("loadicon", {
     end    
     local data = nil
     local stat = fs.stat(arg1)
-    if(stat) then data = fs.readFile(arg1) end
-  return b64.enc(data or "")
+    if(stat) then 
+        data = fs.readFile(arg1) 
+        data = b64.enc(data or "")
+    elseif(arg1 and #arg1 > 32) then 
+        data = arg1
+    end
+  return data
 end)
 
 funcs.add("print", {

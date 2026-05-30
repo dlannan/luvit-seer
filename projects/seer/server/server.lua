@@ -38,24 +38,25 @@ end
 -- ------------------------------------------------------------------------------------------
 -- Included objects for the list.
 
-local pathJoin = require('luvi').path.join
-local static = require('weblit-static')
-local resty = require('weblit-static-resty')
+local pathJoin      = require('luvi').path.join
+local static        = require('weblit-static')
+local resty         = require('weblit-static-resty')
+local snapshot      = require('snapshot_handler')
 
-local lfs = require('fs')
+local lfs           = require('fs')
 
-local admin = require('administration')
-local msetup = require('setupmodules')
-local asetup = require('setupassets')
-local session = require('html_session')
-local logger = require('flodstats')
+local admin         = require('administration')
+local msetup        = require('setupmodules')
+local asetup        = require('setupassets')
+local session       = require('html_session')
+local logger        = require('flodstats')
 
 -- ------------------------------------------------------------------------------------------
 -- Data for testing events and carousels
-local events = require( pathJoin(apppath, pathJoin(project, "server/lua/data_event")))
-local news = require( pathJoin(apppath, pathJoin(project, "server/lua/data_news")))
-local carousel =  require( pathJoin(apppath, pathJoin(project, "server/lua/data_carousel")))
-local search =  require( pathJoin(apppath, pathJoin(project, "server/lua/data_search")))
+local events        = require( pathJoin(apppath, pathJoin(project, "server/lua/data_event")))
+local news          = require( pathJoin(apppath, pathJoin(project, "server/lua/data_news")))
+local carousel      = require( pathJoin(apppath, pathJoin(project, "server/lua/data_carousel")))
+local search        = require( pathJoin(apppath, pathJoin(project, "server/lua/data_search")))
 
 _G.EVENTS   = events
 _G.NEWS     = news 
@@ -167,6 +168,9 @@ require('weblit-app')
 
 -- Example of thow to map a folder to a specific path for access
 -- .use(static(pathJoin(module.dir, "static")))
+
+-- Special methods
+.route({ method = "POST", path = "/snapshot-send" }, snapshot(dataset))
 
 -- Static data routes - these may become redis lookup (scripts and css especially)
 --.route({ path = "/:path" }, static(pathJoin(module.dir, "static")))

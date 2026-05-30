@@ -20,8 +20,8 @@ local dataset = {
         title       = "site title",
         description = "site description",
         metadata    = {
-            title           = "Luvit Seer",
-            seerbuild       = "Luvit Seer 1.0.0",
+            title           = "SEER",
+            seerbuild       = "SEER 1.0.0",
         },
         isMobile    = false,
 
@@ -77,6 +77,26 @@ local dataset = {
             uid      = "012345",
             desc     = "Project 1 description",
             modified = "01/01/2001",
+            paths    = {
+
+            },
+            cases   = {
+                [1] = {
+                    caseid      = 1,
+                    name        = "Case 1",
+                    description = "Case 1 Description",
+
+                    edituser    = "Joe Smith",
+                    edittime    = "01-01-2001-12-30",
+                    icon        = "/content/images/plywood.jpg",
+                    
+                    tags        = "vehicles, f18, static",
+                    
+                    models      = {},
+                    images      = {},
+                    animations  = {},
+                }
+            },
             scenes   = {
                 [1] = {
                     name        = "Scene 1",

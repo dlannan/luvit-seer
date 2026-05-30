@@ -1,5 +1,5 @@
-{% set pid = page.uri.query.projectid %}
-{% set sid = page.uri.query.sceneid %}
+{% set pid = page.uri.query.projectid|int %}
+{% set sid = page.uri.query.sceneid|int %}
 
 {% set pname = projects[pid].name %}
 
@@ -19,7 +19,7 @@
 <nav id="top-menu" class="navbar navbar-expand-sm nav-pills nav-justified" role="navigation" style="display: none;">
 
     <div class="scenarist-project-scene">
-    <div id="menu-main-project" class="nav-link btn-info scenarist-project-name">{{ pname.name }}</div>
+    <div id="menu-main-project" class="nav-link btn-info scenarist-project-name">{{ pname }}</div>
 
     <div id="scene-title" class="scene-title">
     <form class="navbar-form navbar-left">

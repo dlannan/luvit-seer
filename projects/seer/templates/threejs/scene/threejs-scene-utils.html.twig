@@ -54,17 +54,19 @@ function takeSnapshot( oncomplete ) {
 
     // Always update icon in database if screenshot is taken.
     var base64icon = icon.split(',')[1];
+    // May do some image scaling or something here to reduce screenshot sizes, or maybe a param for size use.
 
-    var sqldata = { tableid: 'icons', row: {}, index: 'uid' };
-    sqldata.row['data'] = base64icon;
-    sqldata.row['name'] = $('#menu-main-project').text();
+    var data = { };
+    data['icon'] = icon;
+    data['name'] = $('#menu-main-project').text();
+    data['projectid'] = {{ page.uri.query.projectid|int }};
+    data['sceneid'] = {{ page.uri.query.sceneid|int }};
     var id = $('#project-update input[name="data[icon]"]').val();
     if(!id || id.length < 1) id = -1;
-    sqldata.row['uid'] = id;
+    data['uid'] = id;
+    var jsondata = JSON.stringify(data);
 
-    //console.log("SQLData: ", sqldata);
-
-    $.post("{{ base_url }}/sqlite-upsert-row", sqldata, function(data){  
+    $.post("/snapshot-send", jsondata, function(data){  
         //console.log("Data: ", data);
         oncomplete(data);
     });
